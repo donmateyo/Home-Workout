@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="utf-8" />
     <title>No-Equipment Trainer — Timer + Progressions</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="%2338bdf8"/><stop offset="1" stop-color="%2322c55e"/></linearGradient></defs><rect width="64" height="64" rx="12" fill="url(%23g)"/><path d="M16 42l8-20 8 12 8-8 8 16" stroke="%23fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
     <style>
       :root {
+        color-scheme: dark;
         --bg: #0f172a;
         --panel: #0b1220;
         --muted: #94a3b8;
@@ -17,264 +18,126 @@
         --accent-2: #38bdf8;
         --border: #1f2937;
         --chip: #111827;
+        --focus: 2px solid #38bdf8;
       }
-      html,
-      body {
-        height: 100%;
+      .high-contrast {
+        --muted: #cbd5e1;
+        --text: #ffffff;
+        --border: #93c5fd;
+        --accent: #10b981;
+        --accent-2: #60a5fa;
       }
+      html, body { height: 100%; }
       body {
         margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-        background: radial-gradient(1200px 800px at 10% 0%, #0b1220, #0a1020 40%),
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+        background:
+          radial-gradient(1200px 800px at 10% 0%, #0b1220, #0a1020 40%),
           radial-gradient(1000px 600px at 100% 0%, #0e1630, #0f172a 50%);
         color: var(--text);
         padding-bottom: env(safe-area-inset-bottom);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
-      .container {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 16px;
-      }
-      header {
-        margin-bottom: 10px;
-      }
-      header h1 {
-        margin: 0 0 6px;
-        font-size: 24px;
-      }
-      header p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.4;
-      }
+      *, *::before, *::after { box-sizing: border-box; }
+      a { color: var(--accent-2); }
+      :focus-visible { outline: var(--focus); outline-offset: 2px; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+      header { margin-bottom: 10px; }
+      header h1 { margin: 0 0 6px; font-size: 24px; }
+      header p { margin: 0; color: var(--muted); line-height: 1.4; }
       .card {
         background: linear-gradient(180deg, #0c1426, var(--panel) 60%);
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 12px;
       }
-      .controls {
-        display: grid;
-        gap: 10px;
-        margin: 12px 0 14px;
-      }
+      .controls { display: grid; gap: 10px; margin: 12px 0 14px; }
       @media (min-width: 820px) {
         .controls {
-          grid-template-columns: 1.8fr 1fr 1fr auto;
+          grid-template-columns: 1.4fr 1fr 1fr auto;
           align-items: end;
         }
       }
-      label {
-        display: block;
-        font-size: 12px;
-        color: var(--muted);
-        margin-bottom: 4px;
+      label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+      select, button, input, textarea {
+        width: 100%; box-sizing: border-box; background: #0a1222; color: var(--text);
+        border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none;
       }
-      select,
-      button {
-        width: 100%;
-        box-sizing: border-box;
-        background: #0a1222;
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
-        outline: none;
-      }
-      select:focus {
-        border-color: var(--accent-2);
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      select:focus, input:focus, textarea:focus {
+        border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
       }
       .btn {
-        cursor: pointer;
-        border-radius: 10px;
+        cursor: pointer; border-radius: 10px;
         background: linear-gradient(180deg, #22c55e, #16a34a);
-        color: #062814;
-        border: none;
-        padding: 10px 14px;
-        font-weight: 600;
+        color: #062814; border: none; padding: 10px 14px; font-weight: 600;
       }
-      .btn.secondary {
-        background: linear-gradient(180deg, #38bdf8, #0ea5e9);
-        color: #042638;
-      }
-      .btn.ghost {
-        background: #0a1222;
-        border: 1px solid var(--border);
-        color: var(--text);
-      }
-      .grid {
-        display: grid;
-        gap: 12px;
-      }
-      @media (min-width: 980px) {
-        .grid-cols-2 {
-          grid-template-columns: 1.3fr 1fr;
-        }
-      }
-      .chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
+      .btn.secondary { background: linear-gradient(180deg, #38bdf8, #0ea5e9); color: #042638; }
+      .btn.ghost { background: #0a1222; border: 1px solid var(--border); color: var(--text); }
+      .grid { display: grid; gap: 12px; }
+      @media (min-width: 980px) { .grid-cols-2 { grid-template-columns: 1.3fr 1fr; } }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
       .chip {
-        background: var(--chip);
-        border: 1px solid var(--border);
-        color: var(--muted);
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        max-width: 100%;
-        white-space: nowrap;
+        background: var(--chip); border: 1px solid var(--border); color: var(--muted);
+        padding: 6px 10px; border-radius: 999px; font-size: 12px; max-width: 100%; white-space: nowrap;
       }
-      .chip.wrap {
-        white-space: normal;
-      }
-      .exercise {
-        border-top: 1px dashed var(--border);
-        padding-top: 12px;
-        margin-top: 12px;
-      }
-      .exercise:first-child {
-        border-top: none;
-        padding-top: 0;
-        margin-top: 0;
-      }
-      .exercise h4 {
-        margin: 0 0 6px;
-        font-size: 15px;
-      }
-      .row {
-        display: grid;
-        gap: 8px;
-        grid-template-columns: 1fr;
-      }
-      @media (min-width: 640px) {
-        .row.two {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
+      .chip.wrap { white-space: normal; }
+      .exercise { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px; }
+      .exercise:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+      .exercise h4 { margin: 0 0 6px; font-size: 15px; }
+      .row { display: grid; gap: 8px; grid-template-columns: 1fr; }
+      @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } .row.three { grid-template-columns: 1fr 1fr 1fr; } }
       .kbd {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-          Liberation Mono, monospace;
-        border: 1px solid var(--border);
-        background: #0b1628;
-        color: #fff;
-        border-radius: 6px;
-        padding: 1px 6px;
-        font-size: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
+        border: 1px solid var(--border); background: #0b1628; color: #fff; border-radius: 6px; padding: 1px 6px; font-size: 12px;
       }
-      .muted {
-        color: var(--muted);
-      }
-      .divider {
-        height: 1px;
-        background: var(--border);
-        margin: 12px 0;
-      }
-      .inline-btns {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-      }
+      .muted { color: var(--muted); }
+      .divider { height: 1px; background: var(--border); margin: 12px 0; }
+      .inline-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .settings .chip { display: inline-flex; align-items: center; gap: 8px; }
+      .settings input[type="checkbox"] { width: auto; }
       /* Timer drawer */
       .timer-drawer {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #0a111c;
-        border-top: 1px solid var(--border);
-        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.4);
-        padding: 12px;
-        z-index: 50;
+        position: fixed; left: 0; right: 0; bottom: 0; background: #0a111c;
+        border-top: 1px solid var(--border); box-shadow: 0 -12px 40px rgba(0,0,0,0.4);
+        padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 50;
       }
-      .timer-grid {
-        display: grid;
-        gap: 12px;
-      }
-      @media (min-width: 820px) {
-        .timer-grid {
-          grid-template-columns: 1fr auto;
-          align-items: center;
-        }
-      }
-      .big-time {
-        font-size: 42px;
-        font-weight: 700;
-        letter-spacing: 1px;
-      }
-      .flow-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .flow-row .chip {
-        background: #0a1222;
-      }
-      .timer-controls {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
+      .timer-grid { display: grid; gap: 12px; }
+      @media (min-width: 820px) { .timer-grid { grid-template-columns: 1fr auto; align-items: center; } }
+      .big-time { font-size: 42px; font-weight: 700; letter-spacing: 1px; }
+      .flow-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .flow-row .chip { background: #0a1222; }
+      .timer-controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
       .ring {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: conic-gradient(
-          var(--accent) 0deg,
-          var(--accent) 0deg,
-          #0a1222 0deg
-        );
-        border: 2px solid var(--border);
-        position: relative;
+        width: 56px; height: 56px; border-radius: 50%;
+        background: conic-gradient(var(--accent) 0deg, #0a1222 0deg);
+        border: 2px solid var(--border); position: relative;
       }
       .ring::after {
-        content: attr(data-t);
-        position: absolute;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        font-size: 12px;
-        color: var(--text);
+        content: attr(data-t); position: absolute; inset: 0; display: grid; place-items: center;
+        font-size: 11px; color: var(--text); text-transform: uppercase; letter-spacing: .5px;
       }
-      .hidden {
-        display: none !important;
-      }
-      .footer {
-        margin-top: 10px;
-        color: var(--muted);
-        font-size: 12px;
-        text-align: center;
-      }
-      .history {
-        margin-top: 10px;
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .history-item {
-        border-top: 1px dashed var(--border);
-        padding-top: 8px;
-        margin-top: 8px;
+      .hidden { display: none !important; }
+      .footer { margin-top: 10px; color: var(--muted); font-size: 12px; text-align: center; }
+      .history { margin-top: 10px; font-size: 12px; color: var(--muted); }
+      .history-item { border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; display: grid; gap: 6px; }
+      .history-actions { display: flex; gap: 6px; }
+      .sr-only {
+        position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+        clip: rect(0,0,0,0); white-space: nowrap; border: 0;
       }
     </style>
   </head>
   <body>
+    <a class="sr-only" href="#main">Skip to main content</a>
     <div class="container">
       <header>
         <h1>The Comprehensive No-Equipment Trainer</h1>
-        <p>
-          Science-based training with a live timer and progression ladders.
-          Pick a routine, then fine-tune each exercise’s difficulty.
-        </p>
+        <p>Science-based training with a live timer and progression ladders. Pick a routine, then fine-tune each exercise’s difficulty.</p>
       </header>
 
-      <div class="controls card">
+      <div class="controls card" role="region" aria-label="Session controls">
         <div>
           <label for="routineSelect">Routine</label>
           <select id="routineSelect"></select>
@@ -298,53 +161,75 @@
         <div>
           <button id="generateBtn" class="btn">Generate Session</button>
         </div>
+        <div class="row three" style="grid-column: 1/-1">
+          <div class="settings">
+            <span class="chip"><input type="checkbox" id="soundToggle"><label for="soundToggle" style="margin:0">Sound</label></span>
+            <span class="chip"><input type="checkbox" id="hapticsToggle"><label for="hapticsToggle" style="margin:0">Haptics</label></span>
+            <span class="chip"><input type="checkbox" id="wakeToggle"><label for="wakeToggle" style="margin:0">Keep screen awake</label></span>
+            <span class="chip"><input type="checkbox" id="contrastToggle"><label for="contrastToggle" style="margin:0">High contrast</label></span>
+          </div>
+          <div>
+            <label for="overallRPE">Overall RPE (effort)</label>
+            <select id="overallRPE">
+              <option value="">—</option>
+              <option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+            </select>
+          </div>
+          <div>
+            <label for="autoAdjust">Auto-adjust progressions</label>
+            <select id="autoAdjust">
+              <option value="off">Off</option>
+              <option value="on" selected>On</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-2">
-        <section class="card">
-          <h2 style="margin:0 0 8px">Today’s Session</h2>
-          <div id="sessionMeta" class="chips"></div>
+      <div class="grid grid-cols-2" id="main">
+        <section class="card" aria-labelledby="todayHdr">
+          <h2 id="todayHdr" style="margin:0 0 8px">Today’s Session</h2>
+          <div id="sessionMeta" class="chips" aria-live="polite"></div>
           <div id="exerciseList" style="margin-top:8px"></div>
           <div class="divider"></div>
           <div class="inline-btns">
-            <button id="startTimerBtn" class="btn secondary">
-              Start Workout Timer
-            </button>
+            <button id="startTimerBtn" class="btn secondary">Start Workout Timer</button>
             <button id="completeBtn" class="btn ghost">Save Completed</button>
             <button id="exportBtn" class="btn ghost">Export Plan JSON</button>
+            <button id="undoBtn" class="btn ghost">Undo Last Save</button>
           </div>
         </section>
 
-        <aside class="card">
-          <h2 style="margin:0 0 8px">Progress & Notes</h2>
+        <aside class="card" aria-labelledby="progressHdr">
+          <h2 id="progressHdr" style="margin:0 0 8px">Progress & Notes</h2>
           <div class="chips" id="tempoChips"></div>
           <p class="muted" id="tutText" style="margin:8px 0 10px"></p>
+          <label for="sessionNote">Session notes</label>
+          <textarea id="sessionNote" placeholder="How did it go? Any adjustments to make next time?"></textarea>
           <div class="divider"></div>
           <div id="history" class="history"></div>
         </aside>
       </div>
 
       <div class="footer">
-        Shortcuts: <span class="kbd">G</span> generate, <span class="kbd">S</span>
-        start/pause, <span class="kbd">N</span> next, <span class="kbd">B</span>
-        back.
+        Shortcuts: <span class="kbd">G</span> generate, <span class="kbd">S</span> start/pause, <span class="kbd">N</span> next, <span class="kbd">B</span> back.
       </div>
     </div>
 
     <!-- Timer Drawer -->
-    <div id="timerDrawer" class="timer-drawer hidden">
+    <div id="timerDrawer" class="timer-drawer hidden" role="dialog" aria-label="Workout timer" aria-modal="true">
       <div class="timer-grid">
         <div>
           <div class="chips flow-row" id="timerBreadcrumb"></div>
           <div style="display:flex; gap:12px; align-items:center; margin-top:8px">
-            <div id="restRing" class="ring" data-t="0"></div>
+            <div id="restRing" class="ring" data-t="READY" aria-hidden="true"></div>
             <div>
               <div id="timerPhase" class="muted" style="font-size:13px">Ready</div>
-              <div id="timerTitle" style="font-size:18px; font-weight:700">—</div>
-              <div id="timerSub" class="muted" style="font-size:12px">—</div>
+              <div id="timerTitle" style="font-size:18px; font-weight:700">--</div>
+              <div id="timerSub" class="muted" style="font-size:12px">--</div>
             </div>
           </div>
-          <div id="timerClock" class="big-time" style="margin-top:6px">00:00</div>
+          <div id="timerClock" class="big-time" style="margin-top:6px" aria-live="polite">00:00</div>
+          <div id="liveStatus" class="sr-only" aria-live="polite"></div>
         </div>
         <div class="timer-controls">
           <button id="btnBack" class="btn ghost">Back</button>
@@ -357,131 +242,70 @@
     </div>
 
     <script>
+      // App version (for export/migration)
+      const APP_VERSION = "v5.0.0";
+
       // Movement library and routines
       const MOVES = {
         push: {
           name: "Horizontal Push",
-          progressions: [
-            "Wall Push-Up",
-            "Incline Push-Up",
-            "Knee Push-Up",
-            "Standard Push-Up",
-            "Decline Push-Up",
-            "Diamond Push-Up",
-            "Archer Push-Up",
-            "Single-Arm Push-Up",
-          ],
+          progressions: ["Wall Push-Up","Incline Push-Up","Knee Push-Up","Standard Push-Up","Decline Push-Up","Diamond Push-Up","Archer Push-Up","Single-Arm Push-Up"],
           repRanges: { hypertrophy: [6, 12], strength: [4, 8], conditioning: [12, 20] },
           tempo: { hypertrophy: "3-1-3-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [40, 70],
         },
         squat: {
           name: "Squat",
-          progressions: [
-            "Assisted Squat",
-            "Box/Chair Squat",
-            "Bodyweight Squat",
-            "Jump Squat",
-            "Bulgarian Split Squat",
-            "Pistol Squat",
-          ],
+          progressions: ["Assisted Squat","Box/Chair Squat","Bodyweight Squat","Jump Squat","Bulgarian Split Squat","Pistol Squat"],
           repRanges: { hypertrophy: [8, 15], strength: [5, 8], conditioning: [15, 25] },
           tempo: { hypertrophy: "3-1-2-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [40, 70],
         },
         lunge: {
           name: "Lunge",
-          progressions: [
-            "Assisted Lunge",
-            "Static Lunge (Split Squat)",
-            "Reverse Lunge",
-            "Forward Lunge",
-            "Walking Lunge",
-            "Curtsy Lunge",
-            "Jump Lunge",
-          ],
+          progressions: ["Assisted Lunge","Static Lunge (Split Squat)","Reverse Lunge","Forward Lunge","Walking Lunge","Curtsy Lunge","Jump Lunge"],
           repRanges: { hypertrophy: [8, 14], strength: [5, 8], conditioning: [12, 20] },
           tempo: { hypertrophy: "3-1-2-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [40, 70],
         },
         plank: {
           name: "Core (Plank)",
-          progressions: [
-            "Knee Plank",
-            "Incline Plank",
-            "Forearm Plank",
-            "High Plank",
-            "Plank with Leg Lift",
-            "Side Plank",
-            "Side Plank with Hip Dip",
-            "Up-Down Plank",
-          ],
+          progressions: ["Knee Plank","Incline Plank","Forearm Plank","High Plank","Plank with Leg Lift","Side Plank","Side Plank with Hip Dip","Up-Down Plank"],
           repRanges: { hypertrophy: [30, 60], strength: [20, 45], conditioning: [30, 90] },
           tempo: { hypertrophy: "isometric", strength: "isometric", conditioning: "isometric" },
           tutTarget: [30, 90],
         },
         row: {
           name: "Horizontal Pull",
-          progressions: [
-            "Doorway Row",
-            "Bent-Knee Inverted Row",
-            "Straight-Leg Inverted Row",
-            "Elevated-Feet Inverted Row",
-            "Single-Arm Inverted Row",
-          ],
+          progressions: ["Doorway Row","Bent-Knee Inverted Row","Straight-Leg Inverted Row","Elevated-Feet Inverted Row","Single-Arm Inverted Row"],
           repRanges: { hypertrophy: [6, 12], strength: [4, 8], conditioning: [12, 18] },
           tempo: { hypertrophy: "3-1-2-1", strength: "4-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [40, 70],
         },
         verticalPush: {
           name: "Vertical Push",
-          progressions: [
-            "Pike Push-Up (Feet on Floor)",
-            "Decline Pike Push-Up",
-            "Wall-Assisted Handstand Hold",
-            "HSPU Negative (Wall-Assisted)",
-            "Wall-Assisted Handstand Push-Up",
-            "Freestanding Handstand Push-Up",
-          ],
+          progressions: ["Pike Push-Up (Feet on Floor)","Decline Pike Push-Up","Wall-Assisted Handstand Hold","HSPU Negative (Wall-Assisted)","Wall-Assisted Handstand Push-Up","Freestanding Handstand Push-Up"],
           repRanges: { hypertrophy: [4, 8], strength: [3, 6], conditioning: [6, 12] },
           tempo: { hypertrophy: "4-1-2-0", strength: "5-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [30, 60],
         },
         verticalPull: {
           name: "Vertical Pull",
-          progressions: [
-            "Scapular Pulls",
-            "Negative Pull-Ups",
-            "Band-Assisted Pull-Up",
-            "Standard Pull-Up",
-            "L-Sit Pull-Up",
-            "Archer/One-Arm Pull-Up",
-          ],
+          progressions: ["Scapular Pulls","Negative Pull-Ups","Band-Assisted Pull-Up","Standard Pull-Up","L-Sit Pull-Up","Archer/One-Arm Pull-Up"],
           repRanges: { hypertrophy: [4, 8], strength: [3, 5], conditioning: [6, 12] },
           tempo: { hypertrophy: "4-1-2-1", strength: "5-1-2-0", conditioning: "2-0-2-0" },
           tutTarget: [30, 60],
         },
         burpee: {
           name: "Burpee",
-          progressions: [
-            "No-Jump Burpee",
-            "No-Push-Up Burpee",
-            "Standard Burpee",
-            "Burpee with Tuck Jump",
-            "Single-Leg Burpee",
-          ],
+          progressions: ["No-Jump Burpee","No-Push-Up Burpee","Standard Burpee","Burpee with Tuck Jump","Single-Leg Burpee"],
           repRanges: { hypertrophy: [8, 12], strength: [5, 8], conditioning: [10, 20] },
           tempo: { hypertrophy: "controlled", strength: "controlled", conditioning: "fast-safe" },
           tutTarget: [20, 60],
         },
         gluteBridge: {
           name: "Glute Bridge",
-          progressions: [
-            "Glute Bridge",
-            "Feet-Elevated Bridge",
-            "Single-Leg Bridge",
-            "Single-Leg Feet-Elevated Bridge",
-          ],
+          progressions: ["Glute Bridge","Feet-Elevated Bridge","Single-Leg Bridge","Single-Leg Feet-Elevated Bridge"],
           repRanges: { hypertrophy: [8, 15], strength: [6, 10], conditioning: [15, 25] },
           tempo: { hypertrophy: "3-1-2-1", strength: "4-1-2-1", conditioning: "2-0-2-0" },
           tutTarget: [40, 70],
@@ -570,60 +394,124 @@
         },
       ];
 
-      // Persistence
+      // Storage (with migration to v5)
       const STORAGE = {
-        prefs: "neTrainer.prefs.v4",
-        hist: "neTrainer.hist.v4",
-        prog: "neTrainer.userProgressions.v4", // user-chosen indices per move
+        prefs: "neTrainer.prefs.v5",
+        hist: "neTrainer.hist.v5",
+        prog: "neTrainer.userProgressions.v5",
+        progSides: "neTrainer.userProgressionsSides.v5",
+        old: {
+          prefs: "neTrainer.prefs.v4",
+          hist: "neTrainer.hist.v4",
+          prog: "neTrainer.userProgressions.v4",
+        },
       };
       const load = (k, f) => {
-        try {
-          const s = localStorage.getItem(k);
-          return s ? JSON.parse(s) : f;
-        } catch {
-          return f;
-        }
+        try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : f; } catch { return f; }
       };
-      const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+      const save = (k, v) => {
+        try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn("Save failed", k, e); }
+      };
+      // Basic migration if v5 is empty but v4 exists
+      (function migrate() {
+        const hasV5 = localStorage.getItem(STORAGE.prefs) || localStorage.getItem(STORAGE.hist) || localStorage.getItem(STORAGE.prog);
+        if (hasV5) return;
+        const p4 = load(STORAGE.old.prefs, null);
+        const h4 = load(STORAGE.old.hist, null);
+        const g4 = load(STORAGE.old.prog, null);
+        if (p4) save(STORAGE.prefs, p4);
+        if (h4) save(STORAGE.hist, h4);
+        if (g4) save(STORAGE.prog, g4);
+      })();
 
       // State
+      const prefersReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const state = {
         prefs: load(STORAGE.prefs, {
           routineId: ROUTINES[0].id,
           level: "beginner",
           goal: "strength",
+          sound: !prefersReduced,
+          haptics: !prefersReduced,
+          keepAwake: false,
+          highContrast: false,
+          autoAdjust: "on",
         }),
         history: load(STORAGE.hist, []),
-        userProg: load(STORAGE.prog, {}), // e.g., { push: 3, squat: 2 }
+        userProg: load(STORAGE.prog, {}),       // e.g., { push: 3, squat: 2 }
+        userProgSides: load(STORAGE.progSides, {}), // e.g., { lunge: {L:2, R:3} }
         session: null,
+        wakeLock: null,
       };
 
       // Utils
       const el = (q) => document.querySelector(q);
+      const $all = (q, root=document) => Array.from(root.querySelectorAll(q));
       const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
       const pad = (n) => String(n).padStart(2, "0");
       const mmss = (s) => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+      const isFormTarget = (ev) => {
+        const t = ev.target;
+        return t && (t.closest("input, select, textarea, button, [contenteditable='true']"));
+      };
+
+      // Tempo/TUT helpers
+      function parseTempo(tempoStr) {
+        // Formats: "4-1-2-0" => [ecc, bottom, con, top]; "isometric","controlled","fast-safe"
+        if (!tempoStr) return { kind: "unknown", secondsPerRep: 3 };
+        const t = tempoStr.toLowerCase();
+        if (t === "isometric") return { kind: "iso" };
+        if (t === "controlled") return { kind: "free", secondsPerRep: 3.5 };
+        if (t === "fast-safe") return { kind: "free", secondsPerRep: 2.5 };
+        const m = tempoStr.split("-").map((x) => parseFloat(x));
+        if (m.length === 4 && m.every((x) => Number.isFinite(x))) {
+          const perRep = m[0] + m[1] + m[2] + m[3];
+          return { kind: "strict", secondsPerRep: Math.max(1, perRep) };
+        }
+        return { kind: "unknown", secondsPerRep: 3 };
+        // Note: we only use secondsPerRep when work.type=reps
+      }
+      function estimateSetSeconds(ex) {
+        if (ex.work.type === "time") return ex.work.seconds;
+        const tempo = parseTempo(ex.tempo);
+        const reps = ex.work.reps;
+        if (tempo.kind === "iso") {
+          // If iso with reps (rare), assume 5s hold per rep
+          return reps * 5;
+        }
+        const spr = tempo.secondsPerRep ?? 3;
+        let secs = Math.round(reps * spr);
+        if (ex.perSide) secs *= 2; // left + right
+        // Clamp with movement TUT target if available
+        const mv = MOVES[ex.moveKey];
+        if (mv && mv.tutTarget) secs = clamp(secs, mv.tutTarget[0], mv.tutTarget[1] * (ex.perSide ? 2 : 1));
+        return secs;
+      }
 
       function baseIndexByLevel(level, moveKey, hint) {
         const list = MOVES[moveKey].progressions;
         if (hint) {
-          const idx = list.findIndex((p) =>
-            p.toLowerCase().includes(hint.toLowerCase())
-          );
+          const idx = list.findIndex((p) => p.toLowerCase().includes(String(hint).toLowerCase()));
           if (idx >= 0) return idx;
         }
-        const bias = { beginner: 0, intermediate: 1, advanced: 2 }[level];
+        const bias = { beginner: 0, intermediate: 1, advanced: 2 }[level] ?? 0;
         return clamp(bias, 0, list.length - 1);
       }
-
       function getVariant(moveKey, level, hint) {
         const list = MOVES[moveKey].progressions;
         const userIdx = state.userProg[moveKey];
-        const idx =
-          typeof userIdx === "number"
-            ? clamp(userIdx, 0, list.length - 1)
-            : baseIndexByLevel(level, moveKey, hint);
+        const idx = typeof userIdx === "number" ? clamp(userIdx, 0, list.length - 1) : baseIndexByLevel(level, moveKey, hint);
         return { idx, name: list[idx], list };
+      }
+
+      // Per-exercise rest default by goal
+      function defaultRestByGoal(goal) {
+        switch (goal) {
+          case "strength": return 60;
+          case "hypertrophy": return 45;
+          case "conditioning": return 20;
+          default: return 30;
+        }
       }
 
       // Build session
@@ -632,55 +520,65 @@
         const meta = [];
 
         if (routine.type === "full") {
-          const rounds =
-            routine.rounds[0] === routine.rounds[1]
-              ? routine.rounds[0]
-              : Math.round((routine.rounds[0] + routine.rounds[1]) / 2);
-          const restA = routine.restBetweenRounds[0];
-          const restB = routine.restBetweenRounds[1];
-          meta.push(`Rounds ${rounds}, Rest ${restA}–${restB}s`);
+          const rounds = routine.rounds[0] === routine.rounds[1]
+            ? routine.rounds[0]
+            : Math.round((routine.rounds[0] + routine.rounds[1]) / 2);
+
+          const roundRest = Math.round((routine.restBetweenRounds[0] + routine.restBetweenRounds[1]) / 2);
+          meta.push(`Rounds ${rounds}, Between rounds rest ${roundRest}s`);
+
           routine.items.forEach((it) => {
             const mv = MOVES[it.move];
-            const variant = getVariant(it.move, state.prefs.level, it.variantHint);
+            const variant = getVariant(it.move, level, it.variantHint);
             const rr = mv.repRanges[goal] || [8, 12];
-            const reps = it.reps
-              ? clamp(Math.round((it.reps[0] + it.reps[1]) / 2), rr[0], rr[1])
-              : null;
+
+            const reps = it.reps ? clamp(Math.round((it.reps[0] + it.reps[1]) / 2), rr[0], rr[1]) : null;
             const seconds = it.seconds
-              ? clamp(
-                  Math.round((it.seconds[0] + it.seconds[1]) / 2),
-                  mv.tutTarget[0],
-                  mv.tutTarget[1]
-                )
+              ? (Array.isArray(it.seconds)
+                  ? clamp(Math.round((it.seconds[0] + it.seconds[1]) / 2), mv.tutTarget[0], mv.tutTarget[1])
+                  : clamp(it.seconds, mv.tutTarget[0], mv.tutTarget[1]))
               : null;
 
-            items.push({
+            const ex = {
               title: mv.name,
               variant: variant.name,
               moveKey: it.move,
               perSide: !!it.perSide,
               sets: rounds,
               work: seconds ? { type: "time", seconds } : { type: "reps", reps },
-              rest: Math.round((restA + restB) / 2),
+              restSet: defaultRestByGoal(goal), // rest between exercises
+              restRound: roundRest,            // rest between rounds
               tempo: mv.tempo[goal],
               variantIdx: variant.idx,
               variantList: variant.list,
-            });
+            };
+
+            // Per-side variant overrides (optional)
+            const side = state.userProgSides[it.move];
+            if (ex.perSide && side && Number.isFinite(side.L) && Number.isFinite(side.R)) {
+              ex.variantLeftIdx = clamp(side.L, 0, ex.variantList.length - 1);
+              ex.variantRightIdx = clamp(side.R, 0, ex.variantList.length - 1);
+              ex.variantLeft = ex.variantList[ex.variantLeftIdx];
+              ex.variantRight = ex.variantList[ex.variantRightIdx];
+            }
+
+            items.push(ex);
           });
-          return { type: "full", meta, items, rounds };
+
+          return { type: "full", meta, items, rounds, roundRest };
         }
 
         if (routine.type === "hiit") {
           meta.push(`Work ${routine.workRest[0]}s / Rest ${routine.workRest[1]}s`);
           const itemsList = routine.items.map((it) => {
             const mv = MOVES[it.move];
-            const variant = getVariant(it.move, state.prefs.level, it.variantHint);
+            const variant = getVariant(it.move, level, it.variantHint);
             return {
               title: mv.name,
               variant: variant.name,
               moveKey: it.move,
               work: { type: "time", seconds: routine.workRest[0] },
-              rest: routine.workRest[1],
+              restSet: routine.workRest[1],
               sets: routine.blocks,
               tempo: mv.tempo.conditioning,
               variantIdx: variant.idx,
@@ -694,14 +592,14 @@
           meta.push("Tabata 20s/10s x8 each block, 1 min between blocks");
           const blocks = routine.blocks.map((b) => {
             const mv = MOVES[b.move];
-            const variant = getVariant(b.move, state.prefs.level, b.title);
+            const variant = getVariant(b.move, level, b.title);
             return {
               blockTitle: b.title,
               title: mv.name,
               variant: variant.name,
               moveKey: b.move,
               work: { type: "time", seconds: 20 },
-              rest: 10,
+              restSet: 10,
               sets: 8,
               between: 60,
               tempo: mv.tempo.conditioning,
@@ -716,7 +614,7 @@
           meta.push(`AMRAP ${routine.duration} minutes`);
           const itemsList = routine.items.map((it) => {
             const mv = MOVES[it.move];
-            const variant = getVariant(it.move, state.prefs.level, it.variantHint);
+            const variant = getVariant(it.move, level, it.variantHint);
             return {
               title: mv.name,
               variant: variant.name,
@@ -739,38 +637,36 @@
         sel.innerHTML = "";
         ROUTINES.forEach((r) => {
           const o = document.createElement("option");
-          o.value = r.id;
-          o.textContent = r.name;
-          sel.appendChild(o);
+          o.value = r.id; o.textContent = r.name; sel.appendChild(o);
         });
         sel.value = state.prefs.routineId;
         el("#levelSelect").value = state.prefs.level;
         el("#goalSelect").value = state.prefs.goal;
+
+        el("#soundToggle").checked = !!state.prefs.sound;
+        el("#hapticsToggle").checked = !!state.prefs.haptics;
+        el("#wakeToggle").checked = !!state.prefs.keepAwake;
+        el("#contrastToggle").checked = !!state.prefs.highContrast;
+        el("#autoAdjust").value = state.prefs.autoAdjust || "on";
+        document.body.classList.toggle("high-contrast", !!state.prefs.highContrast);
       }
 
       function renderMeta(session, routine, level, goal) {
         const meta = el("#sessionMeta");
         meta.innerHTML = "";
-        [routine.name, `Level: ${level}`, `Goal: ${goal}`, ...session.meta].forEach(
-          (p) => {
-            const c = document.createElement("div");
-            c.className = "chip wrap";
-            c.textContent = p;
-            meta.appendChild(c);
-          }
-        );
+        [routine.name, `Level: ${level}`, `Goal: ${goal}`, ...session.meta].forEach((p) => {
+          const c = document.createElement("div");
+          c.className = "chip wrap"; c.textContent = p; meta.appendChild(c);
+        });
 
         const chips = el("#tempoChips");
         chips.innerHTML = "";
         const uniq = new Set();
-        (session.items || session.blocks || [])
-          .flatMap((it) => (it.tempo ? [it.tempo] : []))
-          .forEach((t) => uniq.add(t));
+        const items = session.items || session.blocks || [];
+        items.flatMap((it) => (it.tempo ? [it.tempo] : [])).forEach((t) => uniq.add(t));
         [...uniq].slice(0, 4).forEach((t) => {
           const c = document.createElement("div");
-          c.className = "chip";
-          c.textContent = `Tempo ${t}`;
-          chips.appendChild(c);
+          c.className = "chip"; c.textContent = `Tempo ${t}`; chips.appendChild(c);
         });
 
         el("#tutText").textContent =
@@ -783,6 +679,24 @@
         renderHistory();
       }
 
+      function perSideControlsHTML(moveKey, idxBase, list, sideProg, exIdx) {
+        const idL = `prog-${exIdx}-${moveKey}-L`;
+        const idR = `prog-${exIdx}-${moveKey}-R`;
+        const opts = list.map((name, i) => `<option value="${i}">${i + 1}. ${name}</option>`).join("");
+        return `
+          <div class="row two" style="margin-top:8px">
+            <div>
+              <label for="${idL}">Left progression</label>
+              <select data-side="L" data-move="${moveKey}" data-ex="${exIdx}" id="${idL}">${opts}</select>
+            </div>
+            <div>
+              <label for="${idR}">Right progression</label>
+              <select data-side="R" data-move="${moveKey}" data-ex="${exIdx}" id="${idR}">${opts}</select>
+            </div>
+          </div>
+        `;
+      }
+
       function renderExercises(session) {
         const list = el("#exerciseList");
         list.innerHTML = "";
@@ -790,12 +704,7 @@
         function progSelectHTML(moveKey, variantIdx, variantList, exerciseIdx) {
           const id = `prog-${exerciseIdx}-${moveKey}`;
           const opts = variantList
-            .map(
-              (name, i) =>
-                `<option value="${i}" ${i === variantIdx ? "selected" : ""}>${
-                  i + 1
-                }. ${name}</option>`
-            )
+            .map((name, i) => `<option value="${i}" ${i === variantIdx ? "selected" : ""}>${i + 1}. ${name}</option>`)
             .join("");
           return `
             <div class="row two" style="margin-top:8px">
@@ -807,78 +716,124 @@
               </div>
               <div>
                 <label>Current Variation</label>
-                <div class="chip" id="${id}-label">${
-            variantList[variantIdx]
-          }</div>
+                <div class="chip" id="${id}-label">${variantList[variantIdx]}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        function actualInputsHTML(ex, idx) {
+          const unit = ex.work.type === "time" ? "sec" : (ex.perSide ? "reps/side" : "reps");
+          const idA = `actual-${idx}`;
+          const idR = `rpe-${idx}`;
+          return `
+            <div class="row two" style="margin-top:8px">
+              <div>
+                <label for="${idA}">Actual (${unit})</label>
+                <input id="${idA}" type="number" min="0" inputmode="numeric" placeholder="e.g., 12" />
+              </div>
+              <div>
+                <label for="${idR}">RPE</label>
+                <select id="${idR}">
+                  <option value="">—</option>
+                  <option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                </select>
               </div>
             </div>
           `;
         }
 
         function makeExercise(ex, idx, title) {
-          const t =
-            ex.work.type === "time"
-              ? `${ex.work.seconds}s`
-              : `${ex.work.reps} reps${ex.perSide ? " / side" : ""}`;
+          const t = ex.work.type === "time"
+            ? `${ex.work.seconds}s`
+            : `${ex.work.reps} reps${ex.perSide ? " / side" : ""}`;
 
           const wrapper = document.createElement("div");
           wrapper.className = "exercise";
+          const perSide = !!ex.perSide;
+          const hasSides = !!state.userProgSides[ex.moveKey];
+          const leftName = ex.variantLeft ?? ex.variant;
+          const rightName = ex.variantRight ?? ex.variant;
+
           wrapper.innerHTML = `
             <h4>${title}</h4>
             <div class="chips">
               <div class="chip">Sets: ${ex.sets ?? (ex.sets === 0 ? 0 : 1)}</div>
               <div class="chip">Target: ${t}</div>
-              ${
-                ex.rest != null
-                  ? `<div class="chip">Rest cue: ${ex.rest}s</div>`
-                  : ""
-              }
-              <div class="chip">Tempo: ${ex.tempo || "—"}</div>
+              ${ex.restSet != null ? `<div class="chip">Rest between exercises: ${ex.restSet}s</div>` : ""}
+              ${ex.restRound != null ? `<div class="chip">Between rounds: ${ex.restRound}s</div>` : ""}
+              <div class="chip">Tempo: ${ex.tempo || "--"}</div>
+              ${perSide ? `<div class="chip">Sides: ${leftName} | ${rightName}</div>` : ""}
             </div>
-            ${progSelectHTML(ex.moveKey, ex.variantIdx, ex.variantList, idx)}
+            ${perSide ? `
+              <div class="chips" style="margin-top:8px">
+                <span class="chip"><input type="checkbox" id="sides-${idx}" ${hasSides ? "checked" : ""} />
+                  <label for="sides-${idx}" style="margin:0">Separate L/R progressions</label>
+                </span>
+              </div>
+            ` : ""}
+            ${perSide && hasSides ? perSideControlsHTML(ex.moveKey, ex.variantIdx, ex.variantList, state.userProgSides[ex.moveKey], idx) : progSelectHTML(ex.moveKey, ex.variantIdx, ex.variantList, idx)}
+            ${actualInputsHTML(ex, idx)}
           `;
           list.appendChild(wrapper);
+
+          // If side selects present, set selected indices
+          if (perSide && hasSides) {
+            const side = state.userProgSides[ex.moveKey];
+            const selL = el(`#prog-${idx}-${ex.moveKey}-L`);
+            const selR = el(`#prog-${idx}-${ex.moveKey}-R`);
+            if (selL && side && Number.isFinite(side.L)) selL.value = String(side.L);
+            if (selR && side && Number.isFinite(side.R)) selR.value = String(side.R);
+          }
         }
 
         if (session.type === "full" || session.type === "hiit" || session.type === "amrap") {
-          const items = session.items;
-          items.forEach((it, i) => {
-            makeExercise(it, i, `${i + 1}. ${it.title}`);
-          });
+          (session.items || []).forEach((it, i) => makeExercise(it, i, `${i + 1}. ${it.title}`));
         } else if (session.type === "tabata") {
           session.blocks.forEach((b, i) => {
-            // Represent as a single configurable line per block
-            makeExercise(
-              {
-                ...b,
-                sets: b.sets,
-                work: { type: "time", seconds: 20 },
-                rest: 10,
-              },
-              i,
-              `Block ${i + 1}: ${b.blockTitle}`
-            );
+            makeExercise({
+              ...b, sets: b.sets, work: { type: "time", seconds: 20 }, restSet: 10
+            }, i, `Block ${i + 1}: ${b.blockTitle}`);
           });
         }
 
-        // Bind change handlers for all selects
-        list.querySelectorAll("select[data-move]").forEach((sel) => {
-          sel.onchange = (e) => {
+        // Bind progression handlers
+        list.querySelectorAll("select[data-move]:not([data-side])").forEach((sel) => {
+          sel.onchange = () => {
             const move = sel.getAttribute("data-move");
-            const exIndex = Number(sel.getAttribute("data-ex"));
             const idx = Number(sel.value);
-
-            // Persist chosen progression for this movement type
-            state.userProg[move] = idx;
-            save(STORAGE.prog, state.userProg);
-
-            // Update label immediately
-            const label = el(`#${sel.id}-label`);
-            const list = MOVES[move].progressions;
-            if (label) label.textContent = list[idx];
-
-            // Regenerate session with updated variations so timer uses them
-            generate(false); // silent regenerate
+            state.userProg[move] = idx; save(STORAGE.prog, state.userProg);
+            const label = el(`#${sel.id}-label`); const names = MOVES[move].progressions;
+            if (label) label.textContent = names[idx];
+            generate(false);
+          };
+        });
+        // Per-side toggles and handlers
+        list.querySelectorAll("input[id^='sides-']").forEach((cb) => {
+          cb.onchange = () => {
+            const idx = Number(cb.id.split("-")[1]);
+            const ex = (state.session.items || state.session.blocks)[idx];
+            const move = ex.moveKey;
+            if (cb.checked) {
+              const base = state.userProg[move] ?? baseIndexByLevel(state.prefs.level, move);
+              state.userProgSides[move] = { L: base, R: base };
+              save(STORAGE.progSides, state.userProgSides);
+            } else {
+              delete state.userProgSides[move];
+              save(STORAGE.progSides, state.userProgSides);
+            }
+            generate(false);
+          };
+        });
+        list.querySelectorAll("select[data-side]").forEach((sel) => {
+          sel.onchange = () => {
+            const move = sel.getAttribute("data-move");
+            const side = sel.getAttribute("data-side");
+            const idx = Number(sel.value);
+            if (!state.userProgSides[move]) state.userProgSides[move] = { L: idx, R: idx };
+            state.userProgSides[move][side] = idx;
+            save(STORAGE.progSides, state.userProgSides);
+            generate(false);
           };
         });
       }
@@ -888,136 +843,126 @@
         const rid = el("#routineSelect").value;
         const level = el("#levelSelect").value;
         const goal = el("#goalSelect").value;
-        state.prefs = { routineId: rid, level, goal };
+        state.prefs = {
+          ...state.prefs,
+          routineId: rid, level, goal,
+          sound: el("#soundToggle").checked,
+          haptics: el("#hapticsToggle").checked,
+          keepAwake: el("#wakeToggle").checked,
+          highContrast: el("#contrastToggle").checked,
+          autoAdjust: el("#autoAdjust").value,
+        };
         save(STORAGE.prefs, state.prefs);
+        document.body.classList.toggle("high-contrast", !!state.prefs.highContrast);
 
         const routine = ROUTINES.find((r) => r.id === rid);
         const session = sessionFromRoutine(routine, level, goal);
         state.session = session;
         renderMeta(session, routine, level, goal);
         renderExercises(session);
-        if (showAlert === true) {
-          // no alert, but keeping param for silent regen
-        }
       }
 
-      // Timer engine (same as before)
-      const audioCtx =
-        typeof AudioContext !== "undefined"
-          ? new AudioContext()
-          : typeof webkitAudioContext !== "undefined"
-          ? new webkitAudioContext()
-          : null;
+      // Audio + Haptics
+      const audioCtx = (() => {
+        try {
+          return typeof AudioContext !== "undefined" ? new AudioContext()
+            : typeof webkitAudioContext !== "undefined" ? new webkitAudioContext()
+            : null;
+        } catch { return null; }
+      })();
       function beep(freq = 660, dur = 120) {
-        if (!audioCtx) return;
+        if (!state.prefs.sound || !audioCtx) return;
         const o = audioCtx.createOscillator();
         const g = audioCtx.createGain();
-        o.connect(g);
-        g.connect(audioCtx.destination);
-        o.frequency.value = freq;
-        o.type = "sine";
-        g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.01);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = freq; o.type = "sine";
+        const now = audioCtx.currentTime;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.22, now + 0.01);
         o.start();
         setTimeout(() => {
-          g.gain.exponentialRampToValueAtTime(
-            0.0001,
-            audioCtx.currentTime + 0.01
-          );
+          g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.01);
           o.stop();
         }, dur);
       }
+      function cueStartWork() { beep(820, 150); if (state.prefs.haptics && navigator.vibrate) navigator.vibrate([30, 40]); }
+      function cueStartRest() { beep(520, 180); if (state.prefs.haptics && navigator.vibrate) navigator.vibrate(20); }
+      function cueCountdown(t) { if (t > 0 && t <= 3) beep(660, 100); }
 
-      const timer = { plan: [], i: 0, running: false, remain: 0, tick: null };
+      // Wake Lock
+      async function requestWakeLock() {
+        try {
+          if (!("wakeLock" in navigator)) return;
+          if (state.wakeLock) return;
+          state.wakeLock = await navigator.wakeLock.request("screen");
+          state.wakeLock.addEventListener("release", () => { state.wakeLock = null; });
+        } catch (e) { /* ignore */ }
+      }
+      async function releaseWakeLock() {
+        try { if (state.wakeLock) { await state.wakeLock.release(); state.wakeLock = null; } } catch {}
+      }
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && state.prefs.keepAwake && !state.wakeLock) requestWakeLock();
+      });
+
+      // Timer engine (drift-free)
+      const timer = { plan: [], i: 0, running: false, remain: 0, timeout: null, expected: 0 };
       const ring = () => el("#restRing");
 
       function buildTimerPlan(session) {
         const plan = [];
-        plan.push({
-          phase: "warmup",
-          title: "Warm-Up",
-          sub: "2 min light movement",
-          seconds: 120,
-        });
+        plan.push({ phase: "warmup", title: "Warm-Up", sub: "2 min light movement", seconds: 120 });
 
         if (session.type === "full") {
-          const sets = session.items[0]?.sets || 1;
-          for (let r = 1; r <= sets; r++) {
+          const rounds = session.rounds || (session.items[0]?.sets || 1);
+          for (let r = 1; r <= rounds; r++) {
             session.items.forEach((it, idx) => {
-              plan.push({
-                phase: "work",
-                title: `${it.title}`,
-                sub:
-                  it.work.type === "time"
-                    ? `${it.variant} — ${it.work.seconds}s`
-                    : `${it.variant} — ${it.work.reps} reps${
-                        it.perSide ? " / side" : ""
-                      }`,
-                seconds: it.work.type === "time" ? it.work.seconds : 45,
-              });
-              const isLast = idx === session.items.length - 1;
-              plan.push({
-                phase: "rest",
-                title: isLast ? "Rest between rounds" : "Rest",
-                sub: isLast ? `Round ${r} complete` : "Next up",
-                seconds: isLast ? it.rest : 20,
-              });
+              if (it.perSide) {
+                const reps = it.work.type === "reps" ? it.work.reps : null;
+                const leftVar = it.variantLeft || it.variant;
+                const rightVar = it.variantRight || it.variant;
+                const perSideSeconds = it.work.type === "time"
+                  ? Math.round(it.work.seconds / 2)
+                  : Math.max(15, Math.round((parseTempo(it.tempo).secondsPerRep ?? 3) * (reps || 8)));
+                plan.push({ phase: "work", title: it.title + " — Left", sub: `${leftVar} — ${it.work.type === "time" ? perSideSeconds + "s" : reps + " reps"}`, seconds: perSideSeconds });
+                plan.push({ phase: "work", title: it.title + " — Right", sub: `${rightVar} — ${it.work.type === "time" ? perSideSeconds + "s" : reps + " reps"}`, seconds: perSideSeconds });
+              } else {
+                const seconds = it.work.type === "time" ? it.work.seconds : estimateSetSeconds(it);
+                const sub = it.work.type === "time" ? `${it.variant} — ${seconds}s` : `${it.variant} — ${it.work.reps} reps`;
+                plan.push({ phase: "work", title: it.title, sub, seconds });
+              }
+              // Rest between exercises; after last exercise in a round, we add round rest instead.
+              const isLastInRound = idx === session.items.length - 1;
+              if (!isLastInRound) {
+                plan.push({ phase: "rest", title: "Rest", sub: "Next up", seconds: it.restSet });
+              } else if (r < rounds) {
+                plan.push({ phase: "rest", title: "Between Rounds", sub: `Round ${r} complete`, seconds: session.roundRest });
+              }
             });
           }
         } else if (session.type === "hiit") {
           for (let b = 1; b <= session.blocks; b++) {
             session.items.forEach((it) => {
-              plan.push({
-                phase: "work",
-                title: it.title,
-                sub: `${it.variant} — ${it.work.seconds}s`,
-                seconds: it.work.seconds,
-              });
-              plan.push({ phase: "rest", title: "Rest", sub: "", seconds: it.rest });
+              plan.push({ phase: "work", title: it.title, sub: `${it.variant} — ${it.work.seconds}s`, seconds: it.work.seconds });
+              plan.push({ phase: "rest", title: "Rest", sub: "", seconds: it.restSet });
             });
-            plan.push({
-              phase: "rest",
-              title: "Block Rest",
-              sub: `Block ${b} complete`,
-              seconds: 60,
-            });
+            if (b < session.blocks) plan.push({ phase: "rest", title: "Block Rest", sub: `Block ${b} complete`, seconds: 60 });
           }
         } else if (session.type === "tabata") {
           session.blocks.forEach((b, bi) => {
             for (let s = 1; s <= b.sets; s++) {
-              plan.push({
-                phase: "work",
-                title: b.blockTitle,
-                sub: `${b.variant} — 20s`,
-                seconds: 20,
-              });
+              plan.push({ phase: "work", title: b.blockTitle, sub: `${b.variant} — 20s`, seconds: 20 });
               plan.push({ phase: "rest", title: "Rest", sub: "", seconds: 10 });
             }
             if (bi < session.blocks.length - 1) {
-              plan.push({
-                phase: "rest",
-                title: "Between Blocks",
-                sub: "Catch breath",
-                seconds: b.between,
-              });
+              plan.push({ phase: "rest", title: "Between Blocks", sub: "Catch breath", seconds: b.between });
             }
           });
         } else if (session.type === "amrap") {
-          plan.push({
-            phase: "amrap",
-            title: "AMRAP",
-            sub: "Cycle movements in order",
-            seconds: session.duration,
-          });
+          plan.push({ phase: "amrap", title: "AMRAP", sub: "Cycle movements in order", seconds: session.duration });
         }
 
-        plan.push({
-          phase: "cooldown",
-          title: "Cool-Down",
-          sub: "2 min easy breathing & stretch",
-          seconds: 120,
-        });
-
+        plan.push({ phase: "cooldown", title: "Cool-Down", sub: "2 min easy breathing & stretch", seconds: 120 });
         return plan;
       }
 
@@ -1025,56 +970,116 @@
         const deg = Math.round(360 * progress);
         ring().style.background = `conic-gradient(var(--accent) ${deg}deg, #0a1222 0deg)`;
       }
-      function showDrawer(show) {
-        el("#timerDrawer").classList.toggle("hidden", !show);
+      function ringLabelForPhase(phase) {
+        if (phase === "work") return "GO";
+        if (phase === "rest") return "REST";
+        if (phase === "warmup") return "WARM";
+        if (phase === "cooldown") return "COOL";
+        return phase.toUpperCase();
       }
+      function showDrawer(show) { el("#timerDrawer").classList.toggle("hidden", !show); }
+
       function renderTimer() {
-        const step = timer.plan[timer.i];
-        if (!step) return;
-        el("#timerPhase").textContent =
-          step.phase === "work"
-            ? "Work"
-            : step.phase === "rest"
-            ? "Rest"
-            : step.phase === "warmup"
-            ? "Warm-Up"
-            : step.phase === "cooldown"
-            ? "Cool-Down"
-            : step.phase.toUpperCase();
+        const step = timer.plan[timer.i]; if (!step) return;
+        const phaseName = step.phase === "work" ? "Work"
+          : step.phase === "rest" ? "Rest"
+          : step.phase === "warmup" ? "Warm-Up"
+          : step.phase === "cooldown" ? "Cool-Down"
+          : step.phase.toUpperCase();
+
+        el("#timerPhase").textContent = phaseName;
         el("#timerTitle").textContent = step.title;
         el("#timerSub").textContent = step.sub || "";
         el("#timerClock").textContent = mmss(timer.remain);
         drawRing(1 - timer.remain / (step.seconds || 1));
-        ring().setAttribute("data-t", step.phase === "work" ? "GO" : "REST");
+        ring().setAttribute("data-t", ringLabelForPhase(step.phase));
 
         const bc = el("#timerBreadcrumb");
         bc.innerHTML = "";
         const idxText = `${timer.i + 1}/${timer.plan.length}`;
-        ["Session", idxText, step.phase].forEach((t) => {
-          const c = document.createElement("div");
-          c.className = "chip";
-          c.textContent = t;
-          bc.appendChild(c);
-        });
+        const next = timer.plan[timer.i + 1];
+        const chips = [
+          "Session",
+          idxText,
+          phaseName,
+        ];
+        chips.forEach((t) => { const c = document.createElement("div"); c.className = "chip"; c.textContent = t; bc.appendChild(c); });
+        if (next) {
+          const n = document.createElement("div");
+          n.className = "chip"; n.textContent = `Next: ${next.phase === "work" ? "Work" : next.phase === "rest" ? "Rest" : next.phase} — ${next.title}`;
+          bc.appendChild(n);
+        }
 
         el("#btnPause").textContent = timer.running ? "Pause" : "Start";
+
+        // aria-live status
+        el("#liveStatus").textContent = `${phaseName}. ${step.title}. ${mmss(timer.remain)} remaining.`;
       }
-      function nextStep() {
+
+      function scheduleTick() {
+        const now = performance.now();
+        const drift = now - timer.expected;
+        // Advance second
+        if (timer.remain > 0) {
+          timer.remain--;
+          cueCountdown(timer.remain);
+          renderTimer();
+        } else {
+          // Step transition
+          const prev = timer.plan[timer.i];
+          if (prev) {
+            if (prev.phase === "work") cueStartRest(); else cueStartWork();
+          }
+          nextStep(true);
+        }
+        // Next expected tick
+        timer.expected += 1000;
+        const delay = Math.max(0, 1000 - drift);
+        timer.timeout = setTimeout(scheduleTick, delay);
+      }
+
+      function startPause() {
+        if (!state.session) { alert("Generate a session first."); return; }
+        if (!timer.plan.length) {
+          timer.plan = buildTimerPlan(state.session);
+          timer.i = 0; timer.remain = timer.plan[0].seconds;
+          showDrawer(true); renderTimer();
+        }
+        if (!timer.running) {
+          timer.running = true;
+          if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+          if (state.prefs.keepAwake) requestWakeLock();
+          timer.expected = performance.now() + 1000;
+          timer.timeout = setTimeout(scheduleTick, 1000);
+          el("#btnPause").textContent = "Pause";
+        } else {
+          timer.running = false;
+          clearTimeout(timer.timeout);
+          el("#btnPause").textContent = "Start";
+          releaseWakeLock();
+        }
+      }
+
+      function nextStep(internal=false) {
         if (timer.i < timer.plan.length - 1) {
           timer.i++;
           timer.remain = timer.plan[timer.i].seconds;
           renderTimer();
+          if (!internal) cueStartWork();
         } else {
+          // Complete
           beep(880, 200);
-          clearInterval(timer.tick);
+          clearTimeout(timer.timeout);
           timer.running = false;
           el("#timerTitle").textContent = "Workout Complete";
           el("#timerSub").textContent = "Nice work!";
           el("#timerClock").textContent = "00:00";
           drawRing(1);
           el("#btnPause").textContent = "Start";
+          releaseWakeLock();
         }
       }
+
       function prevStep() {
         if (timer.i > 0) {
           timer.i--;
@@ -1082,89 +1087,130 @@
           renderTimer();
         }
       }
-      function startPause() {
-        if (!timer.running) {
-          timer.running = true;
-          if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-          timer.tick = setInterval(() => {
-            if (timer.remain > 0) {
-              timer.remain--;
-              if (timer.remain <= 3 && timer.remain > 0) beep(660, 100);
-              renderTimer();
-            } else {
-              beep(520, 160);
-              nextStep();
-            }
-          }, 1000);
-        } else {
-          timer.running = false;
-          clearInterval(timer.tick);
-          renderTimer();
-        }
-      }
+
       function startTimerForCurrentSession() {
-        if (!state.session) {
-          alert("Generate a session first.");
-          return;
-        }
+        if (!state.session) { alert("Generate a session first."); return; }
         timer.plan = buildTimerPlan(state.session);
-        timer.i = 0;
-        timer.remain = timer.plan[0].seconds;
+        timer.i = 0; timer.remain = timer.plan[0].seconds;
         timer.running = false;
         showDrawer(true);
         renderTimer();
+        if (state.prefs.keepAwake) requestWakeLock();
       }
 
       // History
+      function gatherActuals() {
+        const items = (state.session.items || state.session.blocks || []).map((ex, idx) => {
+          const actualEl = el(`#actual-${idx}`);
+          const rpeEl = el(`#rpe-${idx}`);
+          const actual = actualEl && actualEl.value !== "" ? Number(actualEl.value) : null;
+          const rpe = rpeEl && rpeEl.value !== "" ? Number(rpeEl.value) : null;
+          const leftRight = state.userProgSides[ex.moveKey] || null;
+          return {
+            title: ex.title,
+            moveKey: ex.moveKey,
+            target: ex.work.type === "time" ? { type: "time", seconds: ex.work.seconds } : { type: "reps", reps: ex.work.reps, perSide: !!ex.perSide },
+            variant: ex.variant,
+            variantLeft: ex.variantLeft || null,
+            variantRight: ex.variantRight || null,
+            actual, rpe, leftRight,
+          };
+        });
+        return items;
+      }
+
       function addHistory(note) {
         const rid = state.prefs.routineId;
         const routine = ROUTINES.find((r) => r.id === rid);
-        state.history.push({
-          date: new Date().toLocaleString(),
+        const entry = {
+          appVersion: APP_VERSION,
+          date: new Date().toISOString(),
           routine: routine.name,
           level: state.prefs.level,
           goal: state.prefs.goal,
           note,
           chosenProgressions: state.userProg,
-        });
+          chosenProgressionsSides: state.userProgSides,
+          overallRPE: el("#overallRPE").value || null,
+          items: gatherActuals(),
+        };
+        state.history.push(entry);
         save(STORAGE.hist, state.history);
         renderHistory();
+
+        // Auto-adjust logic
+        if ((state.prefs.autoAdjust || "on") === "on") {
+          const rpe = Number(entry.overallRPE);
+          const usedMoves = new Set(entry.items.map(i => i.moveKey));
+          if (rpe) {
+            for (const m of usedMoves) {
+              const list = MOVES[m].progressions;
+              if (!list) continue;
+              const delta = rpe <= 6 ? +1 : rpe >= 9 ? -1 : 0;
+              if (delta !== 0) {
+                if (state.userProgSides[m]) {
+                  state.userProgSides[m].L = clamp((state.userProgSides[m].L ?? 0) + delta, 0, list.length - 1);
+                  state.userProgSides[m].R = clamp((state.userProgSides[m].R ?? 0) + delta, 0, list.length - 1);
+                } else {
+                  const base = state.userProg[m] ?? baseIndexByLevel(state.prefs.level, m);
+                  state.userProg[m] = clamp(base + delta, 0, list.length - 1);
+                }
+              }
+            }
+            save(STORAGE.prog, state.userProg);
+            save(STORAGE.progSides, state.userProgSides);
+            generate(false);
+          }
+        }
       }
+
       function renderHistory() {
         const box = el("#history");
-        if (!state.history.length) {
-          box.innerHTML = "No sessions saved yet.";
-          return;
-        }
-        box.innerHTML = state.history
-          .slice()
-          .reverse()
-          .slice(0, 8)
-          .map(
-            (h) =>
-              `<div class="history-item"><b>${h.date}</b><br/>${h.routine} — ${h.level} / ${h.goal}<br/><span class="muted">${
-                h.note || ""
-              }</span></div>`
-          )
-          .join("");
+        if (!state.history.length) { box.innerHTML = "No sessions saved yet."; return; }
+        box.innerHTML = state.history.slice().reverse().slice(0, 12).map((h, idx) => {
+          const id = `hist-${state.history.length - 1 - idx}`;
+          const dt = new Date(h.date).toLocaleString();
+          const note = h.note ? `<div class="muted">${h.note}</div>` : "";
+          const rpe = h.overallRPE ? ` • RPE ${h.overallRPE}` : "";
+          return `
+            <div class="history-item" data-id="${id}">
+              <div><b>${dt}</b> — ${h.routine} — ${h.level}/${h.goal}${rpe}</div>
+              ${note}
+              <div class="history-actions">
+                <button class="btn ghost" data-del="${id}">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Bind delete
+        $all("[data-del]").forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.getAttribute("data-del");
+            const idx = Number(id.split("-")[1]);
+            if (!Number.isFinite(idx)) return;
+            if (!confirm("Delete this history entry?")) return;
+            state.history.splice(idx, 1);
+            save(STORAGE.hist, state.history);
+            renderHistory();
+          };
+        });
       }
 
       // Export
       function exportPlan() {
         const payload = {
+          appVersion: APP_VERSION,
           date: new Date().toISOString(),
           prefs: state.prefs,
           session: state.session,
           userProgressions: state.userProg,
+          userProgressionsSides: state.userProgSides,
         };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], {
-          type: "application/json",
-        });
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = url;
-        a.download = "no-equipment-trainer-plan.json";
-        a.click();
+        a.href = url; a.download = "no-equipment-trainer-plan.json"; a.click();
         URL.revokeObjectURL(url);
       }
 
@@ -1172,18 +1218,36 @@
       function bindEvents() {
         el("#generateBtn").onclick = () => generate();
         el("#startTimerBtn").onclick = startTimerForCurrentSession;
-        el("#btnClose").onclick = () => showDrawer(false);
+        el("#btnClose").onclick = () => {
+          if (timer.running) {
+            if (!confirm("Timer is running. Close and stop the timer?")) return;
+            timer.running = false;
+            clearTimeout(timer.timeout);
+            releaseWakeLock();
+          }
+          showDrawer(false);
+        };
         el("#btnPause").onclick = startPause;
-        el("#btnNext").onclick = nextStep;
+        el("#btnNext").onclick = () => nextStep(false);
         el("#btnBack").onclick = prevStep;
-        el("#btnSkip").onclick = nextStep;
+        el("#btnSkip").onclick = () => nextStep(false);
+
         el("#completeBtn").onclick = () => {
-          addHistory("Completed");
+          const note = el("#sessionNote").value || "Completed";
+          addHistory(note);
           alert("Session saved to history. Nice work!");
+        };
+        el("#undoBtn").onclick = () => {
+          if (!state.history.length) return;
+          if (!confirm("Undo last save?")) return;
+          state.history.pop();
+          save(STORAGE.hist, state.history);
+          renderHistory();
         };
         el("#exportBtn").onclick = exportPlan;
 
         document.addEventListener("keydown", (e) => {
+          if (isFormTarget(e)) return;
           const k = e.key.toLowerCase();
           if (k === "g") generate();
           if (k === "s") startPause();
@@ -1191,16 +1255,73 @@
           if (k === "b") prevStep();
         });
 
-        el("#routineSelect").onchange = () => generate();
-        el("#levelSelect").onchange = () => generate();
-        el("#goalSelect").onchange = () => generate();
+        ["routineSelect","levelSelect","goalSelect","soundToggle","hapticsToggle","wakeToggle","contrastToggle","autoAdjust"].forEach(id => {
+          const node = el("#" + id);
+          if (node) node.onchange = () => generate(false);
+        });
       }
 
       // Init
       function init() {
+        document.documentElement.classList.remove("no-js");
         populateRoutineSelect();
         bindEvents();
         generate();
+
+        // Inline PWA: manifest + light SW registration (best-effort)
+        try {
+          const manifest = {
+            name: "No-Equipment Trainer",
+            short_name: "NE Trainer",
+            description: "Timer + Progressions — single-file trainer",
+            start_url: ".",
+            display: "standalone",
+            background_color: "#0b1220",
+            theme_color: "#0b1220",
+            icons: [
+              { src: "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><defs><linearGradient id=%22g%22 x1=%220%22 x2=%221%22 y1=%220%22 y2=%221%22><stop stop-color=%22%2338bdf8%22/><stop offset=%221%22 stop-color=%22%2322c55e%22/></linearGradient></defs><rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22url(%23g)%22/><path d=%22M16 42l8-20 8 12 8-8 8 16%22 stroke=%22%23fff%22 stroke-width=%225%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>", sizes: "64x64", type: "image/svg+xml" }
+            ]
+          };
+          const murl = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+          const link = document.createElement("link");
+          link.rel = "manifest"; link.href = murl; document.head.appendChild(link);
+        } catch {}
+
+        if ("serviceWorker" in navigator) {
+          const swCode = `
+            const CACHE = "ne-trainer-cache-v1";
+            self.addEventListener("install", (e) => {
+              e.waitUntil((async () => {
+                const cache = await caches.open(CACHE);
+                try { await cache.addAll(["./"]); } catch {}
+                self.skipWaiting();
+              })());
+            });
+            self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+            self.addEventListener("fetch", (e) => {
+              const url = new URL(e.request.url);
+              if (url.origin === location.origin) {
+                e.respondWith((async () => {
+                  const cache = await caches.open(CACHE);
+                  const cached = await cache.match(e.request);
+                  if (cached) return cached;
+                  try {
+                    const res = await fetch(e.request);
+                    if (e.request.method === "GET" && res.ok) cache.put(e.request, res.clone());
+                    return res;
+                  } catch {
+                    return cached || Response.error();
+                  }
+                })());
+              }
+            });
+          `;
+          try {
+            const blob = new Blob([swCode], { type: "text/javascript" });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+          } catch {}
+        }
       }
       init();
     </script>
