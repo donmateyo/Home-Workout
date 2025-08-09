@@ -6,134 +6,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#0b1220" />
+
+    <!-- iOS PWA polish -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="NE Trainer">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- App icons (data URLs) -->
+    <link rel="apple-touch-icon" sizes="180x180" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="%2338bdf8"/><stop offset="1" stop-color="%2322c55e"/></linearGradient></defs><rect width="64" height="64" rx="12" fill="url(%23g)"/><path d="M16 42l8-20 8 12 8-8 8 16" stroke="%23fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+    <link rel="mask-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M16 42l8-20 8 12 8-8 8 16" fill="currentColor"/></svg>' color="#22c55e">
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="%2338bdf8"/><stop offset="1" stop-color="%2322c55e"/></linearGradient></defs><rect width="64" height="64" rx="12" fill="url(%23g)"/><path d="M16 42l8-20 8 12 8-8 8 16" stroke="%23fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0f172a;
+        --bg: #0b1120;
+        --bg-2: #0e1629;
         --panel: #0b1220;
-        --muted: #94a3b8;
-        --text: #e5e7eb;
+        --muted: #9aa7c0;
+        --text: #e7ecf6;
         --accent: #22c55e;
         --accent-2: #38bdf8;
-        --border: #1f2937;
-        --chip: #111827;
-        --focus: 2px solid #38bdf8;
+        --accent-3: #a78bfa;
+        --border: #203049;
+        --chip: #0f1a2c;
+        --radius: 14px;
+
+        --shadow-1: 0 1px 2px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.35);
+        --shadow-2: 0 1px 3px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.45);
+        --glow: 0 0 0 1px rgba(56,189,248,0.12), 0 10px 30px rgba(56,189,248,0.08);
+
+        --focus: 2px solid #60a5fa;
+        --grad-hero: radial-gradient(1200px 800px at 10% -10%, rgba(56,189,248,0.18), transparent 55%),
+                      radial-gradient(1000px 600px at 100% -20%, rgba(167,139,250,0.15), transparent 55%);
+
+        --ring-track: #0a1222;
+        --ring-glow: rgba(34,197,94,0.28);
+
+        --btn-grad: linear-gradient(180deg, #22c55e, #16a34a);
+        --btn-grad-2: linear-gradient(180deg, #38bdf8, #0ea5e9);
+        --btn-ghost: #0a1222;
+
+        --chip-grad: linear-gradient(180deg, #0f1a2c, #0c1526);
+
+        /* Accent surfaces for boxes/menus */
+        --accent-surface: linear-gradient(180deg, rgba(34,197,94,0.22), rgba(34,197,94,0.16));
+        --accent-surface-subtle: linear-gradient(180deg, rgba(34,197,94,0.16), rgba(34,197,94,0.10));
+        --accent-border: color-mix(in oklab, var(--accent), black 35%);
+        --accent-shadow: 0 0 0 1px rgba(34,197,94,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
       }
+
       .high-contrast {
-        --muted: #cbd5e1;
+        --muted: #d0def5;
         --text: #ffffff;
-        --border: #93c5fd;
+        --border: #6ea8ff;
         --accent: #10b981;
         --accent-2: #60a5fa;
+        --chip: #102038;
       }
+
+      @media (prefers-reduced-motion: reduce) { *{animation:none!important;transition:none!important} html{scroll-behavior:auto} }
+
       html, body { height: 100%; }
       body {
         margin: 0;
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-        background:
-          radial-gradient(1200px 800px at 10% 0%, #0b1220, #0a1020 40%),
-          radial-gradient(1000px 600px at 100% 0%, #0e1630, #0f172a 50%);
+        background: var(--grad-hero),
+                    radial-gradient(1200px 900px at -20% 40%, rgba(34,197,94,0.12), transparent 60%),
+                    linear-gradient(180deg, var(--bg), var(--bg-2) 60%, #0b1120);
         color: var(--text);
         padding-bottom: env(safe-area-inset-bottom);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        padding-top: env(safe-area-inset-top);
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;
       }
       *, *::before, *::after { box-sizing: border-box; }
       a { color: var(--accent-2); }
       :focus-visible { outline: var(--focus); outline-offset: 2px; }
-      .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-      header { margin-bottom: 10px; }
-      header h1 { margin: 0 0 6px; font-size: 24px; }
-      header p { margin: 0; color: var(--muted); line-height: 1.4; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 18px; }
+
+      /* Centered two-line title */
+      header { margin-bottom: 14px; }
+      .app-title {
+        margin: 0 0 8px; display: grid; gap: 4px; text-align: center; line-height: 1.05; letter-spacing: -0.015em;
+      }
+      .app-title .title-top, .app-title .title-bottom {
+        display: block;
+        background: linear-gradient(90deg, #38bdf8, #22c55e 55%, #a78bfa 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        filter: drop-shadow(0 8px 24px rgba(34,197,94,0.10));
+      }
+      .app-title .title-top { font-weight: 800; font-size: clamp(22px, 5.2vw, 32px); }
+      .app-title .title-bottom { font-weight: 900; font-size: clamp(26px, 6.4vw, 40px); }
+      header p { margin: 6px auto 0; color: var(--muted); line-height: 1.5; font-size: 14.5px; text-align: center; max-width: 740px; }
+
+      /* Cards */
       .card {
-        background: linear-gradient(180deg, #0c1426, var(--panel) 60%);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 12px;
+        position: relative;
+        background: linear-gradient(180deg, rgba(12,20,38,0.9), rgba(11,18,32,0.85) 60%);
+        border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;
+        box-shadow: var(--shadow-1); backdrop-filter: saturate(140%) blur(8px);
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
       }
-      .controls { display: grid; gap: 10px; margin: 12px 0 14px; }
-      @media (min-width: 820px) {
-        .controls {
-          grid-template-columns: 1.4fr 1fr 1fr auto;
-          align-items: end;
-        }
+      .card:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); border-color: color-mix(in oklab, var(--border), var(--accent-2) 14%); }
+      .card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+        background: linear-gradient(180deg, rgba(56,189,248,0.15), rgba(34,197,94,0.12)); opacity: .15; mix-blend-mode: screen; }
+
+      /* Controls layout */
+      .controls { display: grid; gap: 12px; margin: 12px 0 16px; }
+      @media (min-width: 820px) { .controls { grid-template-columns: 1.4fr 1fr 1fr auto; align-items: end; } }
+      label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+      /* Inputs/selects: accented */
+      select, input, textarea {
+        width: 100%; background: var(--accent-surface-subtle); color: var(--text);
+        border: 1px solid var(--accent-border); border-radius: 12px; padding: 11px 12px; font-size: 14px; outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .1s ease;
+        box-shadow: var(--accent-shadow);
       }
-      label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-      select, button, input, textarea {
-        width: 100%; box-sizing: border-box; background: #0a1222; color: var(--text);
-        border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none;
-      }
-      select:focus, input:focus, textarea:focus {
-        border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-      }
-      .btn {
-        cursor: pointer; border-radius: 10px;
-        background: linear-gradient(180deg, #22c55e, #16a34a);
-        color: #062814; border: none; padding: 10px 14px; font-weight: 600;
-      }
-      .btn.secondary { background: linear-gradient(180deg, #38bdf8, #0ea5e9); color: #042638; }
-      .btn.ghost { background: #0a1222; border: 1px solid var(--border); color: var(--text); }
+      select:focus, input:focus, textarea:focus { border-color: color-mix(in oklab, var(--accent), white 10%); box-shadow: 0 0 0 3px rgba(34,197,94,0.22), inset 0 1px 0 rgba(255,255,255,0.05); background: var(--accent-surface); }
+      textarea { min-height: 120px; resize: vertical; }
+
+      /* Buttons */
+      .btn { position: relative; cursor: pointer; border-radius: 12px; border: none; padding: 11px 14px; font-weight: 700; letter-spacing: .2px;
+        background: var(--btn-grad); color: #062814; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), var(--glow); }
+      .btn::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,0.35), transparent 35%); mix-blend-mode:overlay; opacity:.5; }
+      .btn.secondary { background: var(--btn-grad-2); color: #042638; }
+      .btn.ghost { background: var(--accent-surface-subtle); color: var(--text); border: 1px solid var(--accent-border); box-shadow: var(--accent-shadow); }
+      .btn:hover { transform: translateY(-0.5px); box-shadow: var(--shadow-2), 0 0 0 1px rgba(56,189,248,0.15) inset; }
+      .btn:active { transform: translateY(0); filter: brightness(.98); }
+
+      /* Grid */
       .grid { display: grid; gap: 12px; }
-      @media (min-width: 980px) { .grid-cols-2 { grid-template-columns: 1.3fr 1fr; } }
+      @media (min-width: 980px) { .grid-cols-2 { grid-template-columns: 1.35fr 1fr; } }
+
+      /* Chips */
       .chips { display: flex; flex-wrap: wrap; gap: 8px; }
       .chip {
-        background: var(--chip); border: 1px solid var(--border); color: var(--muted);
+        background: var(--accent-surface-subtle); border: 1px solid var(--accent-border); color: #e8fff2;
         padding: 6px 10px; border-radius: 999px; font-size: 12px; max-width: 100%; white-space: nowrap;
+        box-shadow: var(--accent-shadow); text-shadow: 0 0 1px rgba(0,0,0,0.2);
       }
       .chip.wrap { white-space: normal; }
+      .chip.accent { background: var(--accent-surface); border-color: color-mix(in oklab, var(--accent), black 25%); color: #052014; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(34,197,94,0.18); }
+
+      /* Exercises */
       .exercise { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px; }
       .exercise:first-child { border-top: none; padding-top: 0; margin-top: 0; }
-      .exercise h4 { margin: 0 0 6px; font-size: 15px; }
-      .row { display: grid; gap: 8px; grid-template-columns: 1fr; }
+      .exercise h4 { margin: 0 0 8px; font-size: 15px; letter-spacing: .1px; }
+
+      .row { display: grid; gap: 10px; grid-template-columns: 1fr; }
       @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } .row.three { grid-template-columns: 1fr 1fr 1fr; } }
-      .kbd {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
-        border: 1px solid var(--border); background: #0b1628; color: #fff; border-radius: 6px; padding: 1px 6px; font-size: 12px;
-      }
+
+      /* KBD */
+      .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace; border: 1px solid var(--accent-border); background: var(--accent-surface-subtle); color: #e8fff2; border-radius: 6px; padding: 1px 6px; font-size: 12px; box-shadow: var(--accent-shadow); }
       .muted { color: var(--muted); }
       .divider { height: 1px; background: var(--border); margin: 12px 0; }
       .inline-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
       .settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
       .settings .chip { display: inline-flex; align-items: center; gap: 8px; }
-      .settings input[type="checkbox"] { width: auto; }
+      .settings input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+
       /* Timer drawer */
       .timer-drawer {
-        position: fixed; left: 0; right: 0; bottom: 0; background: #0a111c;
-        border-top: 1px solid var(--border); box-shadow: 0 -12px 40px rgba(0,0,0,0.4);
+        position: fixed; left: 0; right: 0; bottom: 0;
+        background: color-mix(in oklab, #081020, transparent 8%);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -20px 60px rgba(0,0,0,0.55);
         padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 50;
+        backdrop-filter: blur(10px) saturate(140%);
       }
       .timer-grid { display: grid; gap: 12px; }
       @media (min-width: 820px) { .timer-grid { grid-template-columns: 1fr auto; align-items: center; } }
-      .big-time { font-size: 42px; font-weight: 700; letter-spacing: 1px; }
+
+      .big-time { font-size: clamp(36px, 7vw, 54px); font-weight: 800; letter-spacing: 1px; font-variant-numeric: tabular-nums; text-shadow: 0 6px 24px rgba(34,197,94,0.15); }
       .flow-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-      .flow-row .chip { background: #0a1222; }
+      .flow-row .chip { background: var(--accent-surface-subtle); }
       .timer-controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+      /* Timer ring */
       .ring {
-        width: 56px; height: 56px; border-radius: 50%;
-        background: conic-gradient(var(--accent) 0deg, #0a1222 0deg);
-        border: 2px solid var(--border); position: relative;
+        --size: clamp(64px, 10vw, 84px);
+        width: var(--size); height: var(--size);
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(0,0,0,0.6) 0 40%, transparent 42%),
+          conic-gradient(from -90deg, var(--accent) 0deg, var(--accent) 0deg, var(--ring-track) 0deg, var(--ring-track) 360deg);
+        border: 2px solid var(--border);
+        position: relative;
+        box-shadow: inset 0 0 0 6px #0a1222, 0 0 0 1px rgba(255,255,255,0.04), 0 12px 36px var(--ring-glow);
       }
-      .ring::after {
-        content: attr(data-t); position: absolute; inset: 0; display: grid; place-items: center;
-        font-size: 11px; color: var(--text); text-transform: uppercase; letter-spacing: .5px;
+      .ring::after { content: attr(data-t); position: absolute; inset: 0; display: grid; place-items: center;
+        font-size: 11px; color: var(--text); text-transform: uppercase; letter-spacing: .6px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+      /* AMRAP helper UI */
+      .amrap-panel { margin-top: 10px; }
+      .amrap-list { margin: 8px 0 0; padding: 0 0 0 18px; }
+      .amrap-list li {
+        margin: 6px 0;
+        padding: 8px 10px;
+        background: var(--accent-surface-subtle);
+        border: 1px solid var(--accent-border);
+        border-radius: 10px;
+        color: var(--text);
+        list-style: decimal;
+        box-shadow: var(--accent-shadow);
+        display: flex; align-items: center; gap: 10px;
       }
+      .amrap-list input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; }
+      .amrap-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+      .amrap-actions .btn.ghost { padding: 8px 10px; }
+
       .hidden { display: none !important; }
       .footer { margin-top: 10px; color: var(--muted); font-size: 12px; text-align: center; }
+
       .history { margin-top: 10px; font-size: 12px; color: var(--muted); }
       .history-item { border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; display: grid; gap: 6px; }
       .history-actions { display: flex; gap: 6px; }
-      .sr-only {
-        position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-        clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-      }
+
+      .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+      ::-webkit-scrollbar { height: 10px; width: 10px; }
+      ::-webkit-scrollbar-track { background: #0a1222; }
+      ::-webkit-scrollbar-thumb { background: #153a2a; border-radius: 10px; border: 2px solid #0a1222; }
+      ::-webkit-scrollbar-thumb:hover { background: #1b4b37; }
     </style>
   </head>
   <body>
     <a class="sr-only" href="#main">Skip to main content</a>
     <div class="container">
       <header>
-        <h1>The Comprehensive No-Equipment Trainer</h1>
+        <h1 class="app-title">
+          <span class="title-top">The Comprehensive</span>
+          <span class="title-bottom">No‑Equipment Trainer</span>
+        </h1>
         <p>Science-based training with a live timer and progression ladders. Pick a routine, then fine-tune each exercise’s difficulty.</p>
       </header>
 
@@ -163,7 +269,7 @@
         </div>
         <div class="row three" style="grid-column: 1/-1">
           <div class="settings">
-            <span class="chip"><input type="checkbox" id="soundToggle"><label for="soundToggle" style="margin:0">Sound</label></span>
+            <span class="chip accent"><input type="checkbox" id="soundToggle"><label for="soundToggle" style="margin:0">Sound</label></span>
             <span class="chip"><input type="checkbox" id="hapticsToggle"><label for="hapticsToggle" style="margin:0">Haptics</label></span>
             <span class="chip"><input type="checkbox" id="wakeToggle"><label for="wakeToggle" style="margin:0">Keep screen awake</label></span>
             <span class="chip"><input type="checkbox" id="contrastToggle"><label for="contrastToggle" style="margin:0">High contrast</label></span>
@@ -187,7 +293,7 @@
 
       <div class="grid grid-cols-2" id="main">
         <section class="card" aria-labelledby="todayHdr">
-          <h2 id="todayHdr" style="margin:0 0 8px">Today’s Session</h2>
+          <h2 id="todayHdr" style="margin:0 0 8px; letter-spacing:.2px">Today’s Session</h2>
           <div id="sessionMeta" class="chips" aria-live="polite"></div>
           <div id="exerciseList" style="margin-top:8px"></div>
           <div class="divider"></div>
@@ -200,7 +306,7 @@
         </section>
 
         <aside class="card" aria-labelledby="progressHdr">
-          <h2 id="progressHdr" style="margin:0 0 8px">Progress & Notes</h2>
+          <h2 id="progressHdr" style="margin:0 0 8px; letter-spacing:.2px">Progress & Notes</h2>
           <div class="chips" id="tempoChips"></div>
           <p class="muted" id="tutText" style="margin:8px 0 10px"></p>
           <label for="sessionNote">Session notes</label>
@@ -220,15 +326,27 @@
       <div class="timer-grid">
         <div>
           <div class="chips flow-row" id="timerBreadcrumb"></div>
-          <div style="display:flex; gap:12px; align-items:center; margin-top:8px">
+          <div style="display:flex; gap:14px; align-items:center; margin-top:10px">
             <div id="restRing" class="ring" data-t="READY" aria-hidden="true"></div>
             <div>
-              <div id="timerPhase" class="muted" style="font-size:13px">Ready</div>
-              <div id="timerTitle" style="font-size:18px; font-weight:700">--</div>
+              <div id="timerPhase" class="muted" style="font-size:13px; letter-spacing:.2px">Ready</div>
+              <div id="timerTitle" style="font-size:18px; font-weight:800; letter-spacing:.2px">--</div>
               <div id="timerSub" class="muted" style="font-size:12px">--</div>
             </div>
           </div>
-          <div id="timerClock" class="big-time" style="margin-top:6px" aria-live="polite">00:00</div>
+          <div id="timerClock" class="big-time" style="margin-top:8px" aria-live="polite">00:00</div>
+
+          <!-- AMRAP helper UI (hidden unless AMRAP phase) -->
+          <div id="amrapPanel" class="amrap-panel hidden" aria-label="AMRAP round tracker">
+            <div class="amrap-actions">
+              <div class="chip" id="amrapRoundChip" aria-live="polite">Round 0</div>
+              <button id="amrapMinus" class="btn ghost" aria-label="Decrease round">−</button>
+              <button id="amrapPlus" class="btn ghost" aria-label="Increase round">+ Round</button>
+              <button id="amrapReset" class="btn ghost" aria-label="Reset rounds">Reset</button>
+            </div>
+            <ol id="amrapList" class="amrap-list"></ol>
+          </div>
+
           <div id="liveStatus" class="sr-only" aria-live="polite"></div>
         </div>
         <div class="timer-controls">
@@ -242,447 +360,132 @@
     </div>
 
     <script>
-      // App version (for export/migration)
-      const APP_VERSION = "v5.0.0";
+      const APP_VERSION = "v5.2.0";
 
       // Movement library and routines
       const MOVES = {
-        push: {
-          name: "Horizontal Push",
-          progressions: ["Wall Push-Up","Incline Push-Up","Knee Push-Up","Standard Push-Up","Decline Push-Up","Diamond Push-Up","Archer Push-Up","Single-Arm Push-Up"],
-          repRanges: { hypertrophy: [6, 12], strength: [4, 8], conditioning: [12, 20] },
-          tempo: { hypertrophy: "3-1-3-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [40, 70],
-        },
-        squat: {
-          name: "Squat",
-          progressions: ["Assisted Squat","Box/Chair Squat","Bodyweight Squat","Jump Squat","Bulgarian Split Squat","Pistol Squat"],
-          repRanges: { hypertrophy: [8, 15], strength: [5, 8], conditioning: [15, 25] },
-          tempo: { hypertrophy: "3-1-2-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [40, 70],
-        },
-        lunge: {
-          name: "Lunge",
-          progressions: ["Assisted Lunge","Static Lunge (Split Squat)","Reverse Lunge","Forward Lunge","Walking Lunge","Curtsy Lunge","Jump Lunge"],
-          repRanges: { hypertrophy: [8, 14], strength: [5, 8], conditioning: [12, 20] },
-          tempo: { hypertrophy: "3-1-2-0", strength: "4-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [40, 70],
-        },
-        plank: {
-          name: "Core (Plank)",
-          progressions: ["Knee Plank","Incline Plank","Forearm Plank","High Plank","Plank with Leg Lift","Side Plank","Side Plank with Hip Dip","Up-Down Plank"],
-          repRanges: { hypertrophy: [30, 60], strength: [20, 45], conditioning: [30, 90] },
-          tempo: { hypertrophy: "isometric", strength: "isometric", conditioning: "isometric" },
-          tutTarget: [30, 90],
-        },
-        row: {
-          name: "Horizontal Pull",
-          progressions: ["Doorway Row","Bent-Knee Inverted Row","Straight-Leg Inverted Row","Elevated-Feet Inverted Row","Single-Arm Inverted Row"],
-          repRanges: { hypertrophy: [6, 12], strength: [4, 8], conditioning: [12, 18] },
-          tempo: { hypertrophy: "3-1-2-1", strength: "4-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [40, 70],
-        },
-        verticalPush: {
-          name: "Vertical Push",
-          progressions: ["Pike Push-Up (Feet on Floor)","Decline Pike Push-Up","Wall-Assisted Handstand Hold","HSPU Negative (Wall-Assisted)","Wall-Assisted Handstand Push-Up","Freestanding Handstand Push-Up"],
-          repRanges: { hypertrophy: [4, 8], strength: [3, 6], conditioning: [6, 12] },
-          tempo: { hypertrophy: "4-1-2-0", strength: "5-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [30, 60],
-        },
-        verticalPull: {
-          name: "Vertical Pull",
-          progressions: ["Scapular Pulls","Negative Pull-Ups","Band-Assisted Pull-Up","Standard Pull-Up","L-Sit Pull-Up","Archer/One-Arm Pull-Up"],
-          repRanges: { hypertrophy: [4, 8], strength: [3, 5], conditioning: [6, 12] },
-          tempo: { hypertrophy: "4-1-2-1", strength: "5-1-2-0", conditioning: "2-0-2-0" },
-          tutTarget: [30, 60],
-        },
-        burpee: {
-          name: "Burpee",
-          progressions: ["No-Jump Burpee","No-Push-Up Burpee","Standard Burpee","Burpee with Tuck Jump","Single-Leg Burpee"],
-          repRanges: { hypertrophy: [8, 12], strength: [5, 8], conditioning: [10, 20] },
-          tempo: { hypertrophy: "controlled", strength: "controlled", conditioning: "fast-safe" },
-          tutTarget: [20, 60],
-        },
-        gluteBridge: {
-          name: "Glute Bridge",
-          progressions: ["Glute Bridge","Feet-Elevated Bridge","Single-Leg Bridge","Single-Leg Feet-Elevated Bridge"],
-          repRanges: { hypertrophy: [8, 15], strength: [6, 10], conditioning: [15, 25] },
-          tempo: { hypertrophy: "3-1-2-1", strength: "4-1-2-1", conditioning: "2-0-2-0" },
-          tutTarget: [40, 70],
-        },
+        push: { name: "Horizontal Push", progressions: ["Wall Push-Up","Incline Push-Up","Knee Push-Up","Standard Push-Up","Decline Push-Up","Diamond Push-Up","Archer Push-Up","Single-Arm Push-Up"], repRanges: { hypertrophy: [6,12], strength: [4,8], conditioning: [12,20] }, tempo: { hypertrophy:"3-1-3-0", strength:"4-1-2-0", conditioning:"2-0-2-0" }, tutTarget: [40,70] },
+        squat: { name: "Squat", progressions: ["Assisted Squat","Box/Chair Squat","Bodyweight Squat","Jump Squat","Bulgarian Split Squat","Pistol Squat"], repRanges: { hypertrophy: [8,15], strength: [5,8], conditioning: [15,25] }, tempo:{ hypertrophy:"3-1-2-0", strength:"4-1-2-0", conditioning:"2-0-2-0" }, tutTarget:[40,70] },
+        lunge: { name: "Lunge", progressions: ["Assisted Lunge","Static Lunge (Split Squat)","Reverse Lunge","Forward Lunge","Walking Lunge","Curtsy Lunge","Jump Lunge"], repRanges: { hypertrophy: [8,14], strength: [5,8], conditioning: [12,20] }, tempo:{ hypertrophy:"3-1-2-0", strength:"4-1-2-0", conditioning:"2-0-2-0" }, tutTarget:[40,70] },
+        plank: { name: "Core (Plank)", progressions: ["Knee Plank","Incline Plank","Forearm Plank","High Plank","Plank with Leg Lift","Side Plank","Side Plank with Hip Dip","Up-Down Plank"], repRanges:{ hypertrophy:[30,60], strength:[20,45], conditioning:[30,90] }, tempo:{ hypertrophy:"isometric", strength:"isometric", conditioning:"isometric" }, tutTarget:[30,90] },
+        row: { name: "Horizontal Pull", progressions: ["Doorway Row","Bent-Knee Inverted Row","Straight-Leg Inverted Row","Elevated-Feet Inverted Row","Single-Arm Inverted Row"], repRanges:{ hypertrophy:[6,12], strength:[4,8], conditioning:[12,18] }, tempo:{ hypertrophy:"3-1-2-1", strength:"4-1-2-0", conditioning:"2-0-2-0" }, tutTarget:[40,70] },
+        verticalPush: { name: "Vertical Push", progressions: ["Pike Push-Up (Feet on Floor)","Decline Pike Push-Up","Wall-Assisted Handstand Hold","HSPU Negative (Wall-Assisted)","Wall-Assisted Handstand Push-Up","Freestanding Handstand Push-Up"], repRanges:{ hypertrophy:[4,8], strength:[3,6], conditioning:[6,12] }, tempo:{ hypertrophy:"4-1-2-0", strength:"5-1-2-0", conditioning:"2-0-2-0" }, tutTarget:[30,60] },
+        verticalPull: { name: "Vertical Pull", progressions: ["Scapular Pulls","Negative Pull-Ups","Band-Assisted Pull-Up","Standard Pull-Up","L-Sit Pull-Up","Archer/One-Arm Pull-Up"], repRanges:{ hypertrophy:[4,8], strength:[3,5], conditioning:[6,12] }, tempo:{ hypertrophy:"4-1-2-1", strength:"5-1-2-0", conditioning:"2-0-2-0" }, tutTarget:[30,60] },
+        burpee: { name: "Burpee", progressions: ["No-Jump Burpee","No-Push-Up Burpee","Standard Burpee","Burpee with Tuck Jump","Single-Leg Burpee"], repRanges:{ hypertrophy:[8,12], strength:[5,8], conditioning:[10,20] }, tempo:{ hypertrophy:"controlled", strength:"controlled", conditioning:"fast-safe" }, tutTarget:[20,60] },
+        gluteBridge: { name: "Glute Bridge", progressions: ["Glute Bridge","Feet-Elevated Bridge","Single-Leg Bridge","Single-Leg Feet-Elevated Bridge"], repRanges:{ hypertrophy:[8,15], strength:[6,10], conditioning:[15,25] }, tempo:{ hypertrophy:"3-1-2-1", strength:"4-1-2-1", conditioning:"2-0-2-0" }, tutTarget:[40,70] },
       };
 
       const ROUTINES = [
-        {
-          id: "full_beginner",
-          name: "Full-Body Circuit — Beginner",
-          type: "full",
-          rounds: [2, 3],
-          restBetweenRounds: [60, 90],
-          items: [
-            { move: "squat", reps: [10, 12] },
-            { move: "push", reps: [5, 10] },
-            { move: "gluteBridge", reps: [10, 12] },
-            { move: "row", reps: [8, 10] },
-            { move: "plank", seconds: [20, 30] },
-          ],
-        },
-        {
-          id: "full_intermediate",
-          name: "Full-Body Circuit — Intermediate",
-          type: "full",
-          rounds: [3, 3],
-          restBetweenRounds: [45, 60],
-          items: [
-            { move: "squat", reps: [18, 22] },
-            { move: "push", reps: [8, 12] },
-            { move: "lunge", reps: [10, 12], perSide: true },
-            { move: "row", reps: [8, 12] },
-            { move: "plank", seconds: [45, 60] },
-            { move: "burpee", reps: [12, 16] },
-          ],
-        },
-        {
-          id: "full_advanced",
-          name: "Full-Body Circuit — Advanced",
-          type: "full",
-          rounds: [3, 4],
-          restBetweenRounds: [45, 60],
-          items: [
-            { move: "squat", reps: [5, 8], perSide: true, variantHint: "Pistol" },
-            { move: "push", reps: [6, 10], variantHint: "Archer" },
-            { move: "row", reps: [6, 10] },
-            { move: "lunge", reps: [8, 10], perSide: true, variantHint: "Jump" },
-            { move: "plank", seconds: [40, 60], variantHint: "Side" },
-          ],
-        },
-        {
-          id: "hiit_beginner",
-          name: "HIIT — Beginner 30:30",
-          type: "hiit",
-          workRest: [30, 30],
-          blocks: 3,
-          items: [
-            { move: "burpee", seconds: 30 },
-            { move: "squat", seconds: 30 },
-            { move: "plank", seconds: 30 },
-            { move: "lunge", seconds: 30 },
-            { move: "row", seconds: 30 },
-          ],
-        },
-        {
-          id: "hiit_tabata",
-          name: "HIIT — Tabata (4x4 mins)",
-          type: "tabata",
-          blocks: [
-            { title: "Burpees", move: "burpee" },
-            { title: "Squat Jumps", move: "squat" },
-            { title: "Mountain Climbers", move: "plank" },
-            { title: "High Knees", move: "squat" },
-          ],
-        },
-        {
-          id: "amrap_cindy",
-          name: "AMRAP — 20-Min Cindy",
-          type: "amrap",
-          duration: 20,
-          items: [
-            { move: "row", reps: 10, variantHint: "Pull-Up" },
-            { move: "push", reps: 10 },
-            { move: "squat", reps: 15 },
-          ],
-        },
+        { id:"full_beginner", name:"Full-Body Circuit — Beginner", type:"full", rounds:[2,3], restBetweenRounds:[60,90],
+          items:[{move:"squat",reps:[10,12]},{move:"push",reps:[5,10]},{move:"gluteBridge",reps:[10,12]},{move:"row",reps:[8,10]},{move:"plank",seconds:[20,30]}]},
+        { id:"full_intermediate", name:"Full-Body Circuit — Intermediate", type:"full", rounds:[3,3], restBetweenRounds:[45,60],
+          items:[{move:"squat",reps:[18,22]},{move:"push",reps:[8,12]},{move:"lunge",reps:[10,12],perSide:true},{move:"row",reps:[8,12]},{move:"plank",seconds:[45,60]},{move:"burpee",reps:[12,16]}]},
+        { id:"full_advanced", name:"Full-Body Circuit — Advanced", type:"full", rounds:[3,4], restBetweenRounds:[45,60],
+          items:[{move:"squat",reps:[5,8],perSide:true,variantHint:"Pistol"},{move:"push",reps:[6,10],variantHint:"Archer"},{move:"row",reps:[6,10]},{move:"lunge",reps:[8,10],perSide:true,variantHint:"Jump"},{move:"plank",seconds:[40,60],variantHint:"Side"}]},
+        { id:"hiit_beginner", name:"HIIT — Beginner 30:30", type:"hiit", workRest:[30,30], blocks:3,
+          items:[{move:"burpee",seconds:30},{move:"squat",seconds:30},{move:"plank",seconds:30},{move:"lunge",seconds:30},{move:"row",seconds:30}]},
+        { id:"hiit_tabata", name:"HIIT — Tabata (4x4 mins)", type:"tabata",
+          blocks:[{title:"Burpees",move:"burpee"},{title:"Squat Jumps",move:"squat"},{title:"Mountain Climbers",move:"plank"},{title:"High Knees",move:"squat"}]},
+        { id:"amrap_cindy", name:"AMRAP — 20-Min Cindy", type:"amrap", duration:20,
+          items:[{move:"row",reps:10,variantHint:"Pull-Up"},{move:"push",reps:10},{move:"squat",reps:15}]},
       ];
 
-      // Storage (with migration to v5)
-      const STORAGE = {
-        prefs: "neTrainer.prefs.v5",
-        hist: "neTrainer.hist.v5",
-        prog: "neTrainer.userProgressions.v5",
-        progSides: "neTrainer.userProgressionsSides.v5",
-        old: {
-          prefs: "neTrainer.prefs.v4",
-          hist: "neTrainer.hist.v4",
-          prog: "neTrainer.userProgressions.v4",
-        },
-      };
-      const load = (k, f) => {
-        try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : f; } catch { return f; }
-      };
-      const save = (k, v) => {
-        try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn("Save failed", k, e); }
-      };
-      // Basic migration if v5 is empty but v4 exists
-      (function migrate() {
-        const hasV5 = localStorage.getItem(STORAGE.prefs) || localStorage.getItem(STORAGE.hist) || localStorage.getItem(STORAGE.prog);
-        if (hasV5) return;
-        const p4 = load(STORAGE.old.prefs, null);
-        const h4 = load(STORAGE.old.hist, null);
-        const g4 = load(STORAGE.old.prog, null);
-        if (p4) save(STORAGE.prefs, p4);
-        if (h4) save(STORAGE.hist, h4);
-        if (g4) save(STORAGE.prog, g4);
-      })();
+      // Storage/migration
+      const STORAGE = { prefs:"neTrainer.prefs.v5", hist:"neTrainer.hist.v5", prog:"neTrainer.userProgressions.v5", progSides:"neTrainer.userProgressionsSides.v5",
+        old:{prefs:"neTrainer.prefs.v4",hist:"neTrainer.hist.v4",prog:"neTrainer.userProgressions.v4"} };
+      const load=(k,f)=>{try{const s=localStorage.getItem(k);return s?JSON.parse(s):f;}catch{return f;}};
+      const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.warn("Save failed",k,e);} };
+      (function migrate(){const hasV5=localStorage.getItem(STORAGE.prefs)||localStorage.getItem(STORAGE.hist)||localStorage.getItem(STORAGE.prog); if(hasV5) return;
+        const p4=load(STORAGE.old.prefs,null),h4=load(STORAGE.old.hist,null),g4=load(STORAGE.old.prog,null); if(p4)save(STORAGE.prefs,p4); if(h4)save(STORAGE.hist,h4); if(g4)save(STORAGE.prog,g4);})();
 
-      // State
       const prefersReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const state = {
-        prefs: load(STORAGE.prefs, {
-          routineId: ROUTINES[0].id,
-          level: "beginner",
-          goal: "strength",
-          sound: !prefersReduced,
-          haptics: !prefersReduced,
-          keepAwake: false,
-          highContrast: false,
-          autoAdjust: "on",
-        }),
-        history: load(STORAGE.hist, []),
-        userProg: load(STORAGE.prog, {}),       // e.g., { push: 3, squat: 2 }
-        userProgSides: load(STORAGE.progSides, {}), // e.g., { lunge: {L:2, R:3} }
-        session: null,
-        wakeLock: null,
-      };
+      const state = { prefs: load(STORAGE.prefs,{ routineId: ROUTINES[0].id, level:"beginner", goal:"strength", sound:!prefersReduced, haptics:!prefersReduced, keepAwake:false, highContrast:false, autoAdjust:"on" }),
+        history: load(STORAGE.hist,[]), userProg: load(STORAGE.prog,{}), userProgSides: load(STORAGE.progSides,{}), session:null, wakeLock:null };
 
       // Utils
-      const el = (q) => document.querySelector(q);
-      const $all = (q, root=document) => Array.from(root.querySelectorAll(q));
-      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-      const pad = (n) => String(n).padStart(2, "0");
-      const mmss = (s) => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
-      const isFormTarget = (ev) => {
-        const t = ev.target;
-        return t && (t.closest("input, select, textarea, button, [contenteditable='true']"));
-      };
+      const el = (q)=>document.querySelector(q);
+      const $all = (q,root=document)=>Array.from(root.querySelectorAll(q));
+      const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+      const pad=(n)=>String(n).padStart(2,"0");
+      const mmss=(s)=>`${pad(Math.floor(s/60))}:${pad(s%60)}`;
+      const isFormTarget=(ev)=>{const t=ev.target; return t&&(t.closest("input, select, textarea, button, [contenteditable='true']"));};
 
-      // Tempo/TUT helpers
-      function parseTempo(tempoStr) {
-        // Formats: "4-1-2-0" => [ecc, bottom, con, top]; "isometric","controlled","fast-safe"
-        if (!tempoStr) return { kind: "unknown", secondsPerRep: 3 };
-        const t = tempoStr.toLowerCase();
-        if (t === "isometric") return { kind: "iso" };
-        if (t === "controlled") return { kind: "free", secondsPerRep: 3.5 };
-        if (t === "fast-safe") return { kind: "free", secondsPerRep: 2.5 };
-        const m = tempoStr.split("-").map((x) => parseFloat(x));
-        if (m.length === 4 && m.every((x) => Number.isFinite(x))) {
-          const perRep = m[0] + m[1] + m[2] + m[3];
-          return { kind: "strict", secondsPerRep: Math.max(1, perRep) };
-        }
-        return { kind: "unknown", secondsPerRep: 3 };
-        // Note: we only use secondsPerRep when work.type=reps
-      }
-      function estimateSetSeconds(ex) {
-        if (ex.work.type === "time") return ex.work.seconds;
-        const tempo = parseTempo(ex.tempo);
-        const reps = ex.work.reps;
-        if (tempo.kind === "iso") {
-          // If iso with reps (rare), assume 5s hold per rep
-          return reps * 5;
-        }
-        const spr = tempo.secondsPerRep ?? 3;
-        let secs = Math.round(reps * spr);
-        if (ex.perSide) secs *= 2; // left + right
-        // Clamp with movement TUT target if available
-        const mv = MOVES[ex.moveKey];
-        if (mv && mv.tutTarget) secs = clamp(secs, mv.tutTarget[0], mv.tutTarget[1] * (ex.perSide ? 2 : 1));
-        return secs;
-      }
+      function parseTempo(tempoStr){ if(!tempoStr) return {kind:"unknown",secondsPerRep:3}; const t=tempoStr.toLowerCase();
+        if(t==="isometric") return {kind:"iso"}; if(t==="controlled") return {kind:"free",secondsPerRep:3.5}; if(t==="fast-safe") return {kind:"free",secondsPerRep:2.5};
+        const m=tempoStr.split("-").map(x=>parseFloat(x)); if(m.length===4&&m.every(Number.isFinite)){ const perRep=m[0]+m[1]+m[2]+m[3]; return {kind:"strict",secondsPerRep:Math.max(1,perRep)};}
+        return {kind:"unknown",secondsPerRep:3}; }
+      function estimateSetSeconds(ex){ if(ex.work.type==="time") return ex.work.seconds; const tempo=parseTempo(ex.tempo); const reps=ex.work.reps;
+        if(tempo.kind==="iso") return reps*5; const spr=tempo.secondsPerRep??3; let secs=Math.round(reps*spr); if(ex.perSide) secs*=2;
+        const mv=MOVES[ex.moveKey]; if(mv&&mv.tutTarget) secs=clamp(secs,mv.tutTarget[0],mv.tutTarget[1]*(ex.perSide?2:1)); return secs; }
+      function baseIndexByLevel(level,moveKey,hint){ const list=MOVES[moveKey].progressions; if(hint){ const idx=list.findIndex(p=>p.toLowerCase().includes(String(hint).toLowerCase())); if(idx>=0) return idx; }
+        const bias={beginner:0,intermediate:1,advanced:2}[level]??0; return clamp(bias,0,list.length-1); }
+      function getVariant(moveKey,level,hint){ const list=MOVES[moveKey].progressions; const userIdx=state.userProg[moveKey];
+        const idx=typeof userIdx==="number"?clamp(userIdx,0,list.length-1):baseIndexByLevel(level,moveKey,hint); return {idx,name:list[idx],list}; }
+      function defaultRestByGoal(goal){ switch(goal){case"strength":return 60;case"hypertrophy":return 45;case"conditioning":return 20;default:return 30;} }
 
-      function baseIndexByLevel(level, moveKey, hint) {
-        const list = MOVES[moveKey].progressions;
-        if (hint) {
-          const idx = list.findIndex((p) => p.toLowerCase().includes(String(hint).toLowerCase()));
-          if (idx >= 0) return idx;
-        }
-        const bias = { beginner: 0, intermediate: 1, advanced: 2 }[level] ?? 0;
-        return clamp(bias, 0, list.length - 1);
-      }
-      function getVariant(moveKey, level, hint) {
-        const list = MOVES[moveKey].progressions;
-        const userIdx = state.userProg[moveKey];
-        const idx = typeof userIdx === "number" ? clamp(userIdx, 0, list.length - 1) : baseIndexByLevel(level, moveKey, hint);
-        return { idx, name: list[idx], list };
-      }
-
-      // Per-exercise rest default by goal
-      function defaultRestByGoal(goal) {
-        switch (goal) {
-          case "strength": return 60;
-          case "hypertrophy": return 45;
-          case "conditioning": return 20;
-          default: return 30;
-        }
-      }
-
-      // Build session
-      function sessionFromRoutine(routine, level, goal) {
-        const items = [];
-        const meta = [];
-
-        if (routine.type === "full") {
-          const rounds = routine.rounds[0] === routine.rounds[1]
-            ? routine.rounds[0]
-            : Math.round((routine.rounds[0] + routine.rounds[1]) / 2);
-
-          const roundRest = Math.round((routine.restBetweenRounds[0] + routine.restBetweenRounds[1]) / 2);
+      function sessionFromRoutine(routine,level,goal){
+        const items=[], meta=[];
+        if(routine.type==="full"){
+          const rounds=routine.rounds[0]===routine.rounds[1]?routine.rounds[0]:Math.round((routine.rounds[0]+routine.rounds[1])/2);
+          const roundRest=Math.round((routine.restBetweenRounds[0]+routine.restBetweenRounds[1])/2);
           meta.push(`Rounds ${rounds}, Between rounds rest ${roundRest}s`);
-
-          routine.items.forEach((it) => {
-            const mv = MOVES[it.move];
-            const variant = getVariant(it.move, level, it.variantHint);
-            const rr = mv.repRanges[goal] || [8, 12];
-
-            const reps = it.reps ? clamp(Math.round((it.reps[0] + it.reps[1]) / 2), rr[0], rr[1]) : null;
-            const seconds = it.seconds
-              ? (Array.isArray(it.seconds)
-                  ? clamp(Math.round((it.seconds[0] + it.seconds[1]) / 2), mv.tutTarget[0], mv.tutTarget[1])
-                  : clamp(it.seconds, mv.tutTarget[0], mv.tutTarget[1]))
-              : null;
-
-            const ex = {
-              title: mv.name,
-              variant: variant.name,
-              moveKey: it.move,
-              perSide: !!it.perSide,
-              sets: rounds,
-              work: seconds ? { type: "time", seconds } : { type: "reps", reps },
-              restSet: defaultRestByGoal(goal), // rest between exercises
-              restRound: roundRest,            // rest between rounds
-              tempo: mv.tempo[goal],
-              variantIdx: variant.idx,
-              variantList: variant.list,
-            };
-
-            // Per-side variant overrides (optional)
-            const side = state.userProgSides[it.move];
-            if (ex.perSide && side && Number.isFinite(side.L) && Number.isFinite(side.R)) {
-              ex.variantLeftIdx = clamp(side.L, 0, ex.variantList.length - 1);
-              ex.variantRightIdx = clamp(side.R, 0, ex.variantList.length - 1);
-              ex.variantLeft = ex.variantList[ex.variantLeftIdx];
-              ex.variantRight = ex.variantList[ex.variantRightIdx];
-            }
-
+          routine.items.forEach(it=>{
+            const mv=MOVES[it.move]; const variant=getVariant(it.move,level,it.variantHint); const rr=mv.repRanges[goal]||[8,12];
+            const reps=it.reps?clamp(Math.round((it.reps[0]+it.reps[1])/2),rr[0],rr[1]):null;
+            const seconds=it.seconds?(Array.isArray(it.seconds)?clamp(Math.round((it.seconds[0]+it.seconds[1])/2),mv.tutTarget[0],mv.tutTarget[1]):clamp(it.seconds,mv.tutTarget[0],mv.tutTarget[1])):null;
+            const ex={ title:mv.name, variant:variant.name, moveKey:it.move, perSide:!!it.perSide, sets:rounds, work: seconds?{type:"time",seconds}:{type:"reps",reps},
+              restSet: defaultRestByGoal(goal), restRound: roundRest, tempo: mv.tempo[goal], variantIdx: variant.idx, variantList: variant.list };
+            const side=state.userProgSides[it.move];
+            if(ex.perSide&&side&&Number.isFinite(side.L)&&Number.isFinite(side.R)){ ex.variantLeftIdx=clamp(side.L,0,ex.variantList.length-1); ex.variantRightIdx=clamp(side.R,0,ex.variantList.length-1);
+              ex.variantLeft=ex.variantList[ex.variantLeftIdx]; ex.variantRight=ex.variantList[ex.variantRightIdx]; }
             items.push(ex);
           });
-
-          return { type: "full", meta, items, rounds, roundRest };
+          return { type:"full", meta, items, rounds, roundRest };
         }
-
-        if (routine.type === "hiit") {
+        if(routine.type==="hiit"){
           meta.push(`Work ${routine.workRest[0]}s / Rest ${routine.workRest[1]}s`);
-          const itemsList = routine.items.map((it) => {
-            const mv = MOVES[it.move];
-            const variant = getVariant(it.move, level, it.variantHint);
-            return {
-              title: mv.name,
-              variant: variant.name,
-              moveKey: it.move,
-              work: { type: "time", seconds: routine.workRest[0] },
-              restSet: routine.workRest[1],
-              sets: routine.blocks,
-              tempo: mv.tempo.conditioning,
-              variantIdx: variant.idx,
-              variantList: variant.list,
-            };
-          });
-          return { type: "hiit", meta, items: itemsList, blocks: routine.blocks };
+          const itemsList=routine.items.map(it=>{ const mv=MOVES[it.move]; const variant=getVariant(it.move,level,it.variantHint);
+            return { title:mv.name, variant:variant.name, moveKey:it.move, work:{type:"time",seconds:routine.workRest[0]}, restSet:routine.workRest[1], sets:routine.blocks, tempo:mv.tempo.conditioning, variantIdx:variant.idx, variantList:variant.list }; });
+          return { type:"hiit", meta, items:itemsList, blocks:routine.blocks };
         }
-
-        if (routine.type === "tabata") {
+        if(routine.type==="tabata"){
           meta.push("Tabata 20s/10s x8 each block, 1 min between blocks");
-          const blocks = routine.blocks.map((b) => {
-            const mv = MOVES[b.move];
-            const variant = getVariant(b.move, level, b.title);
-            return {
-              blockTitle: b.title,
-              title: mv.name,
-              variant: variant.name,
-              moveKey: b.move,
-              work: { type: "time", seconds: 20 },
-              restSet: 10,
-              sets: 8,
-              between: 60,
-              tempo: mv.tempo.conditioning,
-              variantIdx: variant.idx,
-              variantList: variant.list,
-            };
-          });
-          return { type: "tabata", meta, blocks };
+          const blocks=routine.blocks.map(b=>{ const mv=MOVES[b.move]; const variant=getVariant(b.move,level,b.title);
+            return { blockTitle:b.title, title:mv.name, variant:variant.name, moveKey:b.move, work:{type:"time",seconds:20}, restSet:10, sets:8, between:60, tempo:mv.tempo.conditioning, variantIdx:variant.idx, variantList:variant.list };});
+          return { type:"tabata", meta, blocks };
         }
-
-        if (routine.type === "amrap") {
+        if(routine.type==="amrap"){
           meta.push(`AMRAP ${routine.duration} minutes`);
-          const itemsList = routine.items.map((it) => {
-            const mv = MOVES[it.move];
-            const variant = getVariant(it.move, level, it.variantHint);
-            return {
-              title: mv.name,
-              variant: variant.name,
-              moveKey: it.move,
-              work: { type: "reps", reps: it.reps },
-              tempo: mv.tempo.conditioning,
-              variantIdx: variant.idx,
-              variantList: variant.list,
-            };
-          });
-          return { type: "amrap", meta, items: itemsList, duration: routine.duration * 60 };
+          const itemsList=routine.items.map(it=>{ const mv=MOVES[it.move]; const variant=getVariant(it.move,level,it.variantHint);
+            return { title:mv.name, variant:variant.name, moveKey:it.move, work:{type:"reps",reps:it.reps}, tempo:mv.tempo.conditioning, variantIdx:variant.idx, variantList:variant.list };});
+          return { type:"amrap", meta, items:itemsList, duration:routine.duration*60 };
         }
-
-        return { type: "unknown", meta: [], items: [] };
+        return { type:"unknown", meta:[], items:[] };
       }
 
-      // Render
-      function populateRoutineSelect() {
-        const sel = el("#routineSelect");
-        sel.innerHTML = "";
-        ROUTINES.forEach((r) => {
-          const o = document.createElement("option");
-          o.value = r.id; o.textContent = r.name; sel.appendChild(o);
-        });
-        sel.value = state.prefs.routineId;
-        el("#levelSelect").value = state.prefs.level;
-        el("#goalSelect").value = state.prefs.goal;
-
-        el("#soundToggle").checked = !!state.prefs.sound;
-        el("#hapticsToggle").checked = !!state.prefs.haptics;
-        el("#wakeToggle").checked = !!state.prefs.keepAwake;
-        el("#contrastToggle").checked = !!state.prefs.highContrast;
-        el("#autoAdjust").value = state.prefs.autoAdjust || "on";
-        document.body.classList.toggle("high-contrast", !!state.prefs.highContrast);
+      function populateRoutineSelect(){
+        const sel=el("#routineSelect"); sel.innerHTML="";
+        ROUTINES.forEach(r=>{ const o=document.createElement("option"); o.value=r.id; o.textContent=r.name; sel.appendChild(o); });
+        sel.value=state.prefs.routineId;
+        el("#levelSelect").value=state.prefs.level; el("#goalSelect").value=state.prefs.goal;
+        el("#soundToggle").checked=!!state.prefs.sound; el("#hapticsToggle").checked=!!state.prefs.haptics; el("#wakeToggle").checked=!!state.prefs.keepAwake; el("#contrastToggle").checked=!!state.prefs.highContrast; el("#autoAdjust").value=state.prefs.autoAdjust||"on";
+        document.body.classList.toggle("high-contrast",!!state.prefs.highContrast);
       }
 
-      function renderMeta(session, routine, level, goal) {
-        const meta = el("#sessionMeta");
-        meta.innerHTML = "";
-        [routine.name, `Level: ${level}`, `Goal: ${goal}`, ...session.meta].forEach((p) => {
-          const c = document.createElement("div");
-          c.className = "chip wrap"; c.textContent = p; meta.appendChild(c);
-        });
-
-        const chips = el("#tempoChips");
-        chips.innerHTML = "";
-        const uniq = new Set();
-        const items = session.items || session.blocks || [];
-        items.flatMap((it) => (it.tempo ? [it.tempo] : [])).forEach((t) => uniq.add(t));
-        [...uniq].slice(0, 4).forEach((t) => {
-          const c = document.createElement("div");
-          c.className = "chip"; c.textContent = `Tempo ${t}`; chips.appendChild(c);
-        });
-
-        el("#tutText").textContent =
-          goal === "hypertrophy"
-            ? "Target TUT 40–70s per set; slow eccentric and tight positions."
-            : goal === "strength"
-            ? "Lower reps, harder variations, longer rests. Own the eccentric."
-            : "Maintain technique under fatigue; crisp transitions and breathing.";
-
+      function renderMeta(session,routine,level,goal){
+        const meta=el("#sessionMeta"); meta.innerHTML="";
+        [routine.name,`Level: ${level}`,`Goal: ${goal}`,...session.meta].forEach(p=>{ const c=document.createElement("div"); c.className="chip wrap"; c.textContent=p; meta.appendChild(c); });
+        const chips=el("#tempoChips"); chips.innerHTML=""; const uniq=new Set(); const items=session.items||session.blocks||[];
+        items.flatMap(it=>(it.tempo?[it.tempo]:[])).forEach(t=>uniq.add(t)); [...uniq].slice(0,4).forEach(t=>{ const c=document.createElement("div"); c.className="chip"; c.textContent=`Tempo ${t}`; chips.appendChild(c); });
+        el("#tutText").textContent = goal==="hypertrophy" ? "Target TUT 40–70s per set; slow eccentric and tight positions."
+          : goal==="strength" ? "Lower reps, harder variations, longer rests. Own the eccentric."
+          : "Maintain technique under fatigue; crisp transitions and breathing.";
         renderHistory();
       }
 
-      function perSideControlsHTML(moveKey, idxBase, list, sideProg, exIdx) {
-        const idL = `prog-${exIdx}-${moveKey}-L`;
-        const idR = `prog-${exIdx}-${moveKey}-R`;
-        const opts = list.map((name, i) => `<option value="${i}">${i + 1}. ${name}</option>`).join("");
+      function perSideControlsHTML(moveKey, idxBase, list, sideProg, exIdx){
+        const idL=`prog-${exIdx}-${moveKey}-L`, idR=`prog-${exIdx}-${moveKey}-R`;
+        const opts=list.map((name,i)=>`<option value="${i}">${i+1}. ${name}</option>`).join("");
         return `
           <div class="row two" style="margin-top:8px">
             <div>
@@ -697,22 +500,16 @@
         `;
       }
 
-      function renderExercises(session) {
-        const list = el("#exerciseList");
-        list.innerHTML = "";
-
-        function progSelectHTML(moveKey, variantIdx, variantList, exerciseIdx) {
-          const id = `prog-${exerciseIdx}-${moveKey}`;
-          const opts = variantList
-            .map((name, i) => `<option value="${i}" ${i === variantIdx ? "selected" : ""}>${i + 1}. ${name}</option>`)
-            .join("");
+      function renderExercises(session){
+        const list=el("#exerciseList"); list.innerHTML="";
+        function progSelectHTML(moveKey,variantIdx,variantList,exerciseIdx){
+          const id=`prog-${exerciseIdx}-${moveKey}`;
+          const opts=variantList.map((name,i)=>`<option value="${i}" ${i===variantIdx?"selected":""}>${i+1}. ${name}</option>`).join("");
           return `
             <div class="row two" style="margin-top:8px">
               <div>
                 <label for="${id}">Progression: ${MOVES[moveKey].name}</label>
-                <select data-move="${moveKey}" data-ex="${exerciseIdx}" id="${id}">
-                  ${opts}
-                </select>
+                <select data-move="${moveKey}" data-ex="${exerciseIdx}" id="${id}">${opts}</select>
               </div>
               <div>
                 <label>Current Variation</label>
@@ -721,11 +518,8 @@
             </div>
           `;
         }
-
-        function actualInputsHTML(ex, idx) {
-          const unit = ex.work.type === "time" ? "sec" : (ex.perSide ? "reps/side" : "reps");
-          const idA = `actual-${idx}`;
-          const idR = `rpe-${idx}`;
+        function actualInputsHTML(ex,idx){
+          const unit=ex.work.type==="time"?"sec":(ex.perSide?"reps/side":"reps"); const idA=`actual-${idx}`, idR=`rpe-${idx}`;
           return `
             <div class="row two" style="margin-top:8px">
               <div>
@@ -742,410 +536,341 @@
             </div>
           `;
         }
-
-        function makeExercise(ex, idx, title) {
-          const t = ex.work.type === "time"
-            ? `${ex.work.seconds}s`
-            : `${ex.work.reps} reps${ex.perSide ? " / side" : ""}`;
-
-          const wrapper = document.createElement("div");
-          wrapper.className = "exercise";
-          const perSide = !!ex.perSide;
-          const hasSides = !!state.userProgSides[ex.moveKey];
-          const leftName = ex.variantLeft ?? ex.variant;
-          const rightName = ex.variantRight ?? ex.variant;
-
-          wrapper.innerHTML = `
+        function makeExercise(ex,idx,title){
+          const t=ex.work.type==="time"?`${ex.work.seconds}s`:`${ex.work.reps} reps${ex.perSide?" / side":""}`;
+          const wrapper=document.createElement("div"); wrapper.className="exercise";
+          const perSide=!!ex.perSide; const hasSides=!!state.userProgSides[ex.moveKey]; const leftName=ex.variantLeft??ex.variant; const rightName=ex.variantRight??ex.variant;
+          wrapper.innerHTML=`
             <h4>${title}</h4>
             <div class="chips">
-              <div class="chip">Sets: ${ex.sets ?? (ex.sets === 0 ? 0 : 1)}</div>
+              <div class="chip">Sets: ${ex.sets ?? (ex.sets===0?0:1)}</div>
               <div class="chip">Target: ${t}</div>
-              ${ex.restSet != null ? `<div class="chip">Rest between exercises: ${ex.restSet}s</div>` : ""}
-              ${ex.restRound != null ? `<div class="chip">Between rounds: ${ex.restRound}s</div>` : ""}
+              ${ex.restSet!=null?`<div class="chip">Rest between exercises: ${ex.restSet}s</div>`:""}
+              ${ex.restRound!=null?`<div class="chip">Between rounds: ${ex.restRound}s</div>`:""}
               <div class="chip">Tempo: ${ex.tempo || "--"}</div>
-              ${perSide ? `<div class="chip">Sides: ${leftName} | ${rightName}</div>` : ""}
+              ${perSide?`<div class="chip">Sides: ${leftName} | ${rightName}</div>`:""}
             </div>
-            ${perSide ? `
+            ${perSide?`
               <div class="chips" style="margin-top:8px">
-                <span class="chip"><input type="checkbox" id="sides-${idx}" ${hasSides ? "checked" : ""} />
+                <span class="chip"><input type="checkbox" id="sides-${idx}" ${hasSides?"checked":""} />
                   <label for="sides-${idx}" style="margin:0">Separate L/R progressions</label>
                 </span>
-              </div>
-            ` : ""}
-            ${perSide && hasSides ? perSideControlsHTML(ex.moveKey, ex.variantIdx, ex.variantList, state.userProgSides[ex.moveKey], idx) : progSelectHTML(ex.moveKey, ex.variantIdx, ex.variantList, idx)}
-            ${actualInputsHTML(ex, idx)}
+              </div>`:""}
+            ${perSide&&hasSides?perSideControlsHTML(ex.moveKey,ex.variantIdx,ex.variantList,state.userProgSides[ex.moveKey],idx):progSelectHTML(ex.moveKey,ex.variantIdx,ex.variantList,idx)}
+            ${actualInputsHTML(ex,idx)}
           `;
           list.appendChild(wrapper);
-
-          // If side selects present, set selected indices
-          if (perSide && hasSides) {
-            const side = state.userProgSides[ex.moveKey];
-            const selL = el(`#prog-${idx}-${ex.moveKey}-L`);
-            const selR = el(`#prog-${idx}-${ex.moveKey}-R`);
-            if (selL && side && Number.isFinite(side.L)) selL.value = String(side.L);
-            if (selR && side && Number.isFinite(side.R)) selR.value = String(side.R);
-          }
+          if(perSide&&hasSides){ const side=state.userProgSides[ex.moveKey]; const selL=el(`#prog-${idx}-${ex.moveKey}-L`); const selR=el(`#prog-${idx}-${ex.moveKey}-R`);
+            if(selL&&side&&Number.isFinite(side.L)) selL.value=String(side.L); if(selR&&side&&Number.isFinite(side.R)) selR.value=String(side.R); }
         }
+        if(state.session.type==="full"||state.session.type==="hiit"||state.session.type==="amrap"){ (state.session.items||[]).forEach((it,i)=>makeExercise(it,i,`${i+1}. ${it.title}`)); }
+        else if(state.session.type==="tabata"){ state.session.blocks.forEach((b,i)=>{ makeExercise({...b,sets:b.sets,work:{type:"time",seconds:20},restSet:10},i,`Block ${i+1}: ${b.blockTitle}`); }); }
 
-        if (session.type === "full" || session.type === "hiit" || session.type === "amrap") {
-          (session.items || []).forEach((it, i) => makeExercise(it, i, `${i + 1}. ${it.title}`));
-        } else if (session.type === "tabata") {
-          session.blocks.forEach((b, i) => {
-            makeExercise({
-              ...b, sets: b.sets, work: { type: "time", seconds: 20 }, restSet: 10
-            }, i, `Block ${i + 1}: ${b.blockTitle}`);
-          });
-        }
-
-        // Bind progression handlers
-        list.querySelectorAll("select[data-move]:not([data-side])").forEach((sel) => {
-          sel.onchange = () => {
-            const move = sel.getAttribute("data-move");
-            const idx = Number(sel.value);
-            state.userProg[move] = idx; save(STORAGE.prog, state.userProg);
-            const label = el(`#${sel.id}-label`); const names = MOVES[move].progressions;
-            if (label) label.textContent = names[idx];
+        // Bind progression selectors
+        list.querySelectorAll("select[data-move]:not([data-side])").forEach((sel)=>{
+          sel.onchange=()=>{ const move=sel.getAttribute("data-move"); const idx=Number(sel.value); state.userProg[move]=idx; save(STORAGE.prog,state.userProg);
+            const label=el(`#${sel.id}-label`); const names=MOVES[move].progressions; if(label) label.textContent=names[idx]; generate(false); };
+        });
+        list.querySelectorAll("input[id^='sides-']").forEach((cb)=>{
+          cb.onchange=()=>{ const idx=Number(cb.id.split("-")[1]); const ex=(state.session.items||state.session.blocks)[idx]; const move=ex.moveKey;
+            if(cb.checked){ const base=state.userProg[move]??baseIndexByLevel(state.prefs.level,move); state.userProgSides[move]={L:base,R:base}; save(STORAGE.progSides,state.userProgSides); }
+            else { delete state.userProgSides[move]; save(STORAGE.progSides,state.userProgSides); }
             generate(false);
           };
         });
-        // Per-side toggles and handlers
-        list.querySelectorAll("input[id^='sides-']").forEach((cb) => {
-          cb.onchange = () => {
-            const idx = Number(cb.id.split("-")[1]);
-            const ex = (state.session.items || state.session.blocks)[idx];
-            const move = ex.moveKey;
-            if (cb.checked) {
-              const base = state.userProg[move] ?? baseIndexByLevel(state.prefs.level, move);
-              state.userProgSides[move] = { L: base, R: base };
-              save(STORAGE.progSides, state.userProgSides);
-            } else {
-              delete state.userProgSides[move];
-              save(STORAGE.progSides, state.userProgSides);
-            }
-            generate(false);
-          };
-        });
-        list.querySelectorAll("select[data-side]").forEach((sel) => {
-          sel.onchange = () => {
-            const move = sel.getAttribute("data-move");
-            const side = sel.getAttribute("data-side");
-            const idx = Number(sel.value);
-            if (!state.userProgSides[move]) state.userProgSides[move] = { L: idx, R: idx };
-            state.userProgSides[move][side] = idx;
-            save(STORAGE.progSides, state.userProgSides);
-            generate(false);
-          };
+        list.querySelectorAll("select[data-side]").forEach((sel)=>{
+          sel.onchange=()=>{ const move=sel.getAttribute("data-move"); const side=sel.getAttribute("data-side"); const idx=Number(sel.value);
+            if(!state.userProgSides[move]) state.userProgSides[move]={L:idx,R:idx}; state.userProgSides[move][side]=idx; save(STORAGE.progSides,state.userProgSides); generate(false); };
         });
       }
 
-      // Generate action
-      function generate(showAlert = true) {
-        const rid = el("#routineSelect").value;
-        const level = el("#levelSelect").value;
-        const goal = el("#goalSelect").value;
-        state.prefs = {
-          ...state.prefs,
-          routineId: rid, level, goal,
-          sound: el("#soundToggle").checked,
-          haptics: el("#hapticsToggle").checked,
-          keepAwake: el("#wakeToggle").checked,
-          highContrast: el("#contrastToggle").checked,
-          autoAdjust: el("#autoAdjust").value,
-        };
-        save(STORAGE.prefs, state.prefs);
-        document.body.classList.toggle("high-contrast", !!state.prefs.highContrast);
-
-        const routine = ROUTINES.find((r) => r.id === rid);
-        const session = sessionFromRoutine(routine, level, goal);
-        state.session = session;
-        renderMeta(session, routine, level, goal);
-        renderExercises(session);
+      function generate(){
+        const rid=el("#routineSelect").value, level=el("#levelSelect").value, goal=el("#goalSelect").value;
+        state.prefs={...state.prefs, routineId:rid, level, goal, sound:el("#soundToggle").checked, haptics:el("#hapticsToggle").checked, keepAwake:el("#wakeToggle").checked, highContrast:el("#contrastToggle").checked, autoAdjust:el("#autoAdjust").value };
+        save(STORAGE.prefs,state.prefs); document.body.classList.toggle("high-contrast",!!state.prefs.highContrast);
+        const routine=ROUTINES.find(r=>r.id===rid); const session=sessionFromRoutine(routine,level,goal); state.session=session; renderMeta(session,routine,level,goal); renderExercises(session);
       }
 
       // Audio + Haptics
-      const audioCtx = (() => {
-        try {
-          return typeof AudioContext !== "undefined" ? new AudioContext()
-            : typeof webkitAudioContext !== "undefined" ? new webkitAudioContext()
-            : null;
-        } catch { return null; }
-      })();
-      function beep(freq = 660, dur = 120) {
-        if (!state.prefs.sound || !audioCtx) return;
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
-        o.frequency.value = freq; o.type = "sine";
-        const now = audioCtx.currentTime;
-        g.gain.setValueAtTime(0.0001, now);
-        g.gain.exponentialRampToValueAtTime(0.22, now + 0.01);
-        o.start();
-        setTimeout(() => {
-          g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.01);
-          o.stop();
-        }, dur);
-      }
-      function cueStartWork() { beep(820, 150); if (state.prefs.haptics && navigator.vibrate) navigator.vibrate([30, 40]); }
-      function cueStartRest() { beep(520, 180); if (state.prefs.haptics && navigator.vibrate) navigator.vibrate(20); }
-      function cueCountdown(t) { if (t > 0 && t <= 3) beep(660, 100); }
+      const audioCtx=(()=>{ try{ return typeof AudioContext!=="undefined"?new AudioContext(): typeof webkitAudioContext!=="undefined"?new webkitAudioContext():null; }catch{ return null; } })();
+      function beep(freq=660,dur=120){ if(!state.prefs.sound||!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value=freq; o.type="sine"; const now=audioCtx.currentTime; g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(0.22,now+0.01); o.start();
+        setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.01); o.stop(); },dur); }
+      function cueStartWork(){ beep(820,150); if(state.prefs.haptics&&navigator.vibrate) navigator.vibrate([30,40]); }
+      function cueStartRest(){ beep(520,180); if(state.prefs.haptics&&navigator.vibrate) navigator.vibrate(20); }
+      function cueCountdown(t){ if(t>0&&t<=3) beep(660,100); }
 
       // Wake Lock
-      async function requestWakeLock() {
-        try {
-          if (!("wakeLock" in navigator)) return;
-          if (state.wakeLock) return;
-          state.wakeLock = await navigator.wakeLock.request("screen");
-          state.wakeLock.addEventListener("release", () => { state.wakeLock = null; });
-        } catch (e) { /* ignore */ }
-      }
-      async function releaseWakeLock() {
-        try { if (state.wakeLock) { await state.wakeLock.release(); state.wakeLock = null; } } catch {}
-      }
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && state.prefs.keepAwake && !state.wakeLock) requestWakeLock();
-      });
+      async function requestWakeLock(){ try{ if(!("wakeLock" in navigator)) return; if(state.wakeLock) return; state.wakeLock=await navigator.wakeLock.request("screen"); state.wakeLock.addEventListener("release",()=>{state.wakeLock=null;}); }catch{} }
+      async function releaseWakeLock(){ try{ if(state.wakeLock){ await state.wakeLock.release(); state.wakeLock=null; } }catch{} }
+      document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&state.prefs.keepAwake&&!state.wakeLock) requestWakeLock(); });
 
-      // Timer engine (drift-free)
-      const timer = { plan: [], i: 0, running: false, remain: 0, timeout: null, expected: 0 };
-      const ring = () => el("#restRing");
+      // Timer (drift-free) + smooth ring loop
+      const timer={ plan:[], i:0, running:false, remain:0, timeout:null, expected:0, lastTick:0, raf:null, amrap:{rounds:0} };
+      const ring=()=>el("#restRing");
 
-      function buildTimerPlan(session) {
-        const plan = [];
-        plan.push({ phase: "warmup", title: "Warm-Up", sub: "2 min light movement", seconds: 120 });
-
-        if (session.type === "full") {
-          const rounds = session.rounds || (session.items[0]?.sets || 1);
-          for (let r = 1; r <= rounds; r++) {
-            session.items.forEach((it, idx) => {
-              if (it.perSide) {
-                const reps = it.work.type === "reps" ? it.work.reps : null;
-                const leftVar = it.variantLeft || it.variant;
-                const rightVar = it.variantRight || it.variant;
-                const perSideSeconds = it.work.type === "time"
-                  ? Math.round(it.work.seconds / 2)
-                  : Math.max(15, Math.round((parseTempo(it.tempo).secondsPerRep ?? 3) * (reps || 8)));
-                plan.push({ phase: "work", title: it.title + " — Left", sub: `${leftVar} — ${it.work.type === "time" ? perSideSeconds + "s" : reps + " reps"}`, seconds: perSideSeconds });
-                plan.push({ phase: "work", title: it.title + " — Right", sub: `${rightVar} — ${it.work.type === "time" ? perSideSeconds + "s" : reps + " reps"}`, seconds: perSideSeconds });
+      function buildTimerPlan(session){
+        const plan=[]; plan.push({phase:"warmup",title:"Warm-Up",sub:"2 min light movement",seconds:120});
+        if(session.type==="full"){
+          const rounds=session.rounds||(session.items[0]?.sets||1);
+          for(let r=1;r<=rounds;r++){
+            session.items.forEach((it,idx)=>{
+              if(it.perSide){
+                const reps=it.work.type==="reps"?it.work.reps:null;
+                const leftVar=it.variantLeft||it.variant; const rightVar=it.variantRight||it.variant;
+                const perSideSeconds=it.work.type==="time" ? Math.round(it.work.seconds/2) : Math.max(15,Math.round((parseTempo(it.tempo).secondsPerRep??3)*(reps||8)));
+                plan.push({phase:"work",title:it.title+" — Left",sub:`${leftVar} — ${it.work.type==="time"?perSideSeconds+"s":reps+" reps"}`,seconds:perSideSeconds});
+                plan.push({phase:"work",title:it.title+" — Right",sub:`${rightVar} — ${it.work.type==="time"?perSideSeconds+"s":reps+" reps"}`,seconds:perSideSeconds});
               } else {
-                const seconds = it.work.type === "time" ? it.work.seconds : estimateSetSeconds(it);
-                const sub = it.work.type === "time" ? `${it.variant} — ${seconds}s` : `${it.variant} — ${it.work.reps} reps`;
-                plan.push({ phase: "work", title: it.title, sub, seconds });
+                const seconds=it.work.type==="time"?it.work.seconds:estimateSetSeconds(it);
+                const sub=it.work.type==="time"?`${it.variant} — ${seconds}s`:`${it.variant} — ${it.work.reps} reps`;
+                plan.push({phase:"work",title:it.title,sub,seconds});
               }
-              // Rest between exercises; after last exercise in a round, we add round rest instead.
-              const isLastInRound = idx === session.items.length - 1;
-              if (!isLastInRound) {
-                plan.push({ phase: "rest", title: "Rest", sub: "Next up", seconds: it.restSet });
-              } else if (r < rounds) {
-                plan.push({ phase: "rest", title: "Between Rounds", sub: `Round ${r} complete`, seconds: session.roundRest });
-              }
+              const isLastInRound=idx===session.items.length-1;
+              if(!isLastInRound) plan.push({phase:"rest",title:"Rest",sub:"Next up",seconds:it.restSet});
+              else if(r<rounds) plan.push({phase:"rest",title:"Between Rounds",sub:`Round ${r} complete`,seconds:session.roundRest});
             });
           }
-        } else if (session.type === "hiit") {
-          for (let b = 1; b <= session.blocks; b++) {
-            session.items.forEach((it) => {
-              plan.push({ phase: "work", title: it.title, sub: `${it.variant} — ${it.work.seconds}s`, seconds: it.work.seconds });
-              plan.push({ phase: "rest", title: "Rest", sub: "", seconds: it.restSet });
-            });
-            if (b < session.blocks) plan.push({ phase: "rest", title: "Block Rest", sub: `Block ${b} complete`, seconds: 60 });
+        } else if(session.type==="hiit"){
+          for(let b=1;b<=session.blocks;b++){
+            session.items.forEach(it=>{ plan.push({phase:"work",title:it.title,sub:`${it.variant} — ${it.work.seconds}s`,seconds:it.work.seconds}); plan.push({phase:"rest",title:"Rest",sub:"",seconds:it.restSet}); });
+            if(b<session.blocks) plan.push({phase:"rest",title:"Block Rest",sub:`Block ${b} complete`,seconds:60});
           }
-        } else if (session.type === "tabata") {
-          session.blocks.forEach((b, bi) => {
-            for (let s = 1; s <= b.sets; s++) {
-              plan.push({ phase: "work", title: b.blockTitle, sub: `${b.variant} — 20s`, seconds: 20 });
-              plan.push({ phase: "rest", title: "Rest", sub: "", seconds: 10 });
-            }
-            if (bi < session.blocks.length - 1) {
-              plan.push({ phase: "rest", title: "Between Blocks", sub: "Catch breath", seconds: b.between });
-            }
-          });
-        } else if (session.type === "amrap") {
-          plan.push({ phase: "amrap", title: "AMRAP", sub: "Cycle movements in order", seconds: session.duration });
+        } else if(session.type==="tabata"){
+          session.blocks.forEach((b,bi)=>{ for(let s=1;s<=b.sets;s++){ plan.push({phase:"work",title:b.blockTitle,sub:`${b.variant} — 20s`,seconds:20}); plan.push({phase:"rest",title:"Rest",sub:"",seconds:10}); }
+            if(bi<session.blocks.length-1) plan.push({phase:"rest",title:"Between Blocks",sub:"Catch breath",seconds:b.between}); });
+        } else if(session.type==="amrap"){
+          plan.push({phase:"amrap",title:"AMRAP",sub:"Cycle movements in order",seconds:session.duration});
         }
-
-        plan.push({ phase: "cooldown", title: "Cool-Down", sub: "2 min easy breathing & stretch", seconds: 120 });
+        plan.push({phase:"cooldown",title:"Cool-Down",sub:"2 min easy breathing & stretch",seconds:120});
         return plan;
       }
 
-      function drawRing(progress) {
-        const deg = Math.round(360 * progress);
-        ring().style.background = `conic-gradient(var(--accent) ${deg}deg, #0a1222 0deg)`;
+      function drawRing(progress){
+        const p = Math.max(0, Math.min(1, progress || 0));
+        const deg = Math.round(360 * p);
+        ring().style.background = `
+          radial-gradient(circle at 50% 50%, rgba(0,0,0,0.6) 0 40%, transparent 42%),
+          conic-gradient(from -90deg,
+            var(--accent) 0deg,
+            var(--accent) ${deg}deg,
+            var(--ring-track) ${deg}deg,
+            var(--ring-track) 360deg
+          )
+        `;
       }
-      function ringLabelForPhase(phase) {
-        if (phase === "work") return "GO";
-        if (phase === "rest") return "REST";
-        if (phase === "warmup") return "WARM";
-        if (phase === "cooldown") return "COOL";
-        return phase.toUpperCase();
+      function ringLabelForPhase(phase){ if(phase==="work") return "GO"; if(phase==="rest") return "REST"; if(phase==="warmup") return "WARM"; if(phase==="cooldown") return "COOL"; if(phase==="amrap") return "AMRAP"; return phase.toUpperCase(); }
+      function showDrawer(show){ el("#timerDrawer").classList.toggle("hidden",!show); }
+
+      // Smooth animation loop for the ring
+      function startRingLoop(){
+        if (timer.raf) return;
+        const loop = () => {
+          if (timer.plan.length) {
+            const step = timer.plan[timer.i];
+            const total = Math.max(1, step.seconds || 1);
+            let exactRemain = timer.remain;
+            if (timer.running) {
+              const dt = (performance.now() - (timer.lastTick || performance.now())) / 1000;
+              exactRemain = timer.remain - dt;
+            }
+            exactRemain = Math.max(0, Math.min(total, exactRemain));
+            drawRing(1 - (exactRemain / total));
+          }
+          timer.raf = requestAnimationFrame(loop);
+        };
+        timer.raf = requestAnimationFrame(loop);
       }
-      function showDrawer(show) { el("#timerDrawer").classList.toggle("hidden", !show); }
 
-      function renderTimer() {
-        const step = timer.plan[timer.i]; if (!step) return;
-        const phaseName = step.phase === "work" ? "Work"
-          : step.phase === "rest" ? "Rest"
-          : step.phase === "warmup" ? "Warm-Up"
-          : step.phase === "cooldown" ? "Cool-Down"
-          : step.phase.toUpperCase();
+      function renderTimer(){
+        const step=timer.plan[timer.i]; if(!step) return;
+        const phaseName=step.phase==="work"?"Work":step.phase==="rest"?"Rest":step.phase==="warmup"?"Warm-Up":step.phase==="cooldown"?"Cool-Down":step.phase==="amrap"?"AMRAP":step.phase.toUpperCase();
+        el("#timerPhase").textContent=phaseName; el("#timerTitle").textContent=step.title; el("#timerSub").textContent=step.sub||""; el("#timerClock").textContent=mmss(timer.remain);
+        ring().setAttribute("data-t",ringLabelForPhase(step.phase));
 
-        el("#timerPhase").textContent = phaseName;
-        el("#timerTitle").textContent = step.title;
-        el("#timerSub").textContent = step.sub || "";
-        el("#timerClock").textContent = mmss(timer.remain);
-        drawRing(1 - timer.remain / (step.seconds || 1));
-        ring().setAttribute("data-t", ringLabelForPhase(step.phase));
+        // Breadcrumb
+        const bc=el("#timerBreadcrumb"); bc.innerHTML=""; const idxText=`${timer.i+1}/${timer.plan.length}`; const next=timer.plan[timer.i+1];
+        const crumb = ["Session", idxText, phaseName];
+        if (step.phase === "amrap") crumb.push(`Round ${timer.amrap.rounds}`);
+        crumb.forEach(t=>{ const c=document.createElement("div"); c.className="chip"; c.textContent=t; bc.appendChild(c); });
+        if(next){ const n=document.createElement("div"); n.className="chip"; n.textContent=`Next: ${next.phase==="work"?"Work":next.phase==="rest"?"Rest":next.phase} — ${next.title}`; bc.appendChild(n); }
 
-        const bc = el("#timerBreadcrumb");
-        bc.innerHTML = "";
-        const idxText = `${timer.i + 1}/${timer.plan.length}`;
-        const next = timer.plan[timer.i + 1];
-        const chips = [
-          "Session",
-          idxText,
-          phaseName,
-        ];
-        chips.forEach((t) => { const c = document.createElement("div"); c.className = "chip"; c.textContent = t; bc.appendChild(c); });
-        if (next) {
-          const n = document.createElement("div");
-          n.className = "chip"; n.textContent = `Next: ${next.phase === "work" ? "Work" : next.phase === "rest" ? "Rest" : next.phase} — ${next.title}`;
-          bc.appendChild(n);
+        // AMRAP helper visibility
+        const panel = el("#amrapPanel");
+        if (step.phase === "amrap") {
+          panel.classList.remove("hidden");
+          renderAmrapUI();
+        } else {
+          panel.classList.add("hidden");
         }
 
-        el("#btnPause").textContent = timer.running ? "Pause" : "Start";
-
-        // aria-live status
-        el("#liveStatus").textContent = `${phaseName}. ${step.title}. ${mmss(timer.remain)} remaining.`;
+        el("#btnPause").textContent=timer.running?"Pause":"Start";
+        el("#liveStatus").textContent=`${phaseName}. ${step.title}. ${mmss(timer.remain)} remaining.`;
       }
 
-      function scheduleTick() {
-        const now = performance.now();
-        const drift = now - timer.expected;
-        // Advance second
-        if (timer.remain > 0) {
+      function scheduleTick(){
+        const now=performance.now(); const drift=now - timer.expected;
+        if(timer.remain>0){
           timer.remain--;
+          timer.lastTick = now;
           cueCountdown(timer.remain);
           renderTimer();
         } else {
-          // Step transition
-          const prev = timer.plan[timer.i];
-          if (prev) {
-            if (prev.phase === "work") cueStartRest(); else cueStartWork();
-          }
+          const prev=timer.plan[timer.i];
+          if(prev){ if(prev.phase==="work") cueStartRest(); else cueStartWork(); }
           nextStep(true);
         }
-        // Next expected tick
-        timer.expected += 1000;
-        const delay = Math.max(0, 1000 - drift);
-        timer.timeout = setTimeout(scheduleTick, delay);
+        timer.expected+=1000; const delay=Math.max(0,1000-drift); timer.timeout=setTimeout(scheduleTick,delay);
       }
 
-      function startPause() {
-        if (!state.session) { alert("Generate a session first."); return; }
-        if (!timer.plan.length) {
-          timer.plan = buildTimerPlan(state.session);
-          timer.i = 0; timer.remain = timer.plan[0].seconds;
+      function startPause(){
+        if(!state.session){ alert("Generate a session first."); return; }
+        if(!timer.plan.length){
+          timer.plan=buildTimerPlan(state.session);
+          timer.i=0; timer.remain=timer.plan[0].seconds;
+          timer.lastTick = performance.now();
+          // Reset AMRAP helper
+          timer.amrap.rounds = 0;
           showDrawer(true); renderTimer();
         }
-        if (!timer.running) {
-          timer.running = true;
-          if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-          if (state.prefs.keepAwake) requestWakeLock();
-          timer.expected = performance.now() + 1000;
-          timer.timeout = setTimeout(scheduleTick, 1000);
-          el("#btnPause").textContent = "Pause";
+        if(!timer.running){
+          timer.running=true;
+          if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume();
+          if(state.prefs.keepAwake) requestWakeLock();
+          timer.expected=performance.now()+1000;
+          timer.lastTick = performance.now();
+          timer.timeout=setTimeout(scheduleTick,1000);
+          el("#btnPause").textContent="Pause";
+          startRingLoop();
         } else {
-          timer.running = false;
+          timer.running=false;
           clearTimeout(timer.timeout);
-          el("#btnPause").textContent = "Start";
+          el("#btnPause").textContent="Start";
           releaseWakeLock();
         }
       }
 
-      function nextStep(internal=false) {
-        if (timer.i < timer.plan.length - 1) {
+      function nextStep(internal=false){
+        if(timer.i<timer.plan.length-1){
           timer.i++;
-          timer.remain = timer.plan[timer.i].seconds;
+          timer.remain=timer.plan[timer.i].seconds;
+          timer.lastTick = performance.now();
           renderTimer();
-          if (!internal) cueStartWork();
+          if(!internal) cueStartWork();
         } else {
-          // Complete
-          beep(880, 200);
+          beep(880,200);
           clearTimeout(timer.timeout);
-          timer.running = false;
-          el("#timerTitle").textContent = "Workout Complete";
-          el("#timerSub").textContent = "Nice work!";
-          el("#timerClock").textContent = "00:00";
+          timer.running=false;
+          el("#timerTitle").textContent="Workout Complete";
+          el("#timerSub").textContent="Nice work!";
+          el("#timerClock").textContent="00:00";
+          ring().setAttribute("data-t","DONE");
           drawRing(1);
-          el("#btnPause").textContent = "Start";
+          el("#btnPause").textContent="Start";
           releaseWakeLock();
         }
       }
-
-      function prevStep() {
-        if (timer.i > 0) {
-          timer.i--;
-          timer.remain = timer.plan[timer.i].seconds;
-          renderTimer();
-        }
-      }
-
-      function startTimerForCurrentSession() {
-        if (!state.session) { alert("Generate a session first."); return; }
-        timer.plan = buildTimerPlan(state.session);
-        timer.i = 0; timer.remain = timer.plan[0].seconds;
-        timer.running = false;
+      function prevStep(){ if(timer.i>0){ timer.i--; timer.remain=timer.plan[timer.i].seconds; timer.lastTick = performance.now(); renderTimer(); } }
+      function startTimerForCurrentSession(){
+        if(!state.session){ alert("Generate a session first."); return; }
+        timer.plan=buildTimerPlan(state.session);
+        timer.i=0; timer.remain=timer.plan[0].seconds;
+        timer.running=false;
+        timer.lastTick = performance.now();
+        timer.amrap.rounds = 0;
         showDrawer(true);
         renderTimer();
-        if (state.prefs.keepAwake) requestWakeLock();
+        startRingLoop();
+        if(state.prefs.keepAwake) requestWakeLock();
       }
 
-      // History
-      function gatherActuals() {
-        const items = (state.session.items || state.session.blocks || []).map((ex, idx) => {
-          const actualEl = el(`#actual-${idx}`);
-          const rpeEl = el(`#rpe-${idx}`);
-          const actual = actualEl && actualEl.value !== "" ? Number(actualEl.value) : null;
-          const rpe = rpeEl && rpeEl.value !== "" ? Number(rpeEl.value) : null;
-          const leftRight = state.userProgSides[ex.moveKey] || null;
-          return {
-            title: ex.title,
-            moveKey: ex.moveKey,
-            target: ex.work.type === "time" ? { type: "time", seconds: ex.work.seconds } : { type: "reps", reps: ex.work.reps, perSide: !!ex.perSide },
-            variant: ex.variant,
-            variantLeft: ex.variantLeft || null,
-            variantRight: ex.variantRight || null,
-            actual, rpe, leftRight,
-          };
+      // AMRAP helper logic
+      function amrapItems() {
+        return (state.session && state.session.type === "amrap") ? (state.session.items || []) : [];
+      }
+      function renderAmrapUI() {
+        const roundChip = el("#amrapRoundChip");
+        roundChip.textContent = `Round ${timer.amrap.rounds}`;
+        const list = el("#amrapList");
+
+        // If list already built to current items length, keep it (so checks persist between re-renders)
+        const items = amrapItems();
+        const needsBuild = list.childElementCount !== items.length;
+        if (needsBuild) {
+          list.innerHTML = "";
+          items.forEach((ex, i) => {
+            const li = document.createElement("li");
+            const cb = document.createElement("input");
+            cb.type = "checkbox"; cb.id = `amrap-cb-${i}`;
+            cb.addEventListener("change", onAmrapCheckChanged);
+            const label = document.createElement("label");
+            label.setAttribute("for", cb.id);
+            const text = ex.work.type === "reps"
+              ? `${ex.work.reps} × ${ex.variant || ex.title}`
+              : `${ex.work.seconds}s — ${ex.variant || ex.title}`;
+            label.textContent = text;
+            li.appendChild(cb); li.appendChild(label);
+            list.appendChild(li);
+          });
+        }
+      }
+      function onAmrapCheckChanged() {
+        const list = el("#amrapList");
+        const boxes = Array.from(list.querySelectorAll("input[type='checkbox']"));
+        const allDone = boxes.length > 0 && boxes.every(b => b.checked);
+        if (allDone) {
+          timer.amrap.rounds += 1;
+          cueStartWork(); // little cue for a new round
+          // Reset checks for next round
+          boxes.forEach(b => b.checked = false);
+          renderTimer();
+        }
+      }
+
+      // AMRAP controls
+      function bindAmrapButtons() {
+        el("#amrapMinus").onclick = () => {
+          timer.amrap.rounds = Math.max(0, (timer.amrap.rounds || 0) - 1);
+          renderTimer();
+        };
+        el("#amrapPlus").onclick = () => {
+          timer.amrap.rounds = (timer.amrap.rounds || 0) + 1;
+          renderTimer();
+        };
+        el("#amrapReset").onclick = () => {
+          if (confirm("Reset AMRAP round count?")) {
+            timer.amrap.rounds = 0;
+            // Uncheck all
+            $all("#amrapList input[type='checkbox']").forEach(b => b.checked = false);
+            renderTimer();
+          }
+        };
+      }
+
+      function gatherActuals(){
+        const items = (state.session.items||state.session.blocks||[]).map((ex,idx)=>{ const actualEl=el(`#actual-${idx}`); const rpeEl=el(`#rpe-${idx}`);
+          const actual=actualEl&&actualEl.value!==""?Number(actualEl.value):null; const rpe=rpeEl&&rpeEl.value!==""?Number(rpeEl.value):null; const leftRight=state.userProgSides[ex.moveKey]||null;
+          return { title:ex.title, moveKey:ex.moveKey, target: ex.work.type==="time"?{type:"time",seconds:ex.work.seconds}:{type:"reps",reps:ex.work.reps,perSide:!!ex.perSide},
+            variant:ex.variant, variantLeft:ex.variantLeft||null, variantRight:ex.variantRight||null, actual, rpe, leftRight };
         });
         return items;
       }
 
-      function addHistory(note) {
-        const rid = state.prefs.routineId;
-        const routine = ROUTINES.find((r) => r.id === rid);
-        const entry = {
-          appVersion: APP_VERSION,
-          date: new Date().toISOString(),
-          routine: routine.name,
-          level: state.prefs.level,
-          goal: state.prefs.goal,
-          note,
-          chosenProgressions: state.userProg,
-          chosenProgressionsSides: state.userProgSides,
-          overallRPE: el("#overallRPE").value || null,
-          items: gatherActuals(),
-        };
-        state.history.push(entry);
-        save(STORAGE.hist, state.history);
-        renderHistory();
+      function addHistory(note){
+        const rid=state.prefs.routineId; const routine=ROUTINES.find(r=>r.id===rid);
+        const entry={ appVersion:APP_VERSION, date:new Date().toISOString(), routine:routine.name, level:state.prefs.level, goal:state.prefs.goal, note,
+          chosenProgressions:state.userProg, chosenProgressionsSides:state.userProgSides, overallRPE:el("#overallRPE").value||null, items:gatherActuals() };
+        if (state.session && state.session.type === "amrap") {
+          entry.amrapRounds = timer.amrap.rounds || 0;
+        }
+        state.history.push(entry); save(STORAGE.hist,state.history); renderHistory();
 
-        // Auto-adjust logic
-        if ((state.prefs.autoAdjust || "on") === "on") {
+        if ((state.prefs.autoAdjust||"on")==="on") {
           const rpe = Number(entry.overallRPE);
-          const usedMoves = new Set(entry.items.map(i => i.moveKey));
+          const usedMoves = new Set(entry.items.map(i=>i.moveKey));
           if (rpe) {
             for (const m of usedMoves) {
-              const list = MOVES[m].progressions;
-              if (!list) continue;
+              const list = MOVES[m].progressions; if (!list) continue;
               const delta = rpe <= 6 ? +1 : rpe >= 9 ? -1 : 0;
               if (delta !== 0) {
                 if (state.userProgSides[m]) {
@@ -1157,24 +882,22 @@
                 }
               }
             }
-            save(STORAGE.prog, state.userProg);
-            save(STORAGE.progSides, state.userProgSides);
-            generate(false);
+            save(STORAGE.prog,state.userProg); save(STORAGE.progSides,state.userProgSides); generate(false);
           }
         }
       }
 
-      function renderHistory() {
-        const box = el("#history");
-        if (!state.history.length) { box.innerHTML = "No sessions saved yet."; return; }
-        box.innerHTML = state.history.slice().reverse().slice(0, 12).map((h, idx) => {
+      function renderHistory(){
+        const box=el("#history"); if(!state.history.length){ box.innerHTML = "No sessions saved yet."; return; }
+        box.innerHTML = state.history.slice().reverse().slice(0,12).map((h,idx)=>{
           const id = `hist-${state.history.length - 1 - idx}`;
           const dt = new Date(h.date).toLocaleString();
           const note = h.note ? `<div class="muted">${h.note}</div>` : "";
           const rpe = h.overallRPE ? ` • RPE ${h.overallRPE}` : "";
+          const am = typeof h.amrapRounds === "number" ? ` • AMRAP rounds: ${h.amrapRounds}` : "";
           return `
             <div class="history-item" data-id="${id}">
-              <div><b>${dt}</b> — ${h.routine} — ${h.level}/${h.goal}${rpe}</div>
+              <div><b>${dt}</b> — ${h.routine} — ${h.level}/${h.goal}${rpe}${am}</div>
               ${note}
               <div class="history-actions">
                 <button class="btn ghost" data-del="${id}">Delete</button>
@@ -1182,145 +905,69 @@
             </div>
           `;
         }).join("");
-
-        // Bind delete
-        $all("[data-del]").forEach(btn => {
-          btn.onclick = () => {
-            const id = btn.getAttribute("data-del");
-            const idx = Number(id.split("-")[1]);
-            if (!Number.isFinite(idx)) return;
-            if (!confirm("Delete this history entry?")) return;
-            state.history.splice(idx, 1);
-            save(STORAGE.hist, state.history);
-            renderHistory();
+        $all("[data-del]").forEach(btn=>{
+          btn.onclick=()=>{ const id=btn.getAttribute("data-del"); const idx=Number(id.split("-")[1]); if(!Number.isFinite(idx)) return;
+            if(!confirm("Delete this history entry?")) return;
+            state.history.splice(idx,1); save(STORAGE.hist,state.history); renderHistory();
           };
         });
       }
 
-      // Export
-      function exportPlan() {
-        const payload = {
-          appVersion: APP_VERSION,
-          date: new Date().toISOString(),
-          prefs: state.prefs,
-          session: state.session,
-          userProgressions: state.userProg,
-          userProgressionsSides: state.userProgSides,
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "no-equipment-trainer-plan.json"; a.click();
-        URL.revokeObjectURL(url);
+      function exportPlan(){
+        const payload={ appVersion:APP_VERSION, date:new Date().toISOString(), prefs:state.prefs, session:state.session, userProgressions:state.userProg, userProgressionsSides:state.userProgSides };
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a");
+        a.href=url; a.download="no-equipment-trainer-plan.json"; a.click(); URL.revokeObjectURL(url);
       }
 
-      // Events
-      function bindEvents() {
-        el("#generateBtn").onclick = () => generate();
-        el("#startTimerBtn").onclick = startTimerForCurrentSession;
-        el("#btnClose").onclick = () => {
-          if (timer.running) {
-            if (!confirm("Timer is running. Close and stop the timer?")) return;
-            timer.running = false;
-            clearTimeout(timer.timeout);
-            releaseWakeLock();
-          }
-          showDrawer(false);
-        };
-        el("#btnPause").onclick = startPause;
-        el("#btnNext").onclick = () => nextStep(false);
-        el("#btnBack").onclick = prevStep;
-        el("#btnSkip").onclick = () => nextStep(false);
+      function bindEvents(){
+        el("#generateBtn").onclick=()=>generate();
+        el("#startTimerBtn").onclick=startTimerForCurrentSession;
+        el("#btnClose").onclick=()=>{ if(timer.running){ if(!confirm("Timer is running. Close and stop the timer?")) return; timer.running=false; clearTimeout(timer.timeout); releaseWakeLock(); } showDrawer(false); };
+        el("#btnPause").onclick=startPause;
+        el("#btnNext").onclick=()=>nextStep(false);
+        el("#btnBack").onclick=prevStep;
+        el("#btnSkip").onclick=()=>nextStep(false);
 
-        el("#completeBtn").onclick = () => {
-          const note = el("#sessionNote").value || "Completed";
-          addHistory(note);
-          alert("Session saved to history. Nice work!");
-        };
-        el("#undoBtn").onclick = () => {
-          if (!state.history.length) return;
-          if (!confirm("Undo last save?")) return;
-          state.history.pop();
-          save(STORAGE.hist, state.history);
-          renderHistory();
-        };
-        el("#exportBtn").onclick = exportPlan;
+        bindAmrapButtons();
 
-        document.addEventListener("keydown", (e) => {
-          if (isFormTarget(e)) return;
-          const k = e.key.toLowerCase();
-          if (k === "g") generate();
-          if (k === "s") startPause();
-          if (k === "n") nextStep();
-          if (k === "b") prevStep();
-        });
+        el("#completeBtn").onclick=()=>{ const note=el("#sessionNote").value||"Completed"; addHistory(note); alert("Session saved to history. Nice work!"); };
+        el("#undoBtn").onclick=()=>{ if(!state.history.length) return; if(!confirm("Undo last save?")) return; state.history.pop(); save(STORAGE.hist,state.history); renderHistory(); };
+        el("#exportBtn").onclick=exportPlan;
 
-        ["routineSelect","levelSelect","goalSelect","soundToggle","hapticsToggle","wakeToggle","contrastToggle","autoAdjust"].forEach(id => {
-          const node = el("#" + id);
-          if (node) node.onchange = () => generate(false);
+        document.addEventListener("keydown",(e)=>{ if(isFormTarget(e)) return; const k=e.key.toLowerCase();
+          if(k==="g") generate(); if(k==="s") startPause(); if(k==="n") nextStep(); if(k==="b") prevStep(); });
+
+        ["routineSelect","levelSelect","goalSelect","soundToggle","hapticsToggle","wakeToggle","contrastToggle","autoAdjust"].forEach(id=>{
+          const node=el("#"+id); if(node) node.onchange=()=>generate(false);
         });
       }
 
-      // Init
-      function init() {
+      function init(){
         document.documentElement.classList.remove("no-js");
         populateRoutineSelect();
         bindEvents();
         generate();
 
-        // Inline PWA: manifest + light SW registration (best-effort)
-        try {
-          const manifest = {
-            name: "No-Equipment Trainer",
-            short_name: "NE Trainer",
-            description: "Timer + Progressions — single-file trainer",
-            start_url: ".",
-            display: "standalone",
-            background_color: "#0b1220",
-            theme_color: "#0b1220",
-            icons: [
-              { src: "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><defs><linearGradient id=%22g%22 x1=%220%22 x2=%221%22 y1=%220%22 y2=%221%22><stop stop-color=%22%2338bdf8%22/><stop offset=%221%22 stop-color=%22%2322c55e%22/></linearGradient></defs><rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22url(%23g)%22/><path d=%22M16 42l8-20 8 12 8-8 8 16%22 stroke=%22%23fff%22 stroke-width=%225%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>", sizes: "64x64", type: "image/svg+xml" }
-            ]
-          };
-          const murl = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
-          const link = document.createElement("link");
-          link.rel = "manifest"; link.href = murl; document.head.appendChild(link);
-        } catch {}
+        // Start ring loop for smooth arc
+        startRingLoop();
 
-        if ("serviceWorker" in navigator) {
-          const swCode = `
-            const CACHE = "ne-trainer-cache-v1";
-            self.addEventListener("install", (e) => {
-              e.waitUntil((async () => {
-                const cache = await caches.open(CACHE);
-                try { await cache.addAll(["./"]); } catch {}
-                self.skipWaiting();
-              })());
-            });
-            self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
-            self.addEventListener("fetch", (e) => {
-              const url = new URL(e.request.url);
-              if (url.origin === location.origin) {
-                e.respondWith((async () => {
-                  const cache = await caches.open(CACHE);
-                  const cached = await cache.match(e.request);
-                  if (cached) return cached;
-                  try {
-                    const res = await fetch(e.request);
-                    if (e.request.method === "GET" && res.ok) cache.put(e.request, res.clone());
-                    return res;
-                  } catch {
-                    return cached || Response.error();
-                  }
-                })());
-              }
-            });
-          `;
-          try {
-            const blob = new Blob([swCode], { type: "text/javascript" });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(() => {});
-          } catch {}
+        // Inline PWA manifest
+        try{
+          const manifest={ name:"No-Equipment Trainer", short_name:"NE Trainer", description:"A fast, offline-capable bodyweight training timer with progressions and logging.",
+            categories:["fitness","health","utilities"], start_url:".", display:"standalone", background_color:"#0b1220", theme_color:"#0b1220",
+            icons:[{src:"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><defs><linearGradient id=%22g%22 x1=%220%22 x2=%221%22 y1=%220%22 y2=%221%22><stop stop-color=%22%2338bdf8%22/><stop offset=%221%22 stop-color=%22%2322c55e%22/></linearGradient></defs><rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22url(%23g)%22/><path d=%22M16 42l8-20 8 12 8-8 8 16%22 stroke=%22%23fff%22 stroke-width=%225%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>",sizes:"64x64",type:"image/svg+xml",purpose:"any maskable"}] };
+          const murl="data:application/manifest+json,"+encodeURIComponent(JSON.stringify(manifest));
+          const link=document.createElement("link"); link.rel="manifest"; link.href=murl; document.head.appendChild(link);
+        }catch{}
+
+        // Minimal SW
+        if("serviceWorker" in navigator){
+          const swCode=`const CACHE="ne-trainer-cache-v1";
+            self.addEventListener("install",e=>{e.waitUntil((async()=>{const c=await caches.open(CACHE);try{await c.addAll(["./"])}catch{}; self.skipWaiting()})())});
+            self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
+            self.addEventListener("fetch",e=>{const u=new URL(e.request.url); if(u.origin===location.origin){e.respondWith((async()=>{const c=await caches.open(CACHE); const cached=await c.match(e.request); if(cached) return cached;
+              try{const r=await fetch(e.request); if(e.request.method==="GET"&&r.ok) c.put(e.request,r.clone()); return r;}catch{return cached||Response.error();}})())}});`;
+          try{ const blob=new Blob([swCode],{type:"text/javascript"}); const swUrl=URL.createObjectURL(blob); navigator.serviceWorker.register(swUrl).catch(()=>{});}catch{}
         }
       }
       init();
