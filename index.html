@@ -93,6 +93,7 @@
       border-radius: 12px; padding: 8px 10px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;
     }
     .icon-btn:active { transform: translateY(1px); }
+    .icon-btn.danger { color: var(--danger); border-color: color-mix(in oklab, var(--danger) 50%, transparent); }
 
     main {
       padding: 12px 16px calc(env(safe-area-inset-bottom) + 88px);
@@ -377,7 +378,6 @@
           ctx.arcTo(size-2, 2, size-2, size-2, rr2);
           ctx.arcTo(size-2, size-2, 2, size-2, rr2);
           ctx.arcTo(2, size-2, 2, 2, rr2);
-          ctx.arcTo(2, 2, size-2, 2, rr2);
           ctx.stroke();
           ctx.restore();
 
@@ -581,6 +581,7 @@
     function isStandalone() {
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     }
+    function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
 
     // Audio (beep) – created on first user gesture
     let audioCtx = null;
@@ -617,7 +618,7 @@
       const days = settings.daysPerWeek;
       const seq = ['A','B','C'];
       const chosen = seq.slice(0, Math.min(days, 3));
-      const daysOut = chosen.map((code, idx) => {
+      const daysOut = chosen.map((code) => {
         const list = TEMPLATES[code].map(e => ({ id: e.ex }));
         return { code, name: `Day ${code}`, items: list };
       });
@@ -631,31 +632,41 @@
       return sch;
     }
 
-    // Choose a default implement constrained by your gear and exercise compatibility
+    // Choose a default implement constrained by your gear, exercise compatibility, and toggles
     function defaultImplement(exId) {
       const ex = exById(exId);
       const allowed = ex.equip;
-      // Filter by availability (your collection is fixed)
       const have = new Set([
         'DB:25','DB:35','DBPair:25','DBPair:35','KB:50','KB:70','BW'
       ]);
-      const viable = allowed.filter(a => have.has(a));
-      // Prefer heavier within viable if goal is strength; else the ex.default or middle
+      const okToggle = (a) => {
+        if (a.startsWith('DB') && !settings.includeDB) return false;
+        if (a.startsWith('KB') && !settings.includeKB) return false;
+        return true;
+      };
+      const viable = allowed.filter(a => have.has(a)).filter(okToggle);
+
+      const pickFallback = () => {
+        if (allowed.includes('BW')) return 'BW';
+        // try to respect toggles even on fallback
+        const firstOk = allowed.find(okToggle);
+        return firstOk || allowed[0] || 'BW';
+      };
+
+      if (viable.length === 0) return pickFallback();
+
       if (settings.goal === 'strength') {
-        const weightVal = v => v === 'BW' ? -1 : parseInt(v.split(':')[1] || '0', 10);
+        const weightVal = v => v === 'BW' ? -1 : parseInt(v.split(':')[1] || '0', 10) + (v.startsWith('DBPair') ? 0.5 : 0);
         viable.sort((a,b)=> weightVal(b)-weightVal(a));
-        return viable[0] || allowed[0];
+        return viable[0];
       } else {
-        // try exercise's stated default if in viable
         if (viable.includes(ex.default)) return ex.default;
-        // else pick the mid option
-        return viable[Math.floor(viable.length/2)] || viable[0] || 'BW';
+        return viable[Math.floor(viable.length/2)];
       }
     }
 
     // Simple progressive suggestion based on last log of this exercise
     function nextProgressSuggestion(exId, currentImpl, target) {
-      // Find last log entry for this exercise
       const last = [...logs].reverse().find(w => w.items?.some(it => it.id === exId));
       if (!last) return { implement: currentImpl, note: 'New: feel it out.' };
 
@@ -664,7 +675,6 @@
 
       const ex = exById(exId);
       const lastSets = item.sets || [];
-      // compute avg reps/time
       let avgReps = null;
       let avgSecs = null;
       if (ex.timed) {
@@ -675,7 +685,6 @@
         if (reps.length) avgReps = Math.round(reps.reduce((a,b)=>a+b,0)/reps.length);
       }
 
-      // parse target reps/time top
       let top = null;
       if (target?.reps) {
         const parts = String(target.reps).split('-'); top = parseInt(parts[1] || parts[0], 10);
@@ -685,17 +694,19 @@
         if (m) top = parseInt(m[2] || m[1], 10);
       }
 
-      // Determine available heavier implement for this exercise
       const have = new Set([
         'DB:25','DB:35','DBPair:25','DBPair:35','KB:50','KB:70','BW'
       ]);
-      const viable = ex.equip.filter(a => have.has(a));
+      const viable = ex.equip.filter(a => have.has(a)).filter(a => {
+        if (a.startsWith('DB') && !settings.includeDB) return false;
+        if (a.startsWith('KB') && !settings.includeKB) return false;
+        return true;
+      });
       function heaviness(code) {
         if (code === 'BW') return 0;
         const parts = code.split(':');
         const w = parseInt(parts[1] || '0', 10);
         const pair = parts[0].startsWith('DBPair') ? 1 : 0;
-        // prefer pairs > singles of same load
         return w + (pair ? 0.5 : 0);
       }
       const sorted = viable.slice().sort((a,b) => heaviness(a) - heaviness(b));
@@ -869,6 +880,7 @@
       cardDays.innerHTML = `<h2>Weekly Plan</h2><div class="sub">Based on your goal: ${settings.goal.charAt(0).toUpperCase()+settings.goal.slice(1)}. Tap Start to move to Workout.</div>`;
       const list = document.createElement('div'); list.style.display='grid'; list.style.gap='12px';
 
+      if (!plan) plan = buildPlan();
       plan.days.forEach((d, idx) => {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'exercise';
@@ -913,14 +925,13 @@
     }
 
     // Session model
-    let session = null; // { dayIdx, goal, items: [{id, name, cat, timed, sets: [{target, reps/time, rest, log}] }], startedAt, completedAt }
+    let session = null; // { dayIdx, goal, items: [{...}], startedAt, completedAt }
 
     function startWorkout(dayIdx = 0) {
       if (!plan) plan = buildPlan();
       const d = plan.days[dayIdx] || plan.days[0];
       const goal = plan.goal;
 
-      // Build session items
       const items = d.items.map(it => {
         const ex = exById(it.id);
         const sch = schemeFor(it.id);
@@ -946,7 +957,6 @@
     function endWorkout() {
       if (!session) return;
       session.completedAt = Date.now();
-      // Compute summary
       logs.push({
         at: session.completedAt,
         goal: session.goal,
@@ -959,34 +969,74 @@
       save(STORE_KEYS.logs, logs);
       toast('Workout saved');
       session = null;
+      clearTimer();
       renderWorkout();
     }
 
-    // Timer per session (single instance)
-    let timer = { active: false, total: 0, left: 0, id: null, bar: null, label: null };
+    // Timer system (single active timer per app)
+    let timer = { active: false, total: 0, left: 0, id: null, bar: null, label: null, startTime: 0 };
 
-    function startTimer(sec, labelEl, barEl) {
+    function updateTimerUI() {
+      if (timer.label) timer.label.textContent = `${Math.max(0, Math.round(timer.left))}s`;
+      if (timer.bar) {
+        const pct = 1 - (timer.left / Math.max(1, timer.total));
+        timer.bar.style.width = `${Math.round(100 * Math.min(1, Math.max(0, pct)))}%`;
+      }
+    }
+
+    function finishTimer() {
+      if (timer.id) { clearInterval(timer.id); timer.id = null; }
+      timer.active = false;
+      timer.left = 0;
+      updateTimerUI();
+      if (settings.timerBeep) beep();
+      if (settings.timerVibrate) vibrate(35);
+      toast('Rest complete');
+    }
+
+    function clearTimer() {
+      if (timer.id) { clearInterval(timer.id); }
+      timer = { active: false, total: 0, left: 0, id: null, bar: null, label: null, startTime: 0 };
+    }
+
+    function startTimer(totalSec, labelEl, barEl, options = {}) {
       initAudio();
       if (timer.id) clearInterval(timer.id);
-      timer = { active: true, total: sec, left: sec, id: null, bar: barEl, label: labelEl };
-      const tStart = Date.now();
+      timer.active = true;
+      timer.total = Math.max(1, parseInt(totalSec || 0, 10));
+      timer.bar = barEl;
+      timer.label = labelEl;
+      // If presetLeft provided, use it; else full duration
+      const presetLeft = typeof options.presetLeft === 'number' ? options.presetLeft : timer.total;
+      timer.left = clamp(presetLeft, 0, timer.total);
+      // Align startTime so that current left is respected
+      timer.startTime = Date.now() - 1000 * (timer.total - timer.left);
 
       function tick() {
-        const elapsed = Math.floor((Date.now() - tStart) / 1000);
-        const left = Math.max(0, sec - elapsed);
-        timer.left = left;
-        if (timer.label) timer.label.textContent = `${left}s`;
-        if (timer.bar) timer.bar.style.width = `${Math.round(100*(1 - left/sec))}%`;
-        if (left <= 0) {
-          clearInterval(timer.id);
-          timer.active = false;
-          if (settings.timerBeep) beep();
-          if (settings.timerVibrate) vibrate(35);
-          toast('Rest complete');
-        }
+        const elapsed = Math.floor((Date.now() - timer.startTime) / 1000);
+        timer.left = Math.max(0, timer.total - elapsed);
+        updateTimerUI();
+        if (timer.left <= 0) finishTimer();
       }
-      tick();
+      updateTimerUI();
       timer.id = setInterval(tick, 250);
+    }
+
+    // Adjust running timer by +/- seconds if it's the one in this exercise block
+    function adjustRunningTimer(deltaSec, exDiv) {
+      if (!timer.active) return false;
+      const labelEl = exDiv.querySelector('.rest-timer .muted span');
+      const barEl = exDiv.querySelector('.progress > div');
+      if (timer.label !== labelEl || timer.bar !== barEl) return false;
+
+      const newTotal = Math.max(1, timer.total + deltaSec);
+      const newLeft = Math.max(0, Math.min(newTotal, timer.left + deltaSec));
+      timer.total = newTotal;
+      timer.left = newLeft;
+      timer.startTime = Date.now() - 1000 * (timer.total - timer.left);
+      updateTimerUI();
+      if (timer.left <= 0) finishTimer();
+      return true;
     }
 
     function renderWorkout() {
@@ -994,16 +1044,18 @@
       const wrap = document.createElement('div');
 
       if (!session) {
-        // Idle state with “Start Today”
         const card = document.createElement('div');
         card.className = 'card';
+        const d0 = plan?.days?.[0]?.name || 'Day A';
+        const d1 = plan?.days?.[1]?.name;
+        const d2 = plan?.days?.[2]?.name;
         card.innerHTML = `
           <h2>Workout</h2>
           <div class="sub">Start any day from your plan. Your rest timer, sets, and progress will be saved locally.</div>
           <div class="row">
-            <button class="btn" id="startDay0">Start Day ${plan?.days?.[0]?.name || 'A'}</button>
-            ${plan?.days?.[1] ? `<button class="btn secondary" id="startDay1">Day ${plan.days[1].name}</button>` : ''}
-            ${plan?.days?.[2] ? `<button class="btn secondary" id="startDay2">Day ${plan.days[2].name}</button>` : ''}
+            <button class="btn" id="startDay0">Start ${d0}</button>
+            ${d1 ? `<button class="btn secondary" id="startDay1">Start ${d1}</button>` : ''}
+            ${d2 ? `<button class="btn secondary" id="startDay2">Start ${d2}</button>` : ''}
           </div>
         `;
         wrap.appendChild(card);
@@ -1033,13 +1085,12 @@
       wrap.appendChild(header);
 
       const list = document.createElement('div'); list.style.display='grid'; list.style.gap='12px';
-      session.items.forEach((it, idx) => {
+      session.items.forEach((it) => {
         const exDiv = document.createElement('div');
         exDiv.className = 'exercise';
 
         const implementsList = (exById(it.id).equip || []).filter(eq => {
           const has = ['DB:25','DB:35','DBPair:25','DBPair:35','KB:50','KB:70','BW'];
-          // honor user toggles
           if (!settings.includeDB && eq.startsWith('DB')) return false;
           if (!settings.includeKB && eq.startsWith('KB')) return false;
           return has.includes(eq);
@@ -1094,7 +1145,7 @@
               <label>Rest</label>
               <div class="pill"><input data-rest type="number" min="10" step="5" value="${it.rest}"></div>
             </div>
-            <div class="field" style="width:140px">
+            <div class="field" style="width:160px">
               <label>Quick Presets</label>
               <div class="seg">
                 <button data-preset="down">-10s</button>
@@ -1113,15 +1164,27 @@
         // Wire implement change
         $('select[data-impl]', exDiv).addEventListener('change', (e)=>{
           it.implement = e.target.value;
-          // update tag
           exDiv.querySelector('.tags .tag.green').textContent = it.implement.replace('Pair',' x2');
         });
 
         // Wire rest change and presets
-        $('input[data-rest]', exDiv).addEventListener('input', e => { it.rest = parseInt(e.target.value || 0, 10); });
+        const restInput = $('input[data-rest]', exDiv);
+        restInput.addEventListener('input', e => {
+          const val = parseInt(e.target.value || 0, 10);
+          it.rest = clamp(isNaN(val) ? 0 : val, 10, 600);
+        });
+
         $$('.seg [data-preset]', exDiv).forEach(btn => btn.addEventListener('click', ()=>{
-          if (btn.dataset.preset==='up') { it.rest = Math.min(300, (it.rest||0)+10); $('input[data-rest]', exDiv).value = it.rest; }
-          if (btn.dataset.preset==='down') { it.rest = Math.max(10, (it.rest||0)-10); $('input[data-rest]', exDiv).value = it.rest; }
+          if (btn.dataset.preset==='up') {
+            it.rest = clamp((it.rest||0)+10, 10, 600);
+            restInput.value = it.rest;
+            adjustRunningTimer(10, exDiv);
+          }
+          if (btn.dataset.preset==='down') {
+            it.rest = clamp((it.rest||0)-10, 10, 600);
+            restInput.value = it.rest;
+            adjustRunningTimer(-10, exDiv);
+          }
           if (btn.dataset.preset==='start') {
             const label = exDiv.querySelector('.rest-timer .muted span');
             const bar = exDiv.querySelector('.progress > div');
@@ -1146,7 +1209,6 @@
           chk.addEventListener('change', e => {
             it.sets[si].complete = !!e.target.checked;
             if (chk.checked) {
-              // auto start rest timer for next set
               const label = exDiv.querySelector('.rest-timer .muted span');
               const bar = exDiv.querySelector('.progress > div');
               startTimer(it.rest || 60, label, bar);
@@ -1161,11 +1223,10 @@
       // Footer actions
       $('#btnCancel', header).addEventListener('click', ()=>{
         if (confirm('Cancel this workout? Your unsaved entries will be lost.')) {
-          session = null; renderWorkout();
+          session = null; clearTimer(); renderWorkout();
         }
       });
       $('#btnFinish', header).addEventListener('click', ()=>{
-        // Basic validation: if no entries at all, confirm
         const hasAny = session.items.some(it => it.sets.some(s => s.reps || s.timeSec));
         if (!hasAny) {
           if (!confirm('No sets logged. Save anyway?')) return;
@@ -1185,7 +1246,7 @@
       head.innerHTML = `<h2>History</h2><div class="sub">${logs.length ? 'Your last sessions are below.' : 'No workouts logged yet.'}</div>`;
       wrap.appendChild(head);
 
-      // Aggregate PR-ish notes: show last used implements per exercise
+      // Aggregate last used loads per exercise
       const lastMap = new Map();
       for (let i = logs.length - 1; i >= 0; i--) {
         const w = logs[i];
@@ -1201,7 +1262,6 @@
         lastMap.forEach((it, id) => {
           const ex = exById(id);
           const div = document.createElement('div'); div.className='exercise';
-          const usedImpl = it.implement || (it.sets && it.sets[0]?.implement) || '';
           const avg = (()=> {
             const reps = (it.sets||[]).map(s=> parseInt(s.reps||0,10)).filter(Boolean);
             const secs = (it.sets||[]).map(s=> parseInt(s.timeSec||0,10)).filter(Boolean);
@@ -1225,17 +1285,26 @@
         wrap.appendChild(card);
       }
 
-      // Workout list
-      logs.slice().reverse().forEach(w => {
+      // Workout list with per-entry delete
+      logs.slice().reverse().forEach((w, i) => {
+        const idxOrig = logs.length - 1 - i;
         const card = document.createElement('div'); card.className='card';
         const dt = new Date(w.at);
-        card.innerHTML = `<div class="row"><h2>${dt.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})}</h2><div class="tag grey">${w.goal}</div></div>`;
+        card.innerHTML = `
+          <div class="row">
+            <h2>${dt.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})}</h2>
+            <div class="row" style="gap:8px">
+              <div class="tag grey">${w.goal}</div>
+              <button class="icon-btn danger" data-del="${idxOrig}">Delete</button>
+            </div>
+          </div>
+        `;
         (w.items || []).forEach(it => {
           const ex = exById(it.id);
           const row = document.createElement('div'); row.className='exercise';
-          const lines = (it.sets||[]).map((s, i) => {
+          const lines = (it.sets||[]).map((s, i2) => {
             const val = (s.timeSec ? `${s.timeSec}s` : (s.reps ? `${s.reps} reps` : '—'));
-            return `<span class="pill small" style="margin-right:6px">#${i+1} ${val}${s.rpe?` · RPE${s.rpe}`:''}</span>`;
+            return `<span class="pill small" style="margin-right:6px">#${i2+1} ${val}${s.rpe?` · RPE${s.rpe}`:''}</span>`;
           }).join('');
           row.innerHTML = `
             <div class="row wrap">
@@ -1249,6 +1318,17 @@
           `;
           card.appendChild(row);
         });
+
+        // Delete handler
+        $('button[data-del]', card)?.addEventListener('click', () => {
+          if (confirm('Delete this workout from history?')) {
+            logs.splice(idxOrig, 1);
+            save(STORE_KEYS.logs, logs);
+            toast('History entry deleted');
+            renderHistory();
+          }
+        });
+
         wrap.appendChild(card);
       });
 
