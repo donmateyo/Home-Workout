@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0F1419">
     <meta name="description" content="Premium Strength Training Companion - Progressive workout tracking with minimal equipment">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -143,6 +143,10 @@
     </nav>
 
     <script>
+        // ============================================
+        // DATABASE & STORAGE LAYER (IndexedDB)
+        // ============================================
+
         class Database {
             constructor() {
                 this.dbName = 'StrengthTrainingDB';
@@ -251,7 +255,7 @@
                 });
             }
 
-            async clear(storeName) {
+            async clearStore(storeName) {
                 const tx = this.db.transaction(storeName, 'readwrite');
                 const store = tx.objectStore(storeName);
                 return new Promise((resolve, reject) => {
@@ -261,6 +265,10 @@
                 });
             }
         }
+
+        // ============================================
+        // EXERCISE DATABASE
+        // ============================================
 
         const EXERCISE_DATABASE = [
             {
@@ -825,6 +833,10 @@
             }
         ];
 
+        // ============================================
+        // PROGRESSIVE OVERLOAD ENGINE
+        // ============================================
+
         class ProgressionEngine {
             constructor(db) {
                 this.db = db;
@@ -922,6 +934,10 @@
             }
         }
 
+        // ============================================
+        // TIMER SYSTEM
+        // ============================================
+
         class Timer {
             constructor() {
                 this.interval = null;
@@ -981,9 +997,6 @@
             extend(seconds) {
                 this.timeRemaining += seconds;
                 this.totalTime += seconds;
-                if (this.onTick) {
-                    this.onTick(this.timeRemaining, this.totalTime);
-                }
             }
 
             playBeep() {
@@ -1015,6 +1028,10 @@
                 return `${mins}:${secs.toString().padStart(2, '0')}`;
             }
         }
+
+        // ============================================
+        // WORKOUT TEMPLATES
+        // ============================================
 
         const WORKOUT_TEMPLATES = [
             {
@@ -1065,6 +1082,10 @@
             }
         ];
 
+        // ============================================
+        // APPLICATION STATE & ROUTING
+        // ============================================
+
         class App {
             constructor() {
                 this.db = new Database();
@@ -1075,14 +1096,7 @@
                 this.currentExerciseIndex = 0;
                 this.currentSet = 0;
                 this.sessionData = [];
-                this.sessionStartTime = null;
-                this.exerciseCache = [];
                 this.pendingConfirmAction = null;
-                this.pendingConfirmContext = null;
-                this.defaultRestTime = 90;
-                this.workoutBuilder = null;
-                this.builderWorkoutId = null;
-                this.exercisePickerData = [];
             }
 
             async init() {
@@ -1092,30 +1106,27 @@
 
                     await this.initializeExerciseDatabase();
                     await this.initializeSettings();
-
                     this.initializePWA();
-
                     this.navigate('home');
                 } catch (error) {
                     console.error('App initialization failed:', error);
-                    this.showCustomAlert('Initialization failed. Please reload the app.');
                 }
             }
 
             async initializeExerciseDatabase() {
-                let exercises = await this.db.getAll('exercises');
+                const exercises = await this.db.getAll('exercises');
                 if (exercises.length === 0) {
                     for (const exercise of EXERCISE_DATABASE) {
                         await this.db.add('exercises', exercise);
                     }
-                    exercises = await this.db.getAll('exercises');
-                    console.log('Exercise database initialized with', exercises.length, 'exercises');
+                    console.log('Exercise database initialized with', EXERCISE_DATABASE.length, 'exercises');
                 }
-                this.exerciseCache = exercises;
             }
 
             async initializeSettings() {
                 let settings = await this.db.get('settings', 'general');
+                let updated = false;
+
                 if (!settings) {
                     settings = {
                         key: 'general',
@@ -1123,12 +1134,28 @@
                         audioEnabled: true,
                         theme: 'dark'
                     };
+                    updated = true;
+                } else {
+                    if (typeof settings.defaultRestTime !== 'number') {
+                        settings.defaultRestTime = 90;
+                        updated = true;
+                    }
+                    if (typeof settings.audioEnabled !== 'boolean') {
+                        settings.audioEnabled = true;
+                        updated = true;
+                    }
+                    if (!settings.theme) {
+                        settings.theme = 'dark';
+                        updated = true;
+                    }
+                }
+
+                if (updated) {
                     await this.db.put('settings', settings);
                 }
 
-                this.defaultRestTime = Number.isFinite(settings.defaultRestTime) && settings.defaultRestTime > 0 ? settings.defaultRestTime : 90;
-                this.timer.audioEnabled = settings.audioEnabled !== false;
-                this.applyTheme(settings.theme || 'dark');
+                this.timer.audioEnabled = settings.audioEnabled;
+                return settings;
             }
 
             initializePWA() {
@@ -1205,11 +1232,7 @@
                 return URL.createObjectURL(blob);
             }
 
-            async navigate(page, data = null) {
-                if (page !== 'workout-session') {
-                    this.timer.stop();
-                }
-
+            navigate(page, data = null) {
                 this.currentPage = page;
 
                 document.querySelectorAll('.nav-item').forEach(item => {
@@ -1220,7 +1243,7 @@
                     }
                 });
 
-                await this.renderPage(page, data);
+                this.renderPage(page, data);
             }
 
             async renderPage(page, data) {
@@ -1244,7 +1267,7 @@
                         break;
                     case 'workout-session':
                         appContainer.innerHTML = await this.renderWorkoutSession(data);
-                        document.getElementById('bottom-nav').style.display = this.activeWorkout ? 'none' : 'block';
+                        document.getElementById('bottom-nav').style.display = 'none';
                         break;
                     case 'exercise-detail':
                         appContainer.innerHTML = await this.renderExerciseDetail(data);
@@ -1258,12 +1281,14 @@
 
                 if (page !== 'workout-session') {
                     document.getElementById('bottom-nav').style.display = 'block';
-                } else if (!this.activeWorkout) {
-                    document.getElementById('bottom-nav').style.display = 'block';
                 }
 
                 window.scrollTo(0, 0);
             }
+
+            // ============================================
+            // PAGE RENDERERS
+            // ============================================
 
             async renderHomePage() {
                 const workouts = await this.db.getAll('workouts');
@@ -1275,7 +1300,8 @@
                     <div class="min-h-screen pb-8">
                         <div class="bg-gradient-to-br from-accent to-accent-hover p-8 pb-12">
                             <h1 class="text-3xl font-bold mb-2">Strength Training</h1>
-                            <p class="text-text-secondary text-sm">Your progressive workout companion</p>
+                            <p class="text-text-secondary text-sm">by Matthew Flores</p>
+                            <p class="text-text-secondary text-sm mt-1">Your progressive workout companion</p>
                         </div>
 
                         <div class="px-4 -mt-6">
@@ -1284,24 +1310,20 @@
                                     <h2 class="text-xl font-semibold mb-4">Quick Start</h2>
                                     ${workouts.length > 0 ? `
                                         <div class="space-y-3">
-                                            ${workouts.slice(0, 3).map(workout => {
-                                                const name = this.escapeHTML(workout.name || 'Workout');
-                                                const exerciseCount = Array.isArray(workout.exercises) ? workout.exercises.length : 0;
-                                                return `
-                                                    <button onclick="app.startWorkout(${workout.id})"
-                                                        class="w-full bg-accent hover:bg-accent-hover text-left p-4 rounded-lg transition-colors touch-target">
-                                                        <div class="flex items-center justify-between">
-                                                            <div>
-                                                                <div class="font-semibold">${name}</div>
-                                                                <div class="text-sm text-text-secondary">${exerciseCount} exercises</div>
-                                                            </div>
-                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                            </svg>
+                                            ${workouts.slice(0, 3).map(workout => `
+                                                <button onclick="app.startWorkout(${workout.id})"
+                                                    class="w-full bg-accent hover:bg-accent-hover text-left p-4 rounded-lg transition-colors touch-target">
+                                                    <div class="flex items-center justify-between">
+                                                        <div>
+                                                            <div class="font-semibold">${workout.name}</div>
+                                                            <div class="text-sm text-text-secondary">${workout.exercises?.length || 0} exercises</div>
                                                         </div>
-                                                    </button>
-                                                `;
-                                            }).join('')}
+                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </div>
+                                                </button>
+                                            `).join('')}
                                         </div>
                                     ` : `
                                         <p class="text-text-secondary mb-4">No workouts yet. Create your first workout to get started!</p>
@@ -1318,24 +1340,20 @@
                             <div class="px-4 mt-8">
                                 <h2 class="text-xl font-semibold mb-4">Recent Sessions</h2>
                                 <div class="space-y-3">
-                                    ${recentHistory.map(session => {
-                                        const workoutName = this.escapeHTML(session.workoutName || 'Workout');
-                                        const exerciseCount = Array.isArray(session.exercises) ? session.exercises.length : 0;
-                                        const sessionDate = session.date ? new Date(session.date).toLocaleDateString() : '';
-                                        return `
-                                            <div class="bg-secondary-bg p-4 rounded-lg">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <div class="font-semibold">${workoutName}</div>
-                                                        <div class="text-sm text-text-secondary">
-                                                            ${sessionDate} • ${exerciseCount} exercises
-                                                        </div>
+                                    ${recentHistory.map(session => `
+                                        <div class="bg-secondary-bg p-4 rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="font-semibold">${session.workoutName || 'Workout'}</div>
+                                                    <div class="text-sm text-text-secondary">
+                                                        ${new Date(session.date).toLocaleDateString()} •
+                                                        ${session.exercises?.length || 0} exercises
                                                     </div>
-                                                    <div class="text-success font-semibold">✓</div>
                                                 </div>
+                                                <div class="text-success font-semibold">✓</div>
                                             </div>
-                                        `;
-                                    }).join('')}
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>
                         ` : ''}
@@ -1381,49 +1399,43 @@
                         <div class="px-4 mt-6">
                             ${workouts.length > 0 ? `
                                 <div class="space-y-4">
-                                    ${workouts.map(workout => {
-                                        const name = this.escapeHTML(workout.name || 'Untitled Workout');
-                                        const description = this.escapeHTML(workout.description || '');
-                                        const exerciseCount = Array.isArray(workout.exercises) ? workout.exercises.length : 0;
-                                        const duration = this.estimateWorkoutDuration(workout);
-                                        return `
-                                            <div class="bg-secondary-bg rounded-lg overflow-hidden">
-                                                <div class="p-4">
-                                                    <div class="flex items-start justify-between mb-2">
-                                                        <div class="flex-1">
-                                                            <h3 class="text-lg font-semibold">${name}</h3>
-                                                            ${description ? `<p class="text-sm text-text-secondary mt-1">${description}</p>` : ''}
-                                                        </div>
-                                                        <button onclick="app.deleteWorkout(${workout.id})"
-                                                            class="ml-2 text-text-secondary hover:text-warning">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                            </svg>
-                                                        </button>
+                                    ${workouts.map(workout => `
+                                        <div class="bg-secondary-bg rounded-lg overflow-hidden">
+                                            <div class="p-4">
+                                                <div class="flex items-start justify-between mb-2">
+                                                    <div class="flex-1">
+                                                        <h3 class="text-lg font-semibold">${workout.name}</h3>
+                                                        <p class="text-sm text-text-secondary mt-1">${workout.description || ''}</p>
                                                     </div>
+                                                    <button onclick="app.deleteWorkout(${workout.id})"
+                                                        class="ml-2 text-text-secondary hover:text-warning">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
 
-                                                    <div class="flex items-center gap-4 text-sm text-text-secondary mt-3">
-                                                        <span>${exerciseCount} exercises</span>
-                                                        <span>•</span>
-                                                        <span>~${duration} min</span>
-                                                    </div>
+                                                <div class="flex items-center gap-4 text-sm text-text-secondary mt-3">
+                                                    <span>${workout.exercises?.length || 0} exercises</span>
+                                                    <span>•</span>
+                                                    <span>~${this.estimateWorkoutDuration(workout)} min</span>
+                                                </div>
 
-                                                    <div class="flex gap-2 mt-4">
-                                                        <button onclick="app.startWorkout(${workout.id})"
-                                                            class="flex-1 bg-accent hover:bg-accent-hover py-3 rounded-lg transition-colors touch-target font-semibold">
-                                                            Start Workout
-                                                        </button>
-                                                        <button onclick="app.editWorkout(${workout.id})"
-                                                            class="px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors touch-target">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                <div class="flex gap-2 mt-4">
+                                                    <button onclick="app.startWorkout(${workout.id})"
+                                                        class="flex-1 bg-accent hover:bg-accent-hover py-3 rounded-lg transition-colors touch-target font-semibold">
+                                                        Start Workout
+                                                    </button>
+                                                    <button onclick="app.editWorkout(${workout.id})"
+                                                        class="px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors touch-target">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
-                                        `;
-                                    }).join('')}
+                                        </div>
+                                    `).join('')}
                                 </div>
                             ` : `
                                 <div class="text-center py-12">
@@ -1444,18 +1456,15 @@
             }
 
             estimateWorkoutDuration(workout) {
-                if (!Array.isArray(workout.exercises) || workout.exercises.length === 0) return 0;
-                const totalSets = workout.exercises.reduce((sum, ex) => sum + (Number(ex.sets) > 0 ? Number(ex.sets) : 3), 0);
+                if (!workout.exercises) return 0;
+                const totalSets = workout.exercises.reduce((sum, ex) => sum + (ex.sets || 3), 0);
                 const workTime = totalSets * 0.75;
-                const restTime = workout.exercises.reduce((sum, ex) => {
-                    const rest = Number(ex.restTime);
-                    return sum + ((Number.isFinite(rest) && rest >= 0 ? rest : this.defaultRestTime) / 60);
-                }, 0);
+                const restTime = totalSets * ((workout.exercises[0]?.restTime || 90) / 60);
                 return Math.round(workTime + restTime);
             }
 
             async renderExercisesPage() {
-                const exercises = await this.getExercises();
+                const exercises = await this.db.getAll('exercises');
                 const categories = [...new Set(exercises.map(ex => ex.category))];
 
                 return `
@@ -1477,7 +1486,7 @@
                                 ${categories.map(cat => `
                                     <button onclick="app.filterByCategory('${cat}')"
                                         class="category-filter px-4 py-2 rounded-full bg-gray-700 hover:bg-gray-600 text-sm whitespace-nowrap" data-category="${cat}">
-                                        ${this.escapeHTML(cat)}
+                                        ${cat}
                                     </button>
                                 `).join('')}
                             </div>
@@ -1491,7 +1500,7 @@
             }
 
             renderExerciseList(exercises) {
-                if (!exercises.length) {
+                if (exercises.length === 0) {
                     return `
                         <div class="text-center py-12">
                             <p class="text-text-secondary">No exercises found</p>
@@ -1504,13 +1513,13 @@
                         ${exercises.map(exercise => `
                             <button onclick="app.viewExerciseDetail(${exercise.id})"
                                 class="w-full bg-secondary-bg p-4 rounded-lg text-left hover:bg-opacity-80 transition-colors touch-target"
-                                data-exercise-category="${this.escapeHTML(exercise.category)}">
+                                data-exercise-category="${exercise.category}">
                                 <div class="flex items-start justify-between">
                                     <div class="flex-1">
-                                        <h3 class="font-semibold">${this.escapeHTML(exercise.name)}</h3>
+                                        <h3 class="font-semibold">${exercise.name}</h3>
                                         <div class="flex items-center gap-2 mt-1">
-                                            <span class="text-xs px-2 py-1 bg-accent bg-opacity-20 text-accent rounded">${this.escapeHTML(exercise.category)}</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-700 rounded">${this.escapeHTML(exercise.difficulty)}</span>
+                                            <span class="text-xs px-2 py-1 bg-accent bg-opacity-20 text-accent rounded">${exercise.category}</span>
+                                            <span class="text-xs px-2 py-1 bg-gray-700 rounded">${exercise.difficulty}</span>
                                         </div>
                                         <div class="text-sm text-text-secondary mt-2">
                                             ${this.formatEquipment(exercise.equipment)}
@@ -1527,38 +1536,19 @@
             }
 
             formatEquipment(equipment) {
-                if (!equipment) return '—';
-                const map = {
-                    bodyweight: 'Bodyweight',
-                    dumbbell_25: 'DB 25 lbs',
-                    dumbbell_35: 'DB 35 lbs',
-                    kettlebell_50: 'KB 50 lbs',
-                    kettlebell_70: 'KB 70 lbs'
-                };
-                const list = Array.isArray(equipment) ? equipment : [equipment];
-                if (!list.length) return '—';
-                return list.map(eq => map[eq] || this.escapeHTML(eq)).join(', ');
+                return equipment.map(eq => {
+                    if (eq === 'bodyweight') return 'Bodyweight';
+                    if (eq === 'dumbbell_25') return 'DB 25lbs';
+                    if (eq === 'dumbbell_35') return 'DB 35lbs';
+                    if (eq === 'kettlebell_50') return 'KB 50lbs';
+                    if (eq === 'kettlebell_70') return 'KB 70lbs';
+                    return eq;
+                }).join(', ');
             }
 
             async renderExerciseDetail(exerciseId) {
-                const exercises = await this.getExercises();
-                const id = typeof exerciseId === 'string' ? parseInt(exerciseId, 10) : exerciseId;
-                const exercise = exercises.find(ex => ex.id === id);
-
-                if (!exercise) {
-                    return `
-                        <div class="p-6">
-                            <button onclick="app.navigate('exercises')" class="mb-4 text-text-secondary hover:text-text-primary">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
-                            <p class="text-text-secondary">Exercise not found.</p>
-                        </div>
-                    `;
-                }
-
-                const history = await this.db.getByIndex('exerciseHistory', 'exerciseId', exercise.id);
+                const exercise = await this.db.get('exercises', exerciseId);
+                const history = await this.db.getByIndex('exerciseHistory', 'exerciseId', exerciseId);
                 const recentHistory = history.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
                 return `
@@ -1569,11 +1559,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
-                            <h1 class="text-2xl font-bold">${this.escapeHTML(exercise.name)}</h1>
+                            <h1 class="text-2xl font-bold">${exercise.name}</h1>
                             <div class="flex gap-2 mt-3">
-                                <span class="text-xs px-3 py-1 bg-accent bg-opacity-20 text-accent rounded-full">${this.escapeHTML(exercise.category)}</span>
-                                <span class="text-xs px-3 py-1 bg-gray-700 rounded-full">${this.escapeHTML(exercise.difficulty)}</span>
-                                <span class="text-xs px-3 py-1 bg-gray-700 rounded-full">${this.escapeHTML(exercise.movementType)}</span>
+                                <span class="text-xs px-3 py-1 bg-accent bg-opacity-20 text-accent rounded-full">${exercise.category}</span>
+                                <span class="text-xs px-3 py-1 bg-gray-700 rounded-full">${exercise.difficulty}</span>
+                                <span class="text-xs px-3 py-1 bg-gray-700 rounded-full">${exercise.movementType}</span>
                             </div>
                         </div>
 
@@ -1592,7 +1582,7 @@
                                         <div class="flex-shrink-0 w-6 h-6 bg-accent rounded-full flex items-center justify-center text-sm font-semibold">
                                             ${idx + 1}
                                         </div>
-                                        <p class="text-text-secondary flex-1">${this.escapeHTML(cue)}</p>
+                                        <p class="text-text-secondary flex-1">${cue}</p>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1609,7 +1599,7 @@
                             <div class="px-4 mt-6">
                                 <h2 class="text-lg font-semibold mb-3">Next Progression</h2>
                                 <div class="bg-secondary-bg p-4 rounded-lg">
-                                    <p class="text-success">→ ${this.escapeHTML(exercise.progressionPath)}</p>
+                                    <p class="text-success">→ ${exercise.progressionPath}</p>
                                 </div>
                             </div>
                         ` : ''}
@@ -1618,24 +1608,17 @@
                             <div class="px-4 mt-6">
                                 <h2 class="text-lg font-semibold mb-3">Recent Sessions</h2>
                                 <div class="space-y-3">
-                                    ${recentHistory.map(session => {
-                                        const sessionDate = session.date ? new Date(session.date).toLocaleDateString() : '';
-                                        const weightLabel = session.weight ? this.formatEquipment(session.weight) : '—';
-                                        const setsSummary = Array.isArray(session.sets)
-                                            ? session.sets.map(set => `${set.reps || 0} reps`).join(' • ')
-                                            : 'No data';
-                                        return `
-                                            <div class="bg-secondary-bg p-4 rounded-lg">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-sm text-text-secondary">${sessionDate}</span>
-                                                    <span class="text-sm font-semibold">${weightLabel}</span>
-                                                </div>
-                                                <div class="text-sm text-text-secondary">
-                                                    ${setsSummary}
-                                                </div>
+                                    ${recentHistory.map(session => `
+                                        <div class="bg-secondary-bg p-4 rounded-lg">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="text-sm text-text-secondary">${new Date(session.date).toLocaleDateString()}</span>
+                                                <span class="text-sm font-semibold">${this.formatEquipment([session.weight])}</span>
                                             </div>
-                                        `;
-                                    }).join('')}
+                                            <div class="text-sm text-text-secondary">
+                                                ${session.sets.map(set => `${set.reps} reps`).join(' • ')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>
                         ` : ''}
@@ -1690,23 +1673,19 @@
                             <h2 class="text-xl font-semibold mb-4">Workout History</h2>
                             ${history.length > 0 ? `
                                 <div class="space-y-3">
-                                    ${history.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).map(session => {
-                                        const name = this.escapeHTML(session.workoutName || 'Workout');
-                                        const sessionDate = session.date ? new Date(session.date).toLocaleDateString() : '';
-                                        const exerciseCount = Array.isArray(session.exercises) ? session.exercises.length : 0;
-                                        const duration = session.duration ? `${Math.round(session.duration / 60)} min` : '';
-                                        return `
-                                            <div class="bg-secondary-bg p-4 rounded-lg">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <h3 class="font-semibold">${name}</h3>
-                                                    <span class="text-success">✓</span>
-                                                </div>
-                                                <div class="text-sm text-text-secondary">
-                                                    ${sessionDate} • ${exerciseCount} exercises ${duration ? `• ${duration}` : ''}
-                                                </div>
+                                    ${history.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).map(session => `
+                                        <div class="bg-secondary-bg p-4 rounded-lg">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <h3 class="font-semibold">${session.workoutName || 'Workout'}</h3>
+                                                <span class="text-success">✓</span>
                                             </div>
-                                        `;
-                                    }).join('')}
+                                            <div class="text-sm text-text-secondary">
+                                                ${new Date(session.date).toLocaleDateString()} •
+                                                ${session.exercises?.length || 0} exercises •
+                                                ${session.duration ? Math.round(session.duration / 60) + ' min' : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
                             ` : `
                                 <div class="text-center py-12">
@@ -1748,8 +1727,8 @@
 
             async renderSettingsPage() {
                 const settings = await this.db.get('settings', 'general') || {
-                    defaultRestTime: this.defaultRestTime,
-                    audioEnabled: this.timer.audioEnabled,
+                    defaultRestTime: 90,
+                    audioEnabled: true,
                     theme: 'dark'
                 };
 
@@ -1767,7 +1746,6 @@
                                         <label class="block text-sm text-text-secondary mb-2">Default Rest Time (seconds)</label>
                                         <input type="number" id="default-rest-time" value="${settings.defaultRestTime}"
                                             onchange="app.updateSetting('defaultRestTime', parseInt(this.value, 10))"
-                                            min="1"
                                             class="w-full bg-primary-bg text-text-primary px-4 py-3 rounded-lg border border-gray-700 focus:border-accent outline-none text-base">
                                     </div>
 
@@ -1839,177 +1817,77 @@
                 `;
             }
 
-            async renderWorkoutSession(workoutData) {
-                let workout = null;
-                if (workoutData && typeof workoutData === 'object') {
-                    workout = workoutData;
-                } else {
-                    const workoutId = typeof workoutData === 'string' ? parseInt(workoutData, 10) : workoutData;
-                    workout = await this.db.get('workouts', workoutId);
-                }
+            // ============================================
+            // WORKOUT SESSION RENDERER (Complex)
+            // ============================================
 
-                if (!workout) {
-                    this.activeWorkout = null;
-                    return `
-                        <div class="p-6 space-y-4">
-                            <p class="text-text-secondary">Workout not found.</p>
-                            <button onclick="app.navigate('workouts')"
-                                class="bg-accent hover:bg-accent-hover px-4 py-2 rounded-lg touch-target">
-                                Back to Workouts
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const exercisesList = Array.isArray(workout.exercises) ? workout.exercises : [];
-                if (exercisesList.length === 0) {
-                    this.activeWorkout = null;
-                    return `
-                        <div class="p-6 space-y-4">
-                            <p class="text-text-secondary">This workout has no exercises. Please add exercises before starting.</p>
-                            <button onclick="app.navigate('workouts')"
-                                class="bg-accent hover:bg-accent-hover px-4 py-2 rounded-lg touch-target">
-                                Edit Workouts
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const exerciseLibrary = await this.getExercises();
-                const sanitizedWorkout = {
-                    id: workout.id,
-                    name: workout.name || 'Workout',
-                    description: workout.description || '',
-                    exercises: exercisesList.map(ex => {
-                        const exerciseName = ex.exerciseName || '';
-                        const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
-                        const minRep = Math.max(1, parseInt(ex.repRange?.[0], 10) || 1);
-                        const maxRepCandidate = Math.max(minRep, parseInt(ex.repRange?.[1], 10) || minRep);
-                        const repRange = [minRep, maxRepCandidate];
-                        const restParsed = parseInt(ex.restTime, 10);
-                        const restTime = Number.isFinite(restParsed) && restParsed >= 0 ? restParsed : this.defaultRestTime;
-                        return {
-                            exerciseName,
-                            sets,
-                            repRange,
-                            restTime
-                        };
-                    })
-                };
-
-                this.activeWorkout = sanitizedWorkout;
+            async renderWorkoutSession(workoutId) {
+                const workout = await this.db.get('workouts', workoutId);
+                this.activeWorkout = workout;
                 this.currentExerciseIndex = 0;
                 this.currentSet = 0;
                 this.sessionData = [];
                 this.sessionStartTime = Date.now();
 
-                for (const exercise of sanitizedWorkout.exercises) {
-                    const details = exerciseLibrary.find(ex => ex.name === exercise.exerciseName) || null;
+                const exerciseData = await this.db.getAll('exercises');
+
+                for (const exercise of workout.exercises) {
+                    const exerciseDetails = exerciseData.find(ex => ex.name === exercise.exerciseName);
+
                     this.sessionData.push({
                         exerciseName: exercise.exerciseName,
-                        exerciseId: details?.id ?? null,
+                        exerciseId: exerciseDetails?.id,
                         targetSets: exercise.sets,
                         targetRepRange: exercise.repRange,
                         restTime: exercise.restTime,
-                        completedSets: [],
-                        exerciseDetails: details
+                        completedSets: []
                     });
                 }
 
-                return await this.renderCurrentExercise();
+                return this.renderCurrentExercise();
             }
 
-            async renderCurrentExercise() {
-                if (!this.activeWorkout) {
-                    return `
-                        <div class="p-6 space-y-4">
-                            <p class="text-text-secondary">No active workout.</p>
-                            <button onclick="app.navigate('workouts')"
-                                class="bg-accent hover:bg-accent-hover px-4 py-2 rounded-lg touch-target">
-                                Back to Workouts
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const workoutExercises = this.activeWorkout.exercises || [];
-                if (!workoutExercises.length) {
-                    return `
-                        <div class="p-6 space-y-4">
-                            <p class="text-text-secondary">This workout has no exercises to display.</p>
-                            <button onclick="app.navigate('workouts')"
-                                class="bg-accent hover:bg-accent-hover px-4 py-2 rounded-lg touch-target">
-                                Back to Workouts
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const currentExercise = workoutExercises[this.currentExerciseIndex];
+            renderCurrentExercise() {
+                const currentExercise = this.activeWorkout.exercises[this.currentExerciseIndex];
                 const sessionExercise = this.sessionData[this.currentExerciseIndex];
-                const isLastExercise = this.currentExerciseIndex === workoutExercises.length - 1;
+                const isLastExercise = this.currentExerciseIndex === this.activeWorkout.exercises.length - 1;
                 const isLastSet = sessionExercise.completedSets.length >= sessionExercise.targetSets - 1;
 
-                let lastSessionMarkup = '';
-                if (sessionExercise.exerciseId) {
-                    const historyEntries = await this.db.getByIndex('exerciseHistory', 'exerciseId', sessionExercise.exerciseId);
-                    if (historyEntries.length) {
-                        const lastSession = historyEntries.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                        const sessionDate = lastSession.date ? new Date(lastSession.date).toLocaleDateString() : '';
-                        const setsSummary = Array.isArray(lastSession.sets)
-                            ? lastSession.sets.map(set => `${set.reps || 0} reps`).join(' • ')
-                            : 'No sets logged';
-                        const weightLabel = lastSession.weight ? this.formatEquipment(lastSession.weight) : '—';
-                        lastSessionMarkup = `
-                            <div class="text-sm text-text-secondary text-center mb-4">
-                                Last time (${sessionDate}): ${setsSummary} @ ${weightLabel}
+                this.db.getAll('exercises').then(exercises => {
+                    const exerciseDetails = exercises.find(ex => ex.name === currentExercise.exerciseName);
+                    const exerciseDetailHTML = exerciseDetails ? `
+                        <div id="form-cues" class="bg-secondary-bg rounded-lg p-4 mb-6">
+                            <h3 class="font-semibold mb-3">Form Tips</h3>
+                            <div class="space-y-2">
+                                ${exerciseDetails.formCues.slice(0, 2).map((cue, idx) => `
+                                    <div class="flex gap-2 text-sm text-text-secondary">
+                                        <span class="text-accent">•</span>
+                                        <span>${cue}</span>
+                                    </div>
+                                `).join('')}
                             </div>
-                        `;
+                        </div>
+                    ` : '';
+
+                    const container = document.getElementById('exercise-details-container');
+                    if (container) {
+                        container.innerHTML = exerciseDetailHTML;
                     }
-                }
+                });
 
-                const formCues = sessionExercise.exerciseDetails?.formCues?.slice(0, 2) || [];
-                const formCuesMarkup = formCues.length ? `
-                    <div id="form-cues" class="bg-secondary-bg rounded-lg p-4 mb-6">
-                        <h3 class="font-semibold mb-3">Form Tips</h3>
-                        <div class="space-y-2">
-                            ${formCues.map(cue => `
-                                <div class="flex gap-2 text-sm text-text-secondary">
-                                    <span class="text-accent">•</span>
-                                    <span>${this.escapeHTML(cue)}</span>
-                                </div>
-                            `).join('')}
+                this.db.getByIndex('exerciseHistory', 'exerciseId', sessionExercise.exerciseId).then(history => {
+                    const lastSession = history.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                    const lastSessionHTML = lastSession ? `
+                        <div class="text-sm text-text-secondary text-center mb-4">
+                            Last time: ${lastSession.sets.map(s => `${s.reps} reps`).join(' • ')} @ ${this.formatEquipment([lastSession.weight])}
                         </div>
-                    </div>
-                ` : '';
+                    ` : '';
 
-                const completedSetsMarkup = sessionExercise.completedSets.length ? `
-                    <div class="bg-secondary-bg rounded-lg p-4 mb-6">
-                        <h3 class="font-semibold mb-3">Completed Sets</h3>
-                        <div class="space-y-2">
-                            ${sessionExercise.completedSets.map((set, idx) => `
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-text-secondary">Set ${idx + 1}</span>
-                                    <span class="font-semibold text-success">${set.reps || 0} reps @ ${this.formatEquipment(set.weight || 'bodyweight')}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : '';
-
-                const previousWeight = sessionExercise.completedSets.length
-                    ? sessionExercise.completedSets[sessionExercise.completedSets.length - 1].weight
-                    : 'bodyweight';
-
-                const weightOptions = [
-                    { value: 'bodyweight', label: 'Bodyweight' },
-                    { value: 'dumbbell_25', label: 'Dumbbell 25 lbs' },
-                    { value: 'dumbbell_35', label: 'Dumbbell 35 lbs' },
-                    { value: 'kettlebell_50', label: 'Kettlebell 50 lbs' },
-                    { value: 'kettlebell_70', label: 'Kettlebell 70 lbs' }
-                ];
-
-                const repsTarget = `${sessionExercise.targetRepRange[0]}-${sessionExercise.targetRepRange[1]} reps`;
+                    const lastSessionContainer = document.getElementById('last-session-container');
+                    if (lastSessionContainer) {
+                        lastSessionContainer.innerHTML = lastSessionHTML;
+                    }
+                });
 
                 return `
                     <div class="min-h-screen bg-primary-bg pb-8">
@@ -2024,36 +1902,48 @@
                                     Exercise ${this.currentExerciseIndex + 1} of ${this.activeWorkout.exercises.length}
                                 </div>
                             </div>
-                            <h1 class="text-2xl font-bold">${this.escapeHTML(currentExercise.exerciseName)}</h1>
+                            <h1 class="text-2xl font-bold">${currentExercise.exerciseName}</h1>
                             <div class="flex items-center gap-4 mt-2 text-text-secondary">
                                 <span>Set ${sessionExercise.completedSets.length + 1} of ${sessionExercise.targetSets}</span>
                                 <span>•</span>
-                                <span>Target: ${repsTarget}</span>
+                                <span>Target: ${sessionExercise.targetRepRange[0]}-${sessionExercise.targetRepRange[1]} reps</span>
                             </div>
                         </div>
 
                         <div class="px-4 mt-6">
-                            ${lastSessionMarkup}
-                            ${formCuesMarkup}
-                            ${completedSetsMarkup}
+                            <div id="last-session-container"></div>
+                            <div id="exercise-details-container"></div>
+
+                            ${sessionExercise.completedSets.length > 0 ? `
+                                <div class="bg-secondary-bg rounded-lg p-4 mb-6">
+                                    <h3 class="font-semibold mb-3">Completed Sets</h3>
+                                    <div class="space-y-2">
+                                        ${sessionExercise.completedSets.map((set, idx) => `
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-text-secondary">Set ${idx + 1}</span>
+                                                <span class="font-semibold text-success">${set.reps} reps @ ${this.formatEquipment([set.weight])}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
 
                             <div class="gradient-border mb-6">
                                 <div class="gradient-border-inner p-6">
                                     <label class="block text-sm text-text-secondary mb-2">Reps Completed</label>
                                     <input type="number" id="reps-input"
                                         inputmode="numeric"
-                                        min="1"
                                         placeholder="${sessionExercise.targetRepRange[0]}"
                                         class="w-full bg-primary-bg text-text-primary text-4xl font-bold text-center p-4 rounded-lg border-2 border-accent focus:border-accent outline-none mb-4">
 
                                     <label class="block text-sm text-text-secondary mb-2">Weight Used</label>
                                     <select id="weight-input"
                                         class="w-full bg-primary-bg text-text-primary px-4 py-3 rounded-lg border border-gray-700 focus:border-accent outline-none text-base mb-6">
-                                        ${weightOptions.map(option => `
-                                            <option value="${option.value}" ${option.value === previousWeight ? 'selected' : ''}>
-                                                ${option.label}
-                                            </option>
-                                        `).join('')}
+                                        <option value="bodyweight">Bodyweight</option>
+                                        <option value="dumbbell_25">Dumbbell 25 lbs</option>
+                                        <option value="dumbbell_35">Dumbbell 35 lbs</option>
+                                        <option value="kettlebell_50">Kettlebell 50 lbs</option>
+                                        <option value="kettlebell_70">Kettlebell 70 lbs</option>
                                     </select>
 
                                     <button onclick="app.logSet()"
@@ -2069,37 +1959,13 @@
                 `;
             }
 
+            // ============================================
+            // WORKOUT BUILDER
+            // ============================================
+
             async renderWorkoutBuilder(workoutId = null) {
-                await this.getExercises();
-
-                if (!this.workoutBuilder || this.builderWorkoutId !== workoutId) {
-                    let workout = null;
-                    if (workoutId !== null && workoutId !== undefined) {
-                        workout = await this.db.get('workouts', workoutId);
-                    }
-                    this.workoutBuilder = {
-                        name: workout?.name || '',
-                        description: workout?.description || '',
-                        exercises: Array.isArray(workout?.exercises)
-                            ? workout.exercises.map(ex => {
-                                const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
-                                const minRep = Math.max(1, parseInt(ex.repRange?.[0], 10) || 1);
-                                const maxRepCandidate = Math.max(minRep, parseInt(ex.repRange?.[1], 10) || minRep);
-                                const restParsed = parseInt(ex.restTime, 10);
-                                const restTime = Number.isFinite(restParsed) && restParsed >= 0 ? restParsed : this.defaultRestTime;
-                                return {
-                                    exerciseName: ex.exerciseName || '',
-                                    sets,
-                                    repRange: [minRep, maxRepCandidate],
-                                    restTime
-                                };
-                            })
-                            : []
-                    };
-                    this.builderWorkoutId = workoutId ?? null;
-                }
-
-                const workout = this.workoutBuilder;
+                const workout = workoutId ? await this.db.get('workouts', workoutId) : null;
+                const allExercises = await this.db.getAll('exercises');
 
                 return `
                     <div class="min-h-screen pb-8">
@@ -2109,15 +1975,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
-                            <h1 class="text-2xl font-bold">${this.builderWorkoutId !== null ? 'Edit Workout' : 'Create Workout'}</h1>
+                            <h1 class="text-2xl font-bold">${workout ? 'Edit Workout' : 'Create Workout'}</h1>
                         </div>
 
                         <div class="px-4 mt-6">
                             <div class="mb-6">
                                 <label class="block text-sm text-text-secondary mb-2">Workout Name</label>
-                                <input type="text" id="workout-name" value="${this.escapeHTML(workout.name)}"
+                                <input type="text" id="workout-name" value="${workout?.name || ''}"
                                     placeholder="e.g., Full Body Strength A"
-                                    oninput="app.updateBuilderField('name', this.value)"
                                     class="w-full bg-secondary-bg text-text-primary px-4 py-3 rounded-lg border border-gray-700 focus:border-accent outline-none text-base">
                             </div>
 
@@ -2125,9 +1990,8 @@
                                 <label class="block text-sm text-text-secondary mb-2">Description (Optional)</label>
                                 <textarea id="workout-description"
                                     placeholder="Brief description of this workout..."
-                                    oninput="app.updateBuilderField('description', this.value)"
                                     class="w-full bg-secondary-bg text-text-primary px-4 py-3 rounded-lg border border-gray-700 focus:border-accent outline-none text-base resize-none"
-                                    rows="3">${this.escapeHTML(workout.description)}</textarea>
+                                    rows="3">${workout?.description || ''}</textarea>
                             </div>
 
                             <div class="mb-6">
@@ -2140,15 +2004,14 @@
                                 </div>
 
                                 <div id="workout-exercises-list" class="space-y-3">
-                                    ${workout.exercises.length
-                                        ? workout.exercises.map((ex, idx) => this.renderWorkoutExerciseItem(ex, idx)).join('')
-                                        : '<div class="text-center py-8 text-text-secondary">No exercises added yet</div>'}
+                                    ${workout?.exercises ? workout.exercises.map((ex, idx) => this.renderWorkoutExerciseItem(ex, idx)).join('') :
+                                        '<div class="text-center py-8 text-text-secondary">No exercises added yet</div>'}
                                 </div>
                             </div>
 
-                            <button onclick="app.saveWorkout()"
+                            <button onclick="app.saveWorkout(${workoutId})"
                                 class="w-full bg-accent hover:bg-accent-hover py-4 rounded-lg font-bold text-lg touch-target transition-colors">
-                                ${this.builderWorkoutId !== null ? 'Update Workout' : 'Create Workout'}
+                                ${workout ? 'Update Workout' : 'Create Workout'}
                             </button>
                         </div>
                     </div>
@@ -2156,23 +2019,10 @@
             }
 
             renderWorkoutExerciseItem(exercise, index) {
-                const name = this.escapeHTML(exercise.exerciseName || 'Untitled Exercise');
-                const sets = Number.isFinite(exercise.sets) && exercise.sets > 0 ? exercise.sets : 3;
-                const repRange = Array.isArray(exercise.repRange) && exercise.repRange.length === 2
-                    ? [
-                        Math.max(1, parseInt(exercise.repRange[0], 10) || 1),
-                        Math.max(1, parseInt(exercise.repRange[1], 10) || Math.max(1, parseInt(exercise.repRange[0], 10) || 1))
-                    ]
-                    : [8, 12];
-                if (repRange[1] < repRange[0]) {
-                    repRange[1] = repRange[0];
-                }
-                const restTime = Number.isFinite(exercise.restTime) && exercise.restTime >= 0 ? exercise.restTime : this.defaultRestTime;
-
                 return `
                     <div class="bg-secondary-bg rounded-lg p-4" data-exercise-index="${index}">
                         <div class="flex items-start justify-between mb-3">
-                            <h3 class="font-semibold flex-1">${name}</h3>
+                            <h3 class="font-semibold flex-1">${exercise.exerciseName}</h3>
                             <button onclick="app.removeExerciseFromWorkout(${index})"
                                 class="text-text-secondary hover:text-warning ml-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2184,19 +2034,19 @@
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-xs text-text-secondary mb-1">Sets</label>
-                                <input type="number" min="1" value="${sets}"
-                                    onchange="app.updateExerciseSets(${index}, parseInt(this.value, 10))"
+                                <input type="number" value="${exercise.sets}"
+                                    onchange="app.updateExerciseInWorkout(${index}, 'sets', parseInt(this.value, 10))"
                                     class="w-full bg-primary-bg text-text-primary px-2 py-2 rounded text-sm border border-gray-700 focus:border-accent outline-none">
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-xs text-text-secondary mb-1">Rep Range</label>
                                 <div class="flex gap-1 items-center">
-                                    <input type="number" min="1" value="${repRange[0]}"
-                                        onchange="app.updateExerciseRepRange(${index}, 'min', parseInt(this.value, 10))"
+                                    <input type="number" value="${exercise.repRange[0]}"
+                                        onchange="app.updateExerciseInWorkout(${index}, 'repRange', [parseInt(this.value, 10), ${exercise.repRange[1]}])"
                                         class="w-full bg-primary-bg text-text-primary px-2 py-2 rounded text-sm border border-gray-700 focus:border-accent outline-none">
                                     <span class="text-text-secondary">-</span>
-                                    <input type="number" min="1" value="${repRange[1]}"
-                                        onchange="app.updateExerciseRepRange(${index}, 'max', parseInt(this.value, 10))"
+                                    <input type="number" value="${exercise.repRange[1]}"
+                                        onchange="app.updateExerciseInWorkout(${index}, 'repRange', [${exercise.repRange[0]}, parseInt(this.value, 10)])"
                                         class="w-full bg-primary-bg text-text-primary px-2 py-2 rounded text-sm border border-gray-700 focus:border-accent outline-none">
                                 </div>
                             </div>
@@ -2204,65 +2054,43 @@
 
                         <div class="mt-2">
                             <label class="block text-xs text-text-secondary mb-1">Rest Time (seconds)</label>
-                            <input type="number" min="0" value="${restTime}"
-                                onchange="app.updateExerciseRest(${index}, parseInt(this.value, 10))"
+                            <input type="number" value="${exercise.restTime}"
+                                onchange="app.updateExerciseInWorkout(${index}, 'restTime', parseInt(this.value, 10))"
                                 class="w-full bg-primary-bg text-text-primary px-2 py-2 rounded text-sm border border-gray-700 focus:border-accent outline-none">
                         </div>
                     </div>
                 `;
             }
 
+            // ============================================
+            // ACTION HANDLERS
+            // ============================================
+
             async startWorkout(workoutId) {
-                const workout = await this.db.get('workouts', workoutId);
-                if (!workout) {
-                    this.showCustomAlert('Workout not found.');
-                    return;
-                }
-
-                if (!Array.isArray(workout.exercises) || workout.exercises.length === 0) {
-                    this.showCustomAlert('This workout has no exercises. Please add exercises before starting.');
-                    return;
-                }
-
-                this.navigate('workout-session', workout);
+                this.navigate('workout-session', workoutId);
             }
 
             async logSet() {
-                this.timer.stop();
-
                 const repsInput = document.getElementById('reps-input');
-                const weightSelect = document.getElementById('weight-input');
+                const reps = parseInt(repsInput?.value, 10);
+                const weight = document.getElementById('weight-input')?.value;
 
-                if (!repsInput) {
-                    this.showCustomAlert('Reps input not available. Please try again.');
+                if (!reps || reps <= 0) {
+                    this.showCustomAlert('Please enter a valid number of reps');
                     return;
-                }
-
-                const reps = parseInt(repsInput.value, 10);
-                if (!Number.isFinite(reps) || reps <= 0) {
-                    this.showCustomAlert('Please enter a valid number of reps.');
-                    return;
-                }
-
-                const weight = weightSelect ? weightSelect.value : 'bodyweight';
-                const timerContainer = document.getElementById('timer-container');
-                if (timerContainer) {
-                    timerContainer.innerHTML = '';
                 }
 
                 const currentExercise = this.sessionData[this.currentExerciseIndex];
                 currentExercise.completedSets.push({ reps, weight });
 
                 if (currentExercise.completedSets.length >= currentExercise.targetSets) {
-                    if (currentExercise.exerciseId) {
-                        await this.db.add('exerciseHistory', {
-                            exerciseId: currentExercise.exerciseId,
-                            exerciseName: currentExercise.exerciseName,
-                            sets: currentExercise.completedSets.map(set => ({ ...set })),
-                            weight,
-                            date: new Date().toISOString()
-                        });
-                    }
+                    await this.db.add('exerciseHistory', {
+                        exerciseId: currentExercise.exerciseId,
+                        exerciseName: currentExercise.exerciseName,
+                        sets: currentExercise.completedSets,
+                        weight: weight,
+                        date: new Date().toISOString()
+                    });
 
                     if (this.currentExerciseIndex >= this.activeWorkout.exercises.length - 1) {
                         await this.completeWorkout();
@@ -2271,37 +2099,22 @@
 
                     this.currentExerciseIndex++;
                     this.currentSet = 0;
-                    const appContainer = document.getElementById('app');
-                    if (appContainer) {
-                        appContainer.innerHTML = await this.renderCurrentExercise();
-                    }
+                    document.getElementById('app').innerHTML = this.renderCurrentExercise();
                 } else {
-                    repsInput.value = '';
-                    repsInput.focus();
+                    document.getElementById('app').innerHTML = this.renderCurrentExercise();
                     this.startRestTimer(currentExercise.restTime);
                 }
             }
 
             startRestTimer(seconds) {
-                const restSeconds = Number.isFinite(seconds) ? seconds : this.defaultRestTime;
                 const timerContainer = document.getElementById('timer-container');
-
                 if (!timerContainer) return;
-
-                if (restSeconds <= 0) {
-                    timerContainer.innerHTML = `
-                        <div class="bg-secondary-bg rounded-lg p-4 text-center">
-                            <div class="text-sm text-text-secondary">No rest scheduled. Ready for the next set!</div>
-                        </div>
-                    `;
-                    return;
-                }
 
                 timerContainer.innerHTML = `
                     <div class="bg-secondary-bg rounded-lg p-6 text-center">
                         <div class="text-sm text-text-secondary mb-2">Rest Time</div>
                         <div id="timer-display" class="text-6xl font-bold text-accent mb-4">
-                            ${this.timer.formatTime(restSeconds)}
+                            ${this.timer.formatTime(seconds)}
                         </div>
                         <div class="flex gap-2">
                             <button onclick="app.timer.skip()"
@@ -2317,18 +2130,15 @@
                 `;
 
                 this.timer.start(
-                    restSeconds,
+                    seconds,
                     (timeRemaining) => {
                         const display = document.getElementById('timer-display');
                         if (display) {
-                            display.textContent = this.timer.formatTime(Math.max(0, timeRemaining));
+                            display.textContent = this.timer.formatTime(timeRemaining);
                         }
                     },
                     () => {
-                        const display = document.getElementById('timer-display');
-                        if (display) {
-                            display.textContent = '0:00';
-                        }
+                        if (!timerContainer) return;
                         timerContainer.innerHTML = `
                             <div class="bg-success bg-opacity-20 border border-success rounded-lg p-4 text-center">
                                 <div class="text-success font-semibold mb-2">Rest Complete!</div>
@@ -2344,75 +2154,50 @@
             }
 
             async completeWorkout() {
-                this.timer.stop();
-
                 const duration = (Date.now() - this.sessionStartTime) / 1000;
-
-                const historyExercises = this.sessionData.map(exercise => ({
-                    exerciseName: exercise.exerciseName,
-                    exerciseId: exercise.exerciseId,
-                    targetSets: exercise.targetSets,
-                    targetRepRange: [...exercise.targetRepRange],
-                    restTime: exercise.restTime,
-                    completedSets: exercise.completedSets.map(set => ({ ...set }))
-                }));
 
                 await this.db.add('history', {
                     workoutId: this.activeWorkout.id,
                     workoutName: this.activeWorkout.name,
-                    exercises: historyExercises,
+                    exercises: this.sessionData,
                     date: new Date().toISOString(),
-                    duration
+                    duration: duration
                 });
 
-                this.activeWorkout = null;
-                this.sessionData = [];
-                this.currentExerciseIndex = 0;
-                this.sessionStartTime = null;
+                document.getElementById('app').innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center px-4">
+                        <div class="text-center max-w-md w-full">
+                            <div class="text-8xl mb-6">🎉</div>
+                            <h1 class="text-3xl font-bold mb-2">Workout Complete!</h1>
+                            <p class="text-text-secondary mb-8">Great job finishing your workout</p>
 
-                const appContainer = document.getElementById('app');
-                if (appContainer) {
-                    appContainer.innerHTML = `
-                        <div class="min-h-screen flex items-center justify-center px-4">
-                            <div class="text-center max-w-md w-full">
-                                <div class="text-8xl mb-6">🎉</div>
-                                <h1 class="text-3xl font-bold mb-2">Workout Complete!</h1>
-                                <p class="text-text-secondary mb-8">Great job finishing your workout</p>
-
-                                <div class="bg-secondary-bg rounded-lg p-6 mb-6">
-                                    <div class="grid grid-cols-2 gap-4 text-center">
-                                        <div>
-                                            <div class="text-3xl font-bold text-accent">${Math.max(1, Math.round(duration / 60))}</div>
-                                            <div class="text-sm text-text-secondary">Minutes</div>
-                                        </div>
-                                        <div>
-                                            <div class="text-3xl font-bold text-success">${historyExercises.length}</div>
-                                            <div class="text-sm text-text-secondary">Exercises</div>
-                                        </div>
+                            <div class="bg-secondary-bg rounded-lg p-6 mb-6">
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <div class="text-3xl font-bold text-accent">${Math.round(duration / 60)}</div>
+                                        <div class="text-sm text-text-secondary">Minutes</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-3xl font-bold text-success">${this.sessionData.length}</div>
+                                        <div class="text-sm text-text-secondary">Exercises</div>
                                     </div>
                                 </div>
-
-                                <button onclick="app.navigate('home')"
-                                    class="w-full bg-accent hover:bg-accent-hover py-4 rounded-lg font-bold touch-target transition-colors">
-                                    Back to Home
-                                </button>
                             </div>
+
+                            <button onclick="app.navigate('home')"
+                                class="w-full bg-accent hover:bg-accent-hover py-4 rounded-lg font-bold touch-target transition-colors">
+                                Back to Home
+                            </button>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             }
 
             confirmExitWorkout() {
                 this.showCustomConfirm(
                     'Are you sure you want to exit? Your progress will be lost.',
-                    async () => {
-                        this.timer.stop();
-                        this.activeWorkout = null;
-                        this.sessionData = [];
-                        this.currentExerciseIndex = 0;
-                        this.currentSet = 0;
-                        this.sessionStartTime = null;
-                        await this.navigate('home');
+                    () => {
+                        this.navigate('home');
                     }
                 );
             }
@@ -2422,8 +2207,7 @@
                     'Are you sure you want to delete this workout?',
                     async () => {
                         await this.db.delete('workouts', workoutId);
-                        await this.navigate('workouts');
-                        this.showCustomAlert('Workout deleted.');
+                        this.navigate('workouts');
                     }
                 );
             }
@@ -2433,8 +2217,11 @@
             }
 
             showTemplateModal() {
+                const existing = document.getElementById('template-modal');
+                if (existing) existing.remove();
+
                 const modalHTML = `
-                    <div id="template-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-end justify-center z-50" onclick="if(event.target.id==='template-modal') app.closeExercisePickerModal(event)">
+                    <div id="template-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-end justify-center z-50" onclick="if(event.target.id==='template-modal') this.remove()">
                         <div class="bg-secondary-bg w-full max-w-2xl rounded-t-2xl max-h-[80vh] overflow-y-auto">
                             <div class="sticky top-0 bg-secondary-bg border-b border-gray-800 p-6">
                                 <div class="flex items-center justify-between">
@@ -2458,8 +2245,8 @@
                                 ${WORKOUT_TEMPLATES.map((template, idx) => `
                                     <button onclick="app.createFromTemplate(${idx}); document.getElementById('template-modal').remove();"
                                         class="w-full bg-primary-bg hover:bg-opacity-80 p-4 rounded-lg text-left touch-target transition-colors border border-gray-700">
-                                        <div class="font-semibold mb-1">${this.escapeHTML(template.name)}</div>
-                                        <div class="text-sm text-text-secondary mb-2">${this.escapeHTML(template.description)}</div>
+                                        <div class="font-semibold mb-1">${template.name}</div>
+                                        <div class="text-sm text-text-secondary mb-2">${template.description}</div>
                                         <div class="text-xs text-accent">${template.exercises.length} exercises</div>
                                     </button>
                                 `).join('')}
@@ -2479,28 +2266,25 @@
                     exercises: template.exercises
                 });
 
-                await this.navigate('workouts');
-                this.showCustomAlert('Template added to your workouts.');
+                this.navigate('workouts');
             }
 
             viewExerciseDetail(exerciseId) {
                 this.navigate('exercise-detail', exerciseId);
             }
 
-            async filterExercises(searchTerm) {
-                const exercises = await this.getExercises();
-                const filtered = exercises.filter(ex =>
-                    ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    ex.category.toLowerCase().includes(searchTerm.toLowerCase())
-                );
+            filterExercises(searchTerm) {
+                this.db.getAll('exercises').then(exercises => {
+                    const filtered = exercises.filter(ex =>
+                        ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        ex.category.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
 
-                const list = document.getElementById('exercise-list');
-                if (list) {
-                    list.innerHTML = this.renderExerciseList(filtered);
-                }
+                    document.getElementById('exercise-list').innerHTML = this.renderExerciseList(filtered);
+                });
             }
 
-            async filterByCategory(category) {
+            filterByCategory(category) {
                 document.querySelectorAll('.category-filter').forEach(btn => {
                     if (btn.dataset.category === category) {
                         btn.classList.add('active', 'bg-accent');
@@ -2511,42 +2295,26 @@
                     }
                 });
 
-                const exercises = await this.getExercises();
-                const filtered = category === 'all'
-                    ? exercises
-                    : exercises.filter(ex => ex.category === category);
-
-                const list = document.getElementById('exercise-list');
-                if (list) {
-                    list.innerHTML = this.renderExerciseList(filtered);
+                if (category === 'all') {
+                    this.db.getAll('exercises').then(exercises => {
+                        document.getElementById('exercise-list').innerHTML = this.renderExerciseList(exercises);
+                    });
+                } else {
+                    this.db.getAll('exercises').then(exercises => {
+                        const filtered = exercises.filter(ex => ex.category === category);
+                        document.getElementById('exercise-list').innerHTML = this.renderExerciseList(filtered);
+                    });
                 }
             }
 
             async updateSetting(key, value) {
                 const settings = await this.db.get('settings', 'general') || { key: 'general' };
-
-                if (key === 'defaultRestTime') {
-                    if (!Number.isFinite(value) || value <= 0) {
-                        this.showCustomAlert('Please enter a positive number for rest time.');
-                        const input = document.getElementById('default-rest-time');
-                        if (input) {
-                            input.value = this.defaultRestTime;
-                        }
-                        return;
-                    }
-                    this.defaultRestTime = value;
-                }
-
-                if (key === 'audioEnabled') {
-                    this.timer.audioEnabled = !!value;
-                }
-
-                if (key === 'theme') {
-                    this.applyTheme(value);
-                }
-
                 settings[key] = value;
                 await this.db.put('settings', settings);
+
+                if (key === 'audioEnabled') {
+                    this.timer.audioEnabled = value;
+                }
             }
 
             async exportData() {
@@ -2573,35 +2341,29 @@
                     async () => {
                         const stores = ['workouts', 'history', 'exerciseHistory', 'settings'];
                         for (const store of stores) {
-                            await this.db.clear(store);
+                            await this.db.clearStore(store);
                         }
 
-                        await this.initializeExerciseDatabase();
                         await this.initializeSettings();
-
-                        this.workoutBuilder = null;
-                        this.builderWorkoutId = null;
-                        this.exercisePickerData = [];
-                        this.timer.stop();
-                        this.activeWorkout = null;
-                        this.sessionData = [];
-
-                        await this.navigate('home');
+                        this.navigate('home');
                         this.showCustomAlert('All data has been cleared');
                     }
                 );
             }
 
+            // ============================================
+            // CUSTOM MODAL HELPERS
+            // ============================================
+
             showCustomAlert(message) {
                 const existing = document.getElementById('custom-alert');
                 if (existing) existing.remove();
 
-                const safeMessage = this.escapeHTML(message).replace(/\n/g, '<br>');
                 const modalHTML = `
                     <div id="custom-alert" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 px-4">
                         <div class="bg-secondary-bg rounded-lg p-6 max-w-sm w-full">
-                            <p class="text-text-primary mb-6">${safeMessage}</p>
-                            <button onclick="app.cancelCustomAlert()"
+                            <p class="text-text-primary mb-6">${message}</p>
+                            <button onclick="app.dismissAlert()"
                                 class="w-full bg-accent hover:bg-accent-hover py-3 rounded-lg font-semibold touch-target transition-colors">
                                 OK
                             </button>
@@ -2612,11 +2374,9 @@
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
             }
 
-            cancelCustomAlert() {
+            dismissAlert() {
                 const modal = document.getElementById('custom-alert');
-                if (modal) {
-                    modal.remove();
-                }
+                if (modal) modal.remove();
             }
 
             showCustomConfirm(message, onConfirm) {
@@ -2624,20 +2384,17 @@
                 if (existing) existing.remove();
 
                 this.pendingConfirmAction = onConfirm;
-                this.pendingConfirmContext = this;
-
-                const safeMessage = this.escapeHTML(message).replace(/\n/g, '<br>');
 
                 const modalHTML = `
                     <div id="custom-confirm" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 px-4">
                         <div class="bg-secondary-bg rounded-lg p-6 max-w-sm w-full">
-                            <p class="text-text-primary mb-6">${safeMessage}</p>
+                            <p class="text-text-primary mb-6">${message}</p>
                             <div class="flex gap-3">
-                                <button onclick="app.cancelConfirmAction()"
+                                <button onclick="app.cancelConfirm()"
                                     class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold touch-target transition-colors">
                                     Cancel
                                 </button>
-                                <button onclick="app.executeConfirmAction()"
+                                <button onclick="app.handleConfirm()"
                                     class="flex-1 bg-warning hover:bg-opacity-80 py-3 rounded-lg font-semibold touch-target transition-colors">
                                     Confirm
                                 </button>
@@ -2649,286 +2406,35 @@
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
             }
 
-            async executeConfirmAction() {
+            handleConfirm() {
                 const modal = document.getElementById('custom-confirm');
-                if (modal) {
-                    modal.remove();
-                }
+                if (modal) modal.remove();
 
                 const callback = this.pendingConfirmAction;
-                const context = this.pendingConfirmContext;
-
                 this.pendingConfirmAction = null;
-                this.pendingConfirmContext = null;
 
                 if (typeof callback === 'function') {
                     try {
-                        await callback.call(context);
+                        const result = callback();
+                        if (result && typeof result.then === 'function') {
+                            result.catch(error => console.error('Confirm action failed:', error));
+                        }
                     } catch (error) {
-                        console.error('Confirm action failed', error);
-                        this.showCustomAlert('Something went wrong. Please try again.');
+                        console.error('Confirm action failed:', error);
                     }
                 }
             }
 
-            cancelConfirmAction() {
+            cancelConfirm() {
                 const modal = document.getElementById('custom-confirm');
-                if (modal) {
-                    modal.remove();
-                }
+                if (modal) modal.remove();
                 this.pendingConfirmAction = null;
-                this.pendingConfirmContext = null;
-            }
-
-            closeExercisePickerModal(event) {
-                if (event.target.id === 'template-modal') {
-                    event.target.remove();
-                }
-            }
-
-            updateBuilderField(field, value) {
-                if (!this.workoutBuilder) return;
-                if (field === 'name') {
-                    this.workoutBuilder.name = value;
-                } else if (field === 'description') {
-                    this.workoutBuilder.description = value;
-                }
-            }
-
-            refreshWorkoutBuilderExercises() {
-                const list = document.getElementById('workout-exercises-list');
-                if (!list) return;
-                if (!this.workoutBuilder || !this.workoutBuilder.exercises.length) {
-                    list.innerHTML = '<div class="text-center py-8 text-text-secondary">No exercises added yet</div>';
-                    return;
-                }
-                list.innerHTML = this.workoutBuilder.exercises.map((ex, idx) => this.renderWorkoutExerciseItem(ex, idx)).join('');
-            }
-
-            showExercisePicker() {
-                const modalHTML = `
-                    <div id="exercise-picker-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-end justify-center z-50" onclick="if(event.target.id==='exercise-picker-modal') app.closeExercisePicker()">
-                        <div class="bg-secondary-bg w-full max-w-2xl rounded-t-2xl max-h-[80vh] overflow-hidden flex flex-col">
-                            <div class="sticky top-0 bg-secondary-bg border-b border-gray-800 p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h2 class="text-xl font-bold">Add Exercise</h2>
-                                    <button onclick="app.closeExercisePicker()"
-                                        class="text-text-secondary hover:text-text-primary">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <input type="text" placeholder="Search exercises..."
-                                    oninput="app.filterExercisePicker(this.value)"
-                                    class="w-full bg-primary-bg text-text-primary px-4 py-3 rounded-lg border border-gray-700 focus:border-accent outline-none text-base">
-                            </div>
-                            <div class="p-6 overflow-y-auto">
-                                <div id="exercise-picker-list" class="space-y-3">
-                                    ${this.renderExercisePickerItems(this.exerciseCache)}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                document.body.insertAdjacentHTML('beforeend', modalHTML);
-                this.exercisePickerData = [...this.exerciseCache];
-            }
-
-            closeExercisePicker() {
-                const modal = document.getElementById('exercise-picker-modal');
-                if (modal) {
-                    modal.remove();
-                }
-                this.exercisePickerData = [];
-            }
-
-            filterExercisePicker(term = '') {
-                const list = document.getElementById('exercise-picker-list');
-                if (!list) return;
-
-                const normalized = term.trim().toLowerCase();
-                const filtered = !normalized
-                    ? this.exercisePickerData
-                    : this.exercisePickerData.filter(ex => {
-                        const equipment = Array.isArray(ex.equipment) ? ex.equipment.join(' ') : '';
-                        return ex.name.toLowerCase().includes(normalized) ||
-                               ex.category.toLowerCase().includes(normalized) ||
-                               equipment.toLowerCase().includes(normalized);
-                    });
-
-                list.innerHTML = this.renderExercisePickerItems(filtered);
-            }
-
-            renderExercisePickerItems(exercises) {
-                if (!exercises.length) {
-                    return `<div class="text-center py-6 text-text-secondary">No exercises match your search.</div>`;
-                }
-                return exercises.map(ex => `
-                    <button onclick="app.addExerciseToWorkout(${ex.id})"
-                        class="w-full bg-secondary-bg hover:bg-opacity-80 p-4 rounded-lg text-left touch-target transition-colors">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <div class="font-semibold">${this.escapeHTML(ex.name)}</div>
-                                <div class="text-xs text-text-secondary mt-1">${this.escapeHTML(ex.category)} • ${this.escapeHTML(ex.difficulty)}</div>
-                                <div class="text-xs text-text-secondary mt-1">${this.formatEquipment(ex.equipment)}</div>
-                            </div>
-                            <svg class="w-5 h-5 text-text-secondary ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                    </button>
-                `).join('');
-            }
-
-            addExerciseToWorkout(exerciseId) {
-                if (!this.workoutBuilder) return;
-                const exercise = this.exerciseCache.find(ex => ex.id === exerciseId);
-                if (!exercise) return;
-
-                const repRange = Array.isArray(exercise.repRange) && exercise.repRange.length === 2
-                    ? [...exercise.repRange]
-                    : [8, 12];
-
-                this.workoutBuilder.exercises.push({
-                    exerciseName: exercise.name,
-                    sets: 3,
-                    repRange: [
-                        Math.max(1, parseInt(repRange[0], 10) || 8),
-                        Math.max(1, parseInt(repRange[1], 10) || 12)
-                    ],
-                    restTime: this.defaultRestTime
-                });
-
-                this.refreshWorkoutBuilderExercises();
-                this.closeExercisePicker();
-            }
-
-            removeExerciseFromWorkout(index) {
-                if (!this.workoutBuilder) return;
-                this.workoutBuilder.exercises.splice(index, 1);
-                this.refreshWorkoutBuilderExercises();
-            }
-
-            updateExerciseSets(index, value) {
-                if (!this.workoutBuilder || !this.workoutBuilder.exercises[index]) return;
-                const sets = Number.isFinite(value) && value > 0 ? value : 1;
-                this.workoutBuilder.exercises[index].sets = sets;
-                this.refreshWorkoutBuilderExercises();
-            }
-
-            updateExerciseRepRange(index, bound, value) {
-                if (!this.workoutBuilder || !this.workoutBuilder.exercises[index]) return;
-                const exercise = this.workoutBuilder.exercises[index];
-                if (!Array.isArray(exercise.repRange) || exercise.repRange.length !== 2) {
-                    exercise.repRange = [8, 12];
-                }
-                const sanitized = Number.isFinite(value) && value > 0 ? value : 1;
-                if (bound === 'min') {
-                    exercise.repRange[0] = sanitized;
-                    if (exercise.repRange[1] < sanitized) {
-                        exercise.repRange[1] = sanitized;
-                    }
-                } else {
-                    exercise.repRange[1] = Math.max(sanitized, exercise.repRange[0]);
-                }
-                this.refreshWorkoutBuilderExercises();
-            }
-
-            updateExerciseRest(index, value) {
-                if (!this.workoutBuilder || !this.workoutBuilder.exercises[index]) return;
-                const restTime = Number.isFinite(value) && value >= 0 ? value : 0;
-                this.workoutBuilder.exercises[index].restTime = restTime;
-                this.refreshWorkoutBuilderExercises();
-            }
-
-            async saveWorkout() {
-                if (!this.workoutBuilder) return;
-
-                const name = (this.workoutBuilder.name || '').trim();
-                if (!name) {
-                    this.showCustomAlert('Please enter a workout name.');
-                    return;
-                }
-
-                if (!this.workoutBuilder.exercises.length) {
-                    this.showCustomAlert('Add at least one exercise to save the workout.');
-                    return;
-                }
-
-                const sanitizedExercises = this.workoutBuilder.exercises.map(ex => {
-                    const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
-                    const minRep = Math.max(1, parseInt(ex.repRange?.[0], 10) || 1);
-                    const maxRep = Math.max(minRep, parseInt(ex.repRange?.[1], 10) || minRep);
-                    const restParsed = parseInt(ex.restTime, 10);
-                    const restTime = Number.isFinite(restParsed) && restParsed >= 0 ? restParsed : this.defaultRestTime;
-                    return {
-                        exerciseName: ex.exerciseName || '',
-                        sets,
-                        repRange: [minRep, maxRep],
-                        restTime
-                    };
-                });
-
-                const payload = {
-                    name,
-                    description: (this.workoutBuilder.description || '').trim(),
-                    exercises: sanitizedExercises
-                };
-
-                try {
-                    if (this.builderWorkoutId !== null) {
-                        payload.id = this.builderWorkoutId;
-                        await this.db.put('workouts', payload);
-                        this.showCustomAlert('Workout updated successfully.');
-                    } else {
-                        await this.db.add('workouts', payload);
-                        this.showCustomAlert('Workout created successfully.');
-                    }
-                    this.workoutBuilder = null;
-                    this.builderWorkoutId = null;
-                    await this.navigate('workouts');
-                } catch (error) {
-                    console.error('Failed to save workout', error);
-                    this.showCustomAlert('Failed to save workout. Please try again.');
-                }
-            }
-
-            escapeHTML(value) {
-                if (value === undefined || value === null) return '';
-                return String(value).replace(/[&<>"']/g, (char) => {
-                    const map = {
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&#39;'
-                    };
-                    return map[char] || char;
-                });
-            }
-
-            applyTheme(theme = 'dark') {
-                const body = document.body;
-                if (!body) return;
-                if (theme === 'light') {
-                    body.classList.remove('dark');
-                } else {
-                    body.classList.add('dark');
-                }
-            }
-
-            async getExercises(forceReload = false) {
-                if (!Array.isArray(this.exerciseCache)) {
-                    this.exerciseCache = [];
-                }
-                if (forceReload || this.exerciseCache.length === 0) {
-                    this.exerciseCache = await this.db.getAll('exercises');
-                }
-                return this.exerciseCache;
             }
         }
+
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
 
         const app = new App();
         app.init();
