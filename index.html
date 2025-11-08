@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Fit Forge — single-file PWA (v8)
+    <!-- Fit Forge — single-file PWA (v9)
          Updates:
-         • App renamed to “Fit Forge”
-         • Reliable iPhone Home Screen icon: flexing-bicep PNGs exposed at real URLs
-           (apple-touch-icon*.png and icons/icon-*.png) via Service Worker
-           + multiple <link rel="apple-touch-icon"> fallbacks
-         • Metrics per routine show each set with weight + reps/seconds (no global totals)
-         • Prevent accidental zoom (viewport lock, 16px inputs, gesture guards)
-         • Overall workout timer, per-set rest timer, quick set logging, deletable sessions -->
+         • Custom icon (kettlebell + dumbbell) generated via Canvas and served as real PNG URLs
+         • Robust iOS Home Screen icon delivery: SW matches by filename (works in subfolders)
+         • Version bump to v9 so the new icon takes effect
+         • All else unchanged -->
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -26,7 +23,7 @@
       content="Fit Forge: spine-smart strength PWA with warm-up gate, Add-Before-You-Load progression, per-set timers, quick logging, and per-routine metrics."
     />
 
-    <!-- iOS requires actual URLs; we provide a full set and the SW serves them. -->
+    <!-- iOS requires actual URLs; SW provides them -->
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link
       rel="apple-touch-icon"
@@ -393,27 +390,148 @@
     <div id="app" aria-live="polite"></div>
 
     <script>
-      // Fit Forge — PWA (v8)
-      // - Routine dropdown (Hybrid / Iron-Focused / Grumpy Back Day)
-      // - Per-routine metrics with detailed set lines (weight + reps/seconds)
-      // - Installable PWA; bicep icons exposed at real URLs so iOS uses them
-      // - Prevent accidental zoom; overall + per-set timers; quick logging
+      // Fit Forge — PWA (v9)
+      // - Custom kettlebell + dumbbell icon for iOS/Android (Canvas -> PNG -> SW)
+      // - Robust icon URLs (filename match) for subfolder hosting
+      // - Installable PWA; prevent accidental zoom; timers; quick logging
 
       // Manifest + Service Worker (serves real icon URLs)
       (function pwa() {
-        // Flexing-bicep PNGs (base64). SW serves as actual URL responses.
-        // 180x180 (iOS), 167x167 (iPad Pro), 152x152 (iPad), and maskable 192/512.
-        const ICON_180 =
-          "iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAABr3Y8QAAAACXBIWXMAAAsSAAALEgHS3X78AAAB6UlEQVR4nO3aMU7DMBQF0T0mJr0k4w2a0gItpQb7m7r2M2hX9bC0F2eGxL8G8bI2y6nAgAAAAAAAAAAAAAAAAAAAAAAAPgQFQ8w8nCk3r3d4n2f2e0e8nq2zHc4w3yJw6m6G1s6o0c7S1V0i1mBpJr3S7ePqf2pWpw1z2E0w6bqRzvWc2l5d9J7bLr2k+2S9g1wq5xH1g2hKf3yVo8yM0h0s6kV7b0i2f2XJ3zQj7fK7vX5r2m0aYc3H8b0+u9m0A5VvGk3i9nK1zV8cX5q9m6Qm0c8g2uC7R0Gq4z2t8cXb9s1mUj7m8WcHcJf7f7l9m2Z7FQ2kM9d7k6Q+0fGm8o7n8ZC+gXx3x0QyJ7wU3m5C6dQ0J8h9n9f7b4d8lK0bP8o5m2c7kH8y8f3K4cV9w2+v3m2fY9fXj5PzQ+z0vQv7r7s7z2n4Y5yZC9g4N5j0G1q4f1t7K7Kk5aQnq3W3RNWg3n3b8eU3f3nJx8o5K0U1c1q8N7y9m6C3d8J3m2f8d7p5G2r8c7v+9g0p7f9W6b2r6j8f8m+zj2P4i6k7m9e3S7i6h8n8w9gAAAAAAAAAAAAAAAAAAAAAA4Jf+AFqg9P6b6m6cRAA2H1vG4f8WbM8AAAAAElFTkSuQmCC";
-        const ICON_167 =
-          "iVBORw0KGgoAAAANSUhEUgAAAKcAAACnCAYAAAAXdC2iAAAACXBIWXMAAAsSAAALEgHS3X78AAAB1ElEQVR4nO3aQY7DMAxF0T0mSg2gYVQY9v5u3mG6Q2Wb/7f2q0Qm8c8xg8qVQAAAAAAAAAAAAAAAAAAAAAAAGh5Kz3d7kdrP1m1e7y1jWbq0b0q6e0k7bR9xvQ0bC3q1b6q1r6mfbz2nB2s1n2q9d8Zzq5o7Y9k7b9p3cN5s7l9Yf5Z9m3zZ1vTq8p3V9n3m9vJkF3X9Wm7J7m6m7j8b7p5m3b8k5n7r8o6Z7s9l7r8g6Y7q9i6e7o9f6o7g9n6c7k9m6Y7o9l6a7q9i6e7o9f6o7g9n6Y7o9l6a7q9i6e7o9f6o7g9n6Y7o9l6a7q9i6e7o9f6o7g+u3rYV3e9tZ5z3sZkH5q7m9mVY1y9m1n0bP5Kx3F2b2m2mVZ1l7m2m2mFZ0/T8g8e5Xo7f0+0C0AAAAAAAAAAAAAAAAAAAAAAPgW+gAM4m3y5X8sngAAAABJRU5ErkJggg==";
-        const ICON_152 =
-          "iVBORw0KGgoAAAANSUhEUgAAAJgAAACYCAYAAAC9Wc1+AAAACXBIWXMAAAsSAAALEgHS3X78AAABq0lEQVR4nO3aQY7CMBRF0S8T0T7g2JdJgcyg1c6W6w3xwq7r7k3cQw0y3l3i7+gQW4uQqgAAAAAAAAAAAAAAAAAAAAAA4E7yV2m8q8i6v2D0m7v6wG1Bv2f0vO0rWQ6C0N0q0x7m+z4d7ZVb3b8hQy7O1o8b5m9WZx2FZKf0k6b6qfQ2WZLqH7Qf2m0Z7W7X3n8mN0h5s7m1m3b2S7d9v8QnP7W3m+u2rS5Z8Yy6fS9T8m8b3W1e3m8o2Y8b5c7b1a7b9Q5m9o2b7a6Y9l4f7r5k2m7o5Z8Y3b4U5c9b6q8Z+2q5b7m8f8w8AAAAAAAAAAAAAAAAAAAAAADwGvwBrU3X7w5b9WQAAAABJRU5ErkJggg==";
-        const ICON_192 =
-          "iVBORw0KGgoAAAANSUhEUgAAAMAAAAAwCAYAAACi7nIvAAAACXBIWXMAAAsSAAALEgHS3X78AAABrElEQVR4nO3aQY7CMBRF0S8T0T7g2JdJgcyg1c6W6w3xwq7r7k3cQw0y3l3i7+gQW4uQqgAAAAAAAAAAAAAAAAAAAAAA4E7yV2m8q8i6v2D0m7v6wG1Bv2f0vO0rWQ6C0N0q0x7m+z4d7ZVb3b8hQy7O1o8b5m9WZx2FZKf0k6b6qfQ2WZLqH7Qf2m0Z7W7X3n8mN0h5s7m1m3b2S7d9v8QnP7W3m+u2rS5Z8Yy6fS9T8m8b3W1e3m8o2Y8b5c7b1a7b9Q5m9o2b7a6Y9l4f7r5k2m7o5Z8Y3b4U5c9b6q8Z+2q5b7m8f8w8AAAAAAAAAAAAAAAAAAAAAADwGvwBV6lC3Q8cuw4AAAAASUVORK5CYII=";
-        const ICON_512 =
-          "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAAC+5+6NAAAACXBIWXMAAAsSAAALEgHS3X78AAACaUlEQVR4nO3aQY6cQBRF0c9kS6kGkC5Qb7m8a9xsC3pTg1CLk0H3k4yS6m8H+0sX5ZBqgAAAAAAAAAAAAAAAAAAAAAAwNq7v6dWJNZJmP0a9sOq2m8vW+1i2qzV+v9f2n7d7k2t7Y6m2N6m9k9b7l4k5Zk7o0mQ+0v2/1j3+o1q9qfY9q6p8e7Z2m0n6h8a7W3i9Y4m9o0mZ8b6i1b6m9p+Z8X7b6m6f4m8d6r9m6n8b7o0n7v6p+e7Y4l9m1mZ8b6q2b7n8r9o6n4b7m0m8c6o9m6o8a7n1n8b6o4m7o0k8Y5q1r7p9m7o6a7n2n8a6o5m7o0k/Zrj2cH0k3bOyf1H6b8e9UeJ7k3fO6P0m3a9f9QeI7k7vP6n0m3b9f9Qv8zWg7k3fO6P0m3b9f9QeI7k3fO6P0m3b9f9QeI7k3e+5b7g5u8o2V9c7r1a8Y+1o7Z9b6p8Z+2o6Y9b7p8a+1o7Z9b7r9G2wP6n3oZ1yq6H9wWgAAAAAAAAAAAAAAAAAAAAAA4C9gAgJ4C8bWl9C5AAAAAElFTkSuQmCC";
+        // 1) Draw icon via Canvas -> base64 PNG (no external assets)
+        function roundedRectPath(ctx, x, y, w, h, r) {
+          const rr = Math.min(r, w / 2, h / 2);
+          ctx.beginPath();
+          ctx.moveTo(x + rr, y);
+          ctx.arcTo(x + w, y, x + w, y + h, rr);
+          ctx.arcTo(x + w, y + h, x, y + h, rr);
+          ctx.arcTo(x, y + h, x, y, rr);
+          ctx.arcTo(x, y, x + w, y, rr);
+          ctx.closePath();
+        }
 
+        function drawIronIcon(ctx, size) {
+          const s = size / 100; // normalize to 100x100 units
+          ctx.save();
+
+          // Background gradient
+          const bg = ctx.createLinearGradient(0, 0, size, size);
+          bg.addColorStop(0, "#ef4444");
+          bg.addColorStop(1, "#b91c1c");
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, size, size);
+
+          // Subtle vignette
+          const vign = ctx.createRadialGradient(
+            size * 0.5, size * 0.65, size * 0.15,
+            size * 0.5, size * 0.65, size * 0.8
+          );
+          vign.addColorStop(0, "rgba(0,0,0,0)");
+          vign.addColorStop(1, "rgba(0,0,0,0.28)");
+          ctx.fillStyle = vign;
+          ctx.fillRect(0, 0, size, size);
+
+          // Top-left highlight
+          const hi = ctx.createRadialGradient(
+            size * 0.22, size * 0.18, size * 0.04,
+            size * 0.22, size * 0.18, size * 0.35
+          );
+          hi.addColorStop(0, "rgba(255,255,255,0.35)");
+          hi.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = hi;
+          ctx.fillRect(0, 0, size, size);
+
+          // Kettlebell (left-center)
+          ctx.save();
+          ctx.shadowColor = "rgba(0,0,0,0.35)";
+          ctx.shadowBlur = 8 * s;
+          ctx.shadowOffsetY = 2 * s;
+          ctx.fillStyle = "#fff";
+
+          const kx = 38 * s;
+          const ky = 57 * s;
+
+          // Body
+          ctx.beginPath();
+          ctx.ellipse(kx, ky, 18 * s, 16 * s, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Neck (to connect to handle)
+          roundedRectPath(ctx, (kx - 10 * s), (ky - 16 * s), 20 * s, 8 * s, 4 * s);
+          ctx.fill();
+
+          // Outer Handle
+          roundedRectPath(ctx, (kx - 14 * s), (ky - 30 * s), 28 * s, 14 * s, 7 * s);
+          ctx.fill();
+
+          // Cut inner handle hole
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.shadowColor = "transparent";
+          roundedRectPath(ctx, (kx - 9.5 * s), (ky - 26.5 * s), 19 * s, 7 * s, 3.5 * s);
+          ctx.fill();
+
+          // Restore to normal composition
+          ctx.globalCompositeOperation = "source-over";
+          ctx.restore();
+
+          // Dumbbell (bottom-right, slight angle)
+          ctx.save();
+          ctx.translate(68 * s, 70 * s);
+          ctx.rotate(-15 * Math.PI / 180);
+          ctx.shadowColor = "rgba(0,0,0,0.35)";
+          ctx.shadowBlur = 7 * s;
+          ctx.shadowOffsetY = 2 * s;
+          ctx.fillStyle = "#fff";
+
+          // Bar
+          roundedRectPath(ctx, -20 * s, -3 * s, 40 * s, 6 * s, 3 * s);
+          ctx.fill();
+
+          // Plates helper
+          function plate(x, wOuter, hOuter, wInner, hInner) {
+            // Outer plate
+            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 3 * s);
+            ctx.fill();
+            // Inner plate (closer to bar)
+            const ix = x - (wInner + 2 * s);
+            roundedRectPath(ctx, ix, -hInner / 2, wInner, hInner, 2.5 * s);
+            ctx.fill();
+          }
+          // Left plates (x is negative beyond bar)
+          plate(-22 * s, 10 * s, 16 * s, 7 * s, 12 * s);
+          // Right plates
+          ctx.scale(-1, 1);
+          plate(-22 * s, 10 * s, 16 * s, 7 * s, 12 * s);
+          ctx.restore();
+
+          // Subtle white sheen across kettlebell
+          ctx.save();
+          ctx.globalAlpha = 0.08;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.ellipse(34 * s, 52 * s, 26 * s, 20 * s, -20 * Math.PI/180, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.restore();
+        }
+
+        function generateIconB64(size) {
+          const c = document.createElement("canvas");
+          c.width = c.height = size;
+          const ctx = c.getContext("2d");
+          drawIronIcon(ctx, size);
+          const dataURL = c.toDataURL("image/png");
+          return dataURL.slice(dataURL.indexOf(",") + 1); // pure base64
+        }
+
+        // Generate all required sizes
+        const ICON_180 = generateIconB64(180);
+        const ICON_167 = generateIconB64(167);
+        const ICON_152 = generateIconB64(152);
+        const ICON_192 = generateIconB64(192);
+        const ICON_512 = generateIconB64(512);
+
+        // 2) Manifest
         const manifest = {
           name: "Fit Forge — Build Iron. Guard Your Spine.",
           short_name: "Fit Forge",
@@ -447,17 +565,19 @@
         link.href = mu;
         document.head.appendChild(link);
 
-        // Service Worker: serve icon URLs with real PNG bytes + cache index
+        // 3) Service Worker: serve icon URLs with real PNG bytes + cache index
         const sw = `
-          const CACHE="fitforge-v8";
-          const ICONS = new Map([
-            ["/apple-touch-icon.png","${ICON_180}"],
-            ["/apple-touch-icon-precomposed.png","${ICON_180}"],
-            ["/apple-touch-icon-180x180.png","${ICON_180}"],
-            ["/apple-touch-icon-167x167.png","${ICON_167}"],
-            ["/apple-touch-icon-152x152.png","${ICON_152}"],
-            ["/icons/icon-192.png","${ICON_192}"],
-            ["/icons/icon-512.png","${ICON_512}"]
+          const CACHE="fitforge-v9";
+
+          // Map base filenames -> base64 PNG
+          const FILE_ICONS = new Map([
+            ["apple-touch-icon.png","${ICON_180}"],
+            ["apple-touch-icon-precomposed.png","${ICON_180}"],
+            ["apple-touch-icon-180x180.png","${ICON_180}"],
+            ["apple-touch-icon-167x167.png","${ICON_167}"],
+            ["apple-touch-icon-152x152.png","${ICON_152}"],
+            ["icon-192.png","${ICON_192}"],
+            ["icon-512.png","${ICON_512}"]
           ]);
 
           function b64ToUint8(b64){
@@ -488,14 +608,16 @@
           self.addEventListener("fetch", (e) => {
             const url = new URL(e.request.url);
             const path = url.pathname;
-            // Normalize to root-based keys
-            const key = path.startsWith("/") ? path : "/" + path;
+            const name = path.split("/").pop();
 
-            if (ICONS.has(key)) {
-              e.respondWith(pngResponse(ICONS.get(key)));
+            // Serve any of the icon filenames regardless of folder depth
+            if (FILE_ICONS.has(name)) {
+              e.respondWith(pngResponse(FILE_ICONS.get(name)));
               return;
             }
-            if (key === "/" || key.endsWith("/index.html")) {
+
+            // Basic app shell caching
+            if (path === "/" || path.endsWith("/index.html")) {
               e.respondWith(
                 caches.open(CACHE).then(async (c) => {
                   const cached = await c.match("./index.html");
@@ -508,6 +630,7 @@
               );
               return;
             }
+
             e.respondWith(
               caches.match(e.request).then((cRes) => {
                 const net = fetch(e.request).then((nRes) => {
@@ -526,9 +649,9 @@
           const swu = URL.createObjectURL(
             new Blob([sw], { type: "text/javascript" })
           );
-          // Try to scope to root so icon paths resolve regardless of folder.
+          // Try to scope to root so icon paths resolve at domain root
           navigator.serviceWorker.register(swu, { scope: "/" }).catch(() => {
-            // Fallback: default scope
+            // Fallback: default scope (icons still work via filename matching)
             navigator.serviceWorker.register(swu).catch(() => {});
           });
         }
@@ -577,7 +700,7 @@
       function mmss(ms) {
         const t = Math.max(0, Math.floor(ms / 1000));
         const h = Math.floor(t / 3600);
-        const m = Math.floor((t % 3600) / 60);
+        const m = Math.floor((h ? t - h * 3600 : t) / 60);
         const s = t % 60;
         return (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
       }
@@ -810,7 +933,7 @@
 
       // Store
       const Store = (() => {
-        const KEY = "fitforge.v8";
+        const KEY = "fitforge.v8"; // kept for user data stability
         let state = load() || seed();
         function seed() {
           return {
