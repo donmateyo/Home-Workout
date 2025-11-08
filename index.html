@@ -7,47 +7,51 @@
          • Robust iOS Home Screen icon delivery: SW matches by filename (works in subfolders)
          • Version bump to v9 so the new icon takes effect
          • All else unchanged -->
-    <meta charset="utf-8" />
+    <meta charset="utf-8" >
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
-    />
-    <meta name="theme-color" content="#0E0E10" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Fit Forge" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="format-detection" content="telephone=no" />
+    >
+    <meta name="theme-color" content="#0E0E10" >
+    <meta name="apple-mobile-web-app-capable" content="yes" >
+    <meta name="apple-mobile-web-app-title" content="Fit Forge" >
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" >
+    <meta name="format-detection" content="telephone=no" >
     <title>Fit Forge — Simple, Spine-Smart Strength</title>
     <meta
       name="description"
       content="Fit Forge: spine-smart strength PWA with warm-up gate, Add-Before-You-Load progression, per-set timers, quick logging, and per-routine metrics."
-    />
+    >
 
-    <!-- iOS requires actual URLs; SW provides them -->
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <!-- iOS icons - data URLs injected by script -->
+    <link rel="apple-touch-icon" id="apple-touch-icon-default" href="" >
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="apple-touch-icon-180x180.png"
-    />
+      id="apple-touch-icon-180"
+      href=""
+    >
     <link
       rel="apple-touch-icon"
       sizes="167x167"
-      href="apple-touch-icon-167x167.png"
-    />
+      id="apple-touch-icon-167"
+      href=""
+    >
     <link
       rel="apple-touch-icon"
       sizes="152x152"
-      href="apple-touch-icon-152x152.png"
-    />
+      id="apple-touch-icon-152"
+      href=""
+    >
     <link
       rel="apple-touch-icon-precomposed"
-      href="apple-touch-icon-precomposed.png"
-    />
+      id="apple-touch-icon-precomposed"
+      href=""
+    >
 
-    <!-- Favicons for Android/desktop (served by SW as well) -->
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+    <!-- Favicons for Android/desktop -->
+    <link rel="icon" type="image/png" sizes="192x192" id="favicon-192" href="" >
+    <link rel="icon" type="image/png" sizes="512x512" id="favicon-512" href="" >
 
     <style>
       :root {
@@ -117,9 +121,9 @@
         width: 30px;
         height: 30px;
         border-radius: 8px;
-        background: linear-gradient(135deg, var(--accent), #b91c1c);
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25),
-          inset 0 10px 20px rgba(239, 68, 68, 0.2);
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
       }
 
       .title {
@@ -390,10 +394,13 @@
     <div id="app" aria-live="polite"></div>
 
     <script>
-      // Fit Forge — PWA (v9)
-      // - Custom kettlebell + dumbbell icon for iOS/Android (Canvas -> PNG -> SW)
-      // - Robust icon URLs (filename match) for subfolder hosting
-      // - Installable PWA; prevent accidental zoom; timers; quick logging
+      // Fit Forge — PWA (v10) - Enhanced custom icons
+      // - Improved kettlebell + dumbbell icon with better shading and depth
+      // - More professional and polished visual appearance
+      // - Enhanced highlights, shadows, and composition
+
+      // Store generated icon globally for header use
+      let generatedIconDataURL = null;
 
       // Manifest + Service Worker (serves real icon URLs)
       (function pwa() {
@@ -413,103 +420,173 @@
           const s = size / 100; // normalize to 100x100 units
           ctx.save();
 
-          // Background gradient
+          // Background gradient - richer, more depth
           const bg = ctx.createLinearGradient(0, 0, size, size);
-          bg.addColorStop(0, "#ef4444");
-          bg.addColorStop(1, "#b91c1c");
+          bg.addColorStop(0, "#f87171");
+          bg.addColorStop(0.5, "#ef4444");
+          bg.addColorStop(1, "#991b1b");
           ctx.fillStyle = bg;
           ctx.fillRect(0, 0, size, size);
 
-          // Subtle vignette
+          // Deeper vignette for more depth
           const vign = ctx.createRadialGradient(
-            size * 0.5, size * 0.65, size * 0.15,
-            size * 0.5, size * 0.65, size * 0.8
+            size * 0.5, size * 0.5, size * 0.2,
+            size * 0.5, size * 0.5, size * 0.85
           );
           vign.addColorStop(0, "rgba(0,0,0,0)");
-          vign.addColorStop(1, "rgba(0,0,0,0.28)");
+          vign.addColorStop(1, "rgba(0,0,0,0.4)");
           ctx.fillStyle = vign;
           ctx.fillRect(0, 0, size, size);
 
-          // Top-left highlight
+          // Top highlight for dimension
           const hi = ctx.createRadialGradient(
-            size * 0.22, size * 0.18, size * 0.04,
-            size * 0.22, size * 0.18, size * 0.35
+            size * 0.3, size * 0.2, size * 0.05,
+            size * 0.3, size * 0.2, size * 0.45
           );
-          hi.addColorStop(0, "rgba(255,255,255,0.35)");
+          hi.addColorStop(0, "rgba(255,255,255,0.25)");
           hi.addColorStop(1, "rgba(255,255,255,0)");
           ctx.fillStyle = hi;
           ctx.fillRect(0, 0, size, size);
 
-          // Kettlebell (left-center)
+          // Kettlebell (left side, better positioned)
           ctx.save();
-          ctx.shadowColor = "rgba(0,0,0,0.35)";
-          ctx.shadowBlur = 8 * s;
-          ctx.shadowOffsetY = 2 * s;
-          ctx.fillStyle = "#fff";
+          ctx.shadowColor = "rgba(0,0,0,0.5)";
+          ctx.shadowBlur = 10 * s;
+          ctx.shadowOffsetX = 1 * s;
+          ctx.shadowOffsetY = 3 * s;
 
-          const kx = 38 * s;
-          const ky = 57 * s;
+          const kx = 32 * s;
+          const ky = 58 * s;
 
-          // Body
-          ctx.beginPath();
-          ctx.ellipse(kx, ky, 18 * s, 16 * s, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Neck (to connect to handle)
-          roundedRectPath(ctx, (kx - 10 * s), (ky - 16 * s), 20 * s, 8 * s, 4 * s);
-          ctx.fill();
-
-          // Outer Handle
-          roundedRectPath(ctx, (kx - 14 * s), (ky - 30 * s), 28 * s, 14 * s, 7 * s);
-          ctx.fill();
-
-          // Cut inner handle hole
-          ctx.globalCompositeOperation = "destination-out";
-          ctx.shadowColor = "transparent";
-          roundedRectPath(ctx, (kx - 9.5 * s), (ky - 26.5 * s), 19 * s, 7 * s, 3.5 * s);
-          ctx.fill();
-
-          // Restore to normal composition
-          ctx.globalCompositeOperation = "source-over";
-          ctx.restore();
-
-          // Dumbbell (bottom-right, slight angle)
-          ctx.save();
-          ctx.translate(68 * s, 70 * s);
-          ctx.rotate(-15 * Math.PI / 180);
-          ctx.shadowColor = "rgba(0,0,0,0.35)";
-          ctx.shadowBlur = 7 * s;
-          ctx.shadowOffsetY = 2 * s;
-          ctx.fillStyle = "#fff";
-
-          // Bar
-          roundedRectPath(ctx, -20 * s, -3 * s, 40 * s, 6 * s, 3 * s);
-          ctx.fill();
-
-          // Plates helper
-          function plate(x, wOuter, hOuter, wInner, hInner) {
-            // Outer plate
-            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 3 * s);
-            ctx.fill();
-            // Inner plate (closer to bar)
-            const ix = x - (wInner + 2 * s);
-            roundedRectPath(ctx, ix, -hInner / 2, wInner, hInner, 2.5 * s);
-            ctx.fill();
-          }
-          // Left plates (x is negative beyond bar)
-          plate(-22 * s, 10 * s, 16 * s, 7 * s, 12 * s);
-          // Right plates
-          ctx.scale(-1, 1);
-          plate(-22 * s, 10 * s, 16 * s, 7 * s, 12 * s);
-          ctx.restore();
-
-          // Subtle white sheen across kettlebell
-          ctx.save();
-          ctx.globalAlpha = 0.08;
+          // Main body - more realistic shape
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
-          ctx.ellipse(34 * s, 52 * s, 26 * s, 20 * s, -20 * Math.PI/180, 0, Math.PI * 2);
+          ctx.ellipse(kx, ky, 19 * s, 17 * s, 0, 0, Math.PI * 2);
           ctx.fill();
+
+          // Neck connecting to handle
+          roundedRectPath(ctx, kx - 9 * s, ky - 18 * s, 18 * s, 10 * s, 4 * s);
+          ctx.fill();
+
+          // Handle outer ring
+          roundedRectPath(ctx, kx - 15 * s, ky - 32 * s, 30 * s, 16 * s, 8 * s);
+          ctx.fill();
+
+          // Cut handle hole
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.shadowColor = "transparent";
+          roundedRectPath(ctx, kx - 10 * s, ky - 28 * s, 20 * s, 8 * s, 4 * s);
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+
+          // Add inner shadow to handle hole for depth
+          ctx.save();
+          ctx.shadowColor = "rgba(0,0,0,0.3)";
+          ctx.shadowBlur = 3 * s;
+          ctx.shadowOffsetY = -1 * s;
+          ctx.globalCompositeOperation = "source-atop";
+          ctx.strokeStyle = "rgba(0,0,0,0.15)";
+          ctx.lineWidth = 1.5 * s;
+          roundedRectPath(ctx, kx - 10 * s, ky - 28 * s, 20 * s, 8 * s, 4 * s);
+          ctx.stroke();
+          ctx.restore();
+
+          // Highlight on kettlebell body
+          ctx.save();
+          ctx.globalAlpha = 0.3;
+          const kbHighlight = ctx.createRadialGradient(
+            kx - 6 * s, ky - 5 * s, 0,
+            kx - 6 * s, ky - 5 * s, 14 * s
+          );
+          kbHighlight.addColorStop(0, "rgba(255,255,255,1)");
+          kbHighlight.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = kbHighlight;
+          ctx.beginPath();
+          ctx.ellipse(kx - 4 * s, ky - 3 * s, 12 * s, 10 * s, -0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.restore();
+
+          // Dumbbell (right side, tilted for visual interest)
+          ctx.save();
+          ctx.translate(70 * s, 50 * s);
+          ctx.rotate(-12 * Math.PI / 180);
+          ctx.shadowColor = "rgba(0,0,0,0.5)";
+          ctx.shadowBlur = 9 * s;
+          ctx.shadowOffsetX = 1 * s;
+          ctx.shadowOffsetY = 3 * s;
+
+          // Bar/handle
+          ctx.fillStyle = "#ffffff";
+          roundedRectPath(ctx, -22 * s, -3.5 * s, 44 * s, 7 * s, 3.5 * s);
+          ctx.fill();
+
+          // Bar highlight
+          ctx.save();
+          ctx.globalAlpha = 0.4;
+          const barHighlight = ctx.createLinearGradient(0, -3.5 * s, 0, 3.5 * s);
+          barHighlight.addColorStop(0, "rgba(255,255,255,1)");
+          barHighlight.addColorStop(0.5, "rgba(255,255,255,0)");
+          barHighlight.addColorStop(1, "rgba(0,0,0,0.1)");
+          ctx.fillStyle = barHighlight;
+          roundedRectPath(ctx, -22 * s, -3.5 * s, 44 * s, 7 * s, 3.5 * s);
+          ctx.fill();
+          ctx.restore();
+
+          // Weight plates function with better detail
+          function plate(x, wOuter, hOuter, wInner, hInner) {
+            // Outer plate
+            ctx.fillStyle = "#ffffff";
+            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 2.5 * s);
+            ctx.fill();
+
+            // Plate edge detail
+            ctx.save();
+            ctx.globalAlpha = 0.15;
+            ctx.fillStyle = "#000000";
+            roundedRectPath(ctx, x - wOuter + 1 * s, -hOuter / 2 + 1 * s, wOuter - 2 * s, hOuter - 2 * s, 2 * s);
+            ctx.fill();
+            ctx.restore();
+
+            // Inner plate
+            ctx.fillStyle = "#ffffff";
+            const ix = x - (wInner + 2.5 * s);
+            roundedRectPath(ctx, ix, -hInner / 2, wInner, hInner, 2 * s);
+            ctx.fill();
+
+            // Plate highlight
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+            const plateHighlight = ctx.createLinearGradient(x - wOuter, -hOuter / 2, x - wOuter, hOuter / 2);
+            plateHighlight.addColorStop(0, "rgba(255,255,255,1)");
+            plateHighlight.addColorStop(0.6, "rgba(255,255,255,0)");
+            ctx.fillStyle = plateHighlight;
+            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 2.5 * s);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // Left plates
+          plate(-24 * s, 11 * s, 18 * s, 8 * s, 14 * s);
+
+          // Right plates (mirror)
+          ctx.scale(-1, 1);
+          plate(-24 * s, 11 * s, 18 * s, 8 * s, 14 * s);
+
+          ctx.restore();
+
+          // Subtle accent glow around entire composition
+          ctx.save();
+          ctx.globalAlpha = 0.06;
+          const accentGlow = ctx.createRadialGradient(
+            size * 0.5, size * 0.5, size * 0.3,
+            size * 0.5, size * 0.5, size * 0.7
+          );
+          accentGlow.addColorStop(0, "rgba(255,255,255,0.3)");
+          accentGlow.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = accentGlow;
+          ctx.fillRect(0, 0, size, size);
           ctx.restore();
 
           ctx.restore();
@@ -524,7 +601,43 @@
           return dataURL.slice(dataURL.indexOf(",") + 1); // pure base64
         }
 
-        // Generate all required sizes
+        function generateIconDataURL(size) {
+          const c = document.createElement("canvas");
+          c.width = c.height = size;
+          const ctx = c.getContext("2d");
+          drawIronIcon(ctx, size);
+          return c.toDataURL("image/png");
+        }
+
+        // Store icon for header use
+        generatedIconDataURL = generateIconDataURL(120);
+
+        // Generate all required sizes as data URLs for direct embedding
+        const ICON_180_URL = generateIconDataURL(180);
+        const ICON_167_URL = generateIconDataURL(167);
+        const ICON_152_URL = generateIconDataURL(152);
+        const ICON_192_URL = generateIconDataURL(192);
+        const ICON_512_URL = generateIconDataURL(512);
+
+        // Inject data URLs into link elements immediately
+        const iconLinks = {
+          'apple-touch-icon-default': ICON_180_URL,
+          'apple-touch-icon-180': ICON_180_URL,
+          'apple-touch-icon-167': ICON_167_URL,
+          'apple-touch-icon-152': ICON_152_URL,
+          'apple-touch-icon-precomposed': ICON_180_URL,
+          'favicon-192': ICON_192_URL,
+          'favicon-512': ICON_512_URL
+        };
+
+        Object.keys(iconLinks).forEach(id => {
+          const link = document.getElementById(id);
+          if (link) {
+            link.href = iconLinks[id];
+          }
+        });
+
+        // Also generate base64 for service worker
         const ICON_180 = generateIconB64(180);
         const ICON_167 = generateIconB64(167);
         const ICON_152 = generateIconB64(152);
@@ -567,7 +680,7 @@
 
         // 3) Service Worker: serve icon URLs with real PNG bytes + cache index
         const sw = `
-          const CACHE="fitforge-v9";
+          const CACHE="fitforge-v10";
 
           // Map base filenames -> base64 PNG
           const FILE_ICONS = new Map([
@@ -697,6 +810,30 @@
         setTimeout(() => t.remove(), ms);
       }
 
+      function showConfirmDialog(message, onConfirm) {
+        const modal = document.createElement("div");
+        modal.className = "sheet-backdrop";
+        modal.innerHTML = `
+          <div class="sheet" style="border-radius: 16px; max-width: 400px; padding: 20px;">
+            <div style="font-weight: 700; margin-bottom: 12px;">${message}</div>
+            <div class="row" style="justify-content: flex-end; gap: 12px; margin-top: 16px;">
+              <button class="btn" id="cancelBtn">Cancel</button>
+              <button class="btn primary" id="confirmBtn" style="background: var(--accent);">Delete</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.querySelector("#cancelBtn").onclick = () => modal.remove();
+        modal.querySelector("#confirmBtn").onclick = () => {
+          modal.remove();
+          onConfirm();
+        };
+        modal.onclick = (e) => {
+          if (e.target === modal) modal.remove();
+        };
+      }
+
       function mmss(ms) {
         const t = Math.max(0, Math.floor(ms / 1000));
         const h = Math.floor(t / 3600);
@@ -710,7 +847,7 @@
         ["Cat-Cow", "5 reps", "Explore range, no forcing."],
         ["Dead Bug", "8/side", "Press back into floor."],
         ["Bird-Dog", "8/side", "Slow, hold 2 sec."],
-        ["Glute Bridge", "15 reps", "Squeeze, don’t yank."],
+        ["Glute Bridge", "15 reps", "Squeeze, don't yank."],
         ["KB Halo", "8/side @ 35 lb", "Wake up the T-spine."],
       ];
 
@@ -786,7 +923,7 @@
         },
         IronFocused: {
           id: "IronFocused",
-          title: "Iron-Focused: The Backsmith’s Anvil Day",
+          title: "Iron-Focused: The Backsmith's Anvil Day",
           subtitle: "Heavier day, form is king",
           restPolicy: "90-120",
           exercises: [
@@ -957,6 +1094,7 @@
         }
         function load() {
           try {
+            // eslint-disable-next-line no-restricted-globals
             const s = localStorage.getItem(KEY);
             return s ? JSON.parse(s) : null;
           } catch {
@@ -964,6 +1102,7 @@
           }
         }
         function save() {
+          // eslint-disable-next-line no-restricted-globals
           localStorage.setItem(KEY, JSON.stringify(state));
           return state;
         }
@@ -1108,6 +1247,9 @@
         left.className = "brand";
         const logo = document.createElement("div");
         logo.className = "logo";
+        if (generatedIconDataURL) {
+          logo.style.backgroundImage = `url(${generatedIconDataURL})`;
+        }
         const t = document.createElement("div");
         t.innerHTML = `<div class="title">Fit Forge</div>
           <div class="sub">Build Iron. Guard Your Spine.</div>`;
@@ -1257,7 +1399,7 @@
         const routineSel = document.createElement("select");
         const opts = [
           ["Hybrid", "Hybrid"],
-          ["IronFocused", "Iron-Focused: The Backsmith’s Anvil Day"],
+          ["IronFocused", "Iron-Focused: The Backsmith's Anvil Day"],
           ["GrumpyBack", "Grumpy Back Day"],
         ];
         opts.forEach(([v, t]) => {
@@ -1738,8 +1880,9 @@
             del.className = "btn";
             del.textContent = "Delete";
             del.onclick = () => {
-              if (!confirm("Delete this session?")) return;
-              deleteSessionById(l.id);
+              showConfirmDialog("Delete this session?", () => {
+                deleteSessionById(l.id);
+              });
             };
             summary.appendChild(txt);
             summary.appendChild(del);
@@ -1877,7 +2020,7 @@
           <div class="hr"></div>
           <div class="h" style="font-weight:700">KB Swings</div>
           <div class="sub">
-            • Hinge hips; butt to wall<br/>
+            • Hinge at hips; butt to wall<br/>
             • Arms = ropes; bell = pendulum<br/>
             • Brace before hike; ribs down<br/>
             • Top = plank; bell ≤ chest<br/>
@@ -1908,13 +2051,6 @@
         wrap.appendChild(prog);
 
         return wrap;
-      }
-
-      // Helpers
-      function divider() {
-        const d = document.createElement("div");
-        d.className = "hr";
-        return d;
       }
 
       // Kickoff + iOS zoom guards
