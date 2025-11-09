@@ -1,12 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Fit Forge — single-file PWA (v9)
-         Updates:
-         • Custom icon (kettlebell + dumbbell) generated via Canvas and served as real PNG URLs
-         • Robust iOS Home Screen icon delivery: SW matches by filename (works in subfolders)
-         • Version bump to v9 so the new icon takes effect
-         • All else unchanged -->
     <meta charset="utf-8" >
     <meta
       name="viewport"
@@ -70,6 +64,19 @@
         --pad-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
         --touch: 48px;
         --radius: 14px;
+      }
+
+      :root.light {
+        --bg: #f5f5f7;
+        --surface: #ffffff;
+        --card: #ffffff;
+        --card-2: #f5f5f7;
+        --line: #d1d1d6;
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --accent: #ef4444;
+        --ok: #22c55e;
+        --warn: #f59e0b;
       }
 
       * {
@@ -200,7 +207,7 @@
         cursor: pointer;
         user-select: none;
         touch-action: manipulation;
-        font-size: 16px; /* avoid iOS zoom on press */
+        font-size: 16px;
       }
 
       .btn.primary {
@@ -222,12 +229,46 @@
         border-radius: 10px;
         height: var(--touch);
         padding: 0 12px;
-        font-size: 16px; /* Prevent iOS auto-zoom on focus */
+        font-size: 16px;
       }
 
       button {
         background: var(--card-2);
         border: 1px solid var(--line);
+      }
+
+      input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 48px;
+        height: 48px;
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      input[type="checkbox"]:checked {
+        background: #ef4444;
+        border-color: #991b1b;
+      }
+
+      input[type="checkbox"]:checked::after {
+        content: "✓";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      input[type="checkbox"]:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .hr {
@@ -305,9 +346,9 @@
       }
 
       .chip.done {
-        background: #142116;
-        color: #86efac;
-        border-color: #14532d;
+        background: #ef4444;
+        color: #ffffff;
+        border-color: #991b1b;
       }
 
       .cue {
@@ -331,7 +372,7 @@
         display: block;
         height: 100%;
         width: 0%;
-        background: linear-gradient(90deg, #22c55e, #0ea5e9);
+        background: linear-gradient(90deg, #f87171, #ef4444);
         transition: width 0.25s linear;
       }
 
@@ -349,7 +390,6 @@
         box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
       }
 
-      /* Quick Log bottom sheet */
       .sheet-backdrop {
         position: fixed;
         inset: 0;
@@ -394,396 +434,246 @@
     <div id="app" aria-live="polite"></div>
 
     <script>
-      // Fit Forge — PWA (v10) - Enhanced custom icons
-      // - Improved kettlebell + dumbbell icon with better shading and depth
-      // - More professional and polished visual appearance
-      // - Enhanced highlights, shadows, and composition
+      // Global error handler to catch any issues
+      window.onerror = function(msg, url, line, col, error) {
+        document.body.innerHTML = '<div style="color: red; padding: 20px; font-family: monospace;">ERROR: ' + msg + '<br>Line: ' + line + '<br>' + (error ? error.stack : '') + '</div>';
+        return false;
+      };
 
-      // Store generated icon globally for header use
+      // Fit Forge — PWA (v10) - Barbell icon
       let generatedIconDataURL = null;
 
-      // Manifest + Service Worker (serves real icon URLs)
+      // Manifest + Service Worker
       (function pwa() {
-        // 1) Draw icon via Canvas -> base64 PNG (no external assets)
-        function roundedRectPath(ctx, x, y, w, h, r) {
-          const rr = Math.min(r, w / 2, h / 2);
-          ctx.beginPath();
-          ctx.moveTo(x + rr, y);
-          ctx.arcTo(x + w, y, x + w, y + h, rr);
-          ctx.arcTo(x + w, y + h, x, y + h, rr);
-          ctx.arcTo(x, y + h, x, y, rr);
-          ctx.arcTo(x, y, x + w, y, rr);
-          ctx.closePath();
-        }
+        try {
+          function roundedRectPath(ctx, x, y, w, h, r) {
+            const rr = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + rr, y);
+            ctx.arcTo(x + w, y, x + w, y + h, rr);
+            ctx.arcTo(x + w, y + h, x, y + h, rr);
+            ctx.arcTo(x, y + h, x, y, rr);
+            ctx.arcTo(x, y, x + w, y, rr);
+            ctx.closePath();
+          }
 
-        function drawIronIcon(ctx, size) {
-          const s = size / 100; // normalize to 100x100 units
-          ctx.save();
+          function drawWeightStack(ctx, s, xPos, isLeft) {
+            const direction = isLeft ? -1 : 1;
 
-          // Background gradient - richer, more depth
-          const bg = ctx.createLinearGradient(0, 0, size, size);
-          bg.addColorStop(0, "#f87171");
-          bg.addColorStop(0.5, "#ef4444");
-          bg.addColorStop(1, "#991b1b");
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, size, size);
-
-          // Deeper vignette for more depth
-          const vign = ctx.createRadialGradient(
-            size * 0.5, size * 0.5, size * 0.2,
-            size * 0.5, size * 0.5, size * 0.85
-          );
-          vign.addColorStop(0, "rgba(0,0,0,0)");
-          vign.addColorStop(1, "rgba(0,0,0,0.4)");
-          ctx.fillStyle = vign;
-          ctx.fillRect(0, 0, size, size);
-
-          // Top highlight for dimension
-          const hi = ctx.createRadialGradient(
-            size * 0.3, size * 0.2, size * 0.05,
-            size * 0.3, size * 0.2, size * 0.45
-          );
-          hi.addColorStop(0, "rgba(255,255,255,0.25)");
-          hi.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = hi;
-          ctx.fillRect(0, 0, size, size);
-
-          // Kettlebell (left side, better positioned)
-          ctx.save();
-          ctx.shadowColor = "rgba(0,0,0,0.5)";
-          ctx.shadowBlur = 10 * s;
-          ctx.shadowOffsetX = 1 * s;
-          ctx.shadowOffsetY = 3 * s;
-
-          const kx = 32 * s;
-          const ky = 58 * s;
-
-          // Main body - more realistic shape
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.ellipse(kx, ky, 19 * s, 17 * s, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Neck connecting to handle
-          roundedRectPath(ctx, kx - 9 * s, ky - 18 * s, 18 * s, 10 * s, 4 * s);
-          ctx.fill();
-
-          // Handle outer ring
-          roundedRectPath(ctx, kx - 15 * s, ky - 32 * s, 30 * s, 16 * s, 8 * s);
-          ctx.fill();
-
-          // Cut handle hole
-          ctx.globalCompositeOperation = "destination-out";
-          ctx.shadowColor = "transparent";
-          roundedRectPath(ctx, kx - 10 * s, ky - 28 * s, 20 * s, 8 * s, 4 * s);
-          ctx.fill();
-          ctx.globalCompositeOperation = "source-over";
-
-          // Add inner shadow to handle hole for depth
-          ctx.save();
-          ctx.shadowColor = "rgba(0,0,0,0.3)";
-          ctx.shadowBlur = 3 * s;
-          ctx.shadowOffsetY = -1 * s;
-          ctx.globalCompositeOperation = "source-atop";
-          ctx.strokeStyle = "rgba(0,0,0,0.15)";
-          ctx.lineWidth = 1.5 * s;
-          roundedRectPath(ctx, kx - 10 * s, ky - 28 * s, 20 * s, 8 * s, 4 * s);
-          ctx.stroke();
-          ctx.restore();
-
-          // Highlight on kettlebell body
-          ctx.save();
-          ctx.globalAlpha = 0.3;
-          const kbHighlight = ctx.createRadialGradient(
-            kx - 6 * s, ky - 5 * s, 0,
-            kx - 6 * s, ky - 5 * s, 14 * s
-          );
-          kbHighlight.addColorStop(0, "rgba(255,255,255,1)");
-          kbHighlight.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = kbHighlight;
-          ctx.beginPath();
-          ctx.ellipse(kx - 4 * s, ky - 3 * s, 12 * s, 10 * s, -0.3, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-
-          ctx.restore();
-
-          // Dumbbell (right side, tilted for visual interest)
-          ctx.save();
-          ctx.translate(70 * s, 50 * s);
-          ctx.rotate(-12 * Math.PI / 180);
-          ctx.shadowColor = "rgba(0,0,0,0.5)";
-          ctx.shadowBlur = 9 * s;
-          ctx.shadowOffsetX = 1 * s;
-          ctx.shadowOffsetY = 3 * s;
-
-          // Bar/handle
-          ctx.fillStyle = "#ffffff";
-          roundedRectPath(ctx, -22 * s, -3.5 * s, 44 * s, 7 * s, 3.5 * s);
-          ctx.fill();
-
-          // Bar highlight
-          ctx.save();
-          ctx.globalAlpha = 0.4;
-          const barHighlight = ctx.createLinearGradient(0, -3.5 * s, 0, 3.5 * s);
-          barHighlight.addColorStop(0, "rgba(255,255,255,1)");
-          barHighlight.addColorStop(0.5, "rgba(255,255,255,0)");
-          barHighlight.addColorStop(1, "rgba(0,0,0,0.1)");
-          ctx.fillStyle = barHighlight;
-          roundedRectPath(ctx, -22 * s, -3.5 * s, 44 * s, 7 * s, 3.5 * s);
-          ctx.fill();
-          ctx.restore();
-
-          // Weight plates function with better detail
-          function plate(x, wOuter, hOuter, wInner, hInner) {
-            // Outer plate
+            // Collar (small plate closest to center)
             ctx.fillStyle = "#ffffff";
-            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 2.5 * s);
+            ctx.beginPath();
+            const collar_x = isLeft ? xPos - 6 * s : xPos + 2 * s;
+            roundedRectPath(ctx, collar_x, -6 * s, 4 * s, 12 * s, 2 * s);
             ctx.fill();
 
-            // Plate edge detail
+            // Collar shadow detail
+            ctx.save();
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = "#000000";
+            ctx.beginPath();
+            const shadow1_x = isLeft ? xPos - 5.5 * s : xPos + 2.5 * s;
+            roundedRectPath(ctx, shadow1_x, -5.5 * s, 3 * s, 11 * s, 1.5 * s);
+            ctx.fill();
+            ctx.restore();
+
+            // Medium plate
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            const med_x = isLeft ? xPos - 12 * s : xPos + 6 * s;
+            roundedRectPath(ctx, med_x, -10 * s, 6 * s, 20 * s, 2.5 * s);
+            ctx.fill();
+
+            // Medium shadow detail
             ctx.save();
             ctx.globalAlpha = 0.15;
             ctx.fillStyle = "#000000";
-            roundedRectPath(ctx, x - wOuter + 1 * s, -hOuter / 2 + 1 * s, wOuter - 2 * s, hOuter - 2 * s, 2 * s);
+            ctx.beginPath();
+            const shadow2_x = isLeft ? xPos - 11.3 * s : xPos + 6.8 * s;
+            roundedRectPath(ctx, shadow2_x, -9 * s, 4.5 * s, 18 * s, 2 * s);
             ctx.fill();
             ctx.restore();
 
-            // Inner plate
+            // Large outer plate
             ctx.fillStyle = "#ffffff";
-            const ix = x - (wInner + 2.5 * s);
-            roundedRectPath(ctx, ix, -hInner / 2, wInner, hInner, 2 * s);
+            ctx.beginPath();
+            const large_x = isLeft ? xPos - 20 * s : xPos + 12 * s;
+            roundedRectPath(ctx, large_x, -14 * s, 8 * s, 28 * s, 3 * s);
             ctx.fill();
 
-            // Plate highlight
+            // Large shadow detail
             ctx.save();
-            ctx.globalAlpha = 0.35;
-            const plateHighlight = ctx.createLinearGradient(x - wOuter, -hOuter / 2, x - wOuter, hOuter / 2);
-            plateHighlight.addColorStop(0, "rgba(255,255,255,1)");
-            plateHighlight.addColorStop(0.6, "rgba(255,255,255,0)");
-            ctx.fillStyle = plateHighlight;
-            roundedRectPath(ctx, x - wOuter, -hOuter / 2, wOuter, hOuter, 2.5 * s);
+            ctx.globalAlpha = 0.12;
+            ctx.fillStyle = "#000000";
+            ctx.beginPath();
+            const shadow3_x = isLeft ? xPos - 19 * s : xPos + 13 * s;
+            roundedRectPath(ctx, shadow3_x, -12.5 * s, 6 * s, 25 * s, 2.5 * s);
+            ctx.fill();
+            ctx.restore();
+
+            // Highlight gradient on weights
+            ctx.save();
+            ctx.globalAlpha = 0.4;
+            const highlightGrad = ctx.createLinearGradient(xPos, -14 * s, xPos, 14 * s);
+            highlightGrad.addColorStop(0, "rgba(255,255,255,1)");
+            highlightGrad.addColorStop(0.3, "rgba(255,255,255,0.3)");
+            highlightGrad.addColorStop(0.7, "rgba(255,255,255,0)");
+            highlightGrad.addColorStop(1, "rgba(0,0,0,0.1)");
+            ctx.fillStyle = highlightGrad;
+            ctx.beginPath();
+            roundedRectPath(ctx, large_x, -14 * s, 8 * s, 28 * s, 3 * s);
             ctx.fill();
             ctx.restore();
           }
 
-          // Left plates
-          plate(-24 * s, 11 * s, 18 * s, 8 * s, 14 * s);
+          function drawIronIcon(ctx, size) {
+            const s = size / 100;
+            ctx.save();
 
-          // Right plates (mirror)
-          ctx.scale(-1, 1);
-          plate(-24 * s, 11 * s, 18 * s, 8 * s, 14 * s);
+            const bg = ctx.createLinearGradient(0, 0, size, size);
+            bg.addColorStop(0, "#dc2626");
+            bg.addColorStop(0.5, "#991b1b");
+            bg.addColorStop(1, "#7f1d1d");
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, size, size);
 
-          ctx.restore();
+            ctx.save();
+            ctx.globalAlpha = 0.03;
+            for (let i = 0; i < 200; i++) {
+              ctx.fillStyle = Math.random() > 0.5 ? "#ffffff" : "#000000";
+              ctx.fillRect(Math.random() * size, Math.random() * size, 1, 1);
+            }
+            ctx.restore();
 
-          // Subtle accent glow around entire composition
-          ctx.save();
-          ctx.globalAlpha = 0.06;
-          const accentGlow = ctx.createRadialGradient(
-            size * 0.5, size * 0.5, size * 0.3,
-            size * 0.5, size * 0.5, size * 0.7
-          );
-          accentGlow.addColorStop(0, "rgba(255,255,255,0.3)");
-          accentGlow.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = accentGlow;
-          ctx.fillRect(0, 0, size, size);
-          ctx.restore();
+            ctx.translate(size * 0.5, size * 0.5);
 
-          ctx.restore();
-        }
+            ctx.save();
+            ctx.shadowColor = "rgba(0,0,0,0.4)";
+            ctx.shadowBlur = 8 * s;
+            ctx.shadowOffsetY = 2 * s;
 
-        function generateIconB64(size) {
-          const c = document.createElement("canvas");
-          c.width = c.height = size;
-          const ctx = c.getContext("2d");
-          drawIronIcon(ctx, size);
-          const dataURL = c.toDataURL("image/png");
-          return dataURL.slice(dataURL.indexOf(",") + 1); // pure base64
-        }
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            roundedRectPath(ctx, -32 * s, -2 * s, 64 * s, 4 * s, 2 * s);
+            ctx.fill();
 
-        function generateIconDataURL(size) {
-          const c = document.createElement("canvas");
-          c.width = c.height = size;
-          const ctx = c.getContext("2d");
-          drawIronIcon(ctx, size);
-          return c.toDataURL("image/png");
-        }
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            const barGrad = ctx.createLinearGradient(0, -2 * s, 0, 2 * s);
+            barGrad.addColorStop(0, "rgba(255,255,255,1)");
+            barGrad.addColorStop(0.5, "rgba(255,255,255,0)");
+            barGrad.addColorStop(1, "rgba(0,0,0,0.2)");
+            ctx.fillStyle = barGrad;
+            roundedRectPath(ctx, -32 * s, -2 * s, 64 * s, 4 * s, 2 * s);
+            ctx.fill();
+            ctx.restore();
 
-        // Store icon for header use
-        generatedIconDataURL = generateIconDataURL(120);
+            drawWeightStack(ctx, s, -32 * s, true);
+            drawWeightStack(ctx, s, 32 * s, false);
 
-        // Generate all required sizes as data URLs for direct embedding
-        const ICON_180_URL = generateIconDataURL(180);
-        const ICON_167_URL = generateIconDataURL(167);
-        const ICON_152_URL = generateIconDataURL(152);
-        const ICON_192_URL = generateIconDataURL(192);
-        const ICON_512_URL = generateIconDataURL(512);
+            ctx.restore();
 
-        // Inject data URLs into link elements immediately
-        const iconLinks = {
-          'apple-touch-icon-default': ICON_180_URL,
-          'apple-touch-icon-180': ICON_180_URL,
-          'apple-touch-icon-167': ICON_167_URL,
-          'apple-touch-icon-152': ICON_152_URL,
-          'apple-touch-icon-precomposed': ICON_180_URL,
-          'favicon-192': ICON_192_URL,
-          'favicon-512': ICON_512_URL
-        };
+            ctx.save();
+            ctx.globalAlpha = 0.15;
+            const glow = ctx.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 0.6);
+            glow.addColorStop(0, "rgba(255,255,255,0.3)");
+            glow.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.fillStyle = glow;
+            ctx.fillRect(-size * 0.5, -size * 0.5, size, size);
+            ctx.restore();
 
-        Object.keys(iconLinks).forEach(id => {
-          const link = document.getElementById(id);
-          if (link) {
-            link.href = iconLinks[id];
+            ctx.restore();
           }
-        });
 
-        // Also generate base64 for service worker
-        const ICON_180 = generateIconB64(180);
-        const ICON_167 = generateIconB64(167);
-        const ICON_152 = generateIconB64(152);
-        const ICON_192 = generateIconB64(192);
-        const ICON_512 = generateIconB64(512);
-
-        // 2) Manifest
-        const manifest = {
-          name: "Fit Forge — Build Iron. Guard Your Spine.",
-          short_name: "Fit Forge",
-          start_url: "./index.html",
-          display: "standalone",
-          background_color: "#0E0E10",
-          theme_color: "#0E0E10",
-          categories: ["health", "fitness", "education"],
-          icons: [
-            {
-              src: "icons/icon-192.png",
-              sizes: "192x192",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "icons/icon-512.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-          ],
-        };
-
-        const m = new Blob([JSON.stringify(manifest)], {
-          type: "application/manifest+json",
-        });
-        const mu = URL.createObjectURL(m);
-        const link = document.createElement("link");
-        link.rel = "manifest";
-        link.href = mu;
-        document.head.appendChild(link);
-
-        // 3) Service Worker: serve icon URLs with real PNG bytes + cache index
-        const sw = `
-          const CACHE="fitforge-v10";
-
-          // Map base filenames -> base64 PNG
-          const FILE_ICONS = new Map([
-            ["apple-touch-icon.png","${ICON_180}"],
-            ["apple-touch-icon-precomposed.png","${ICON_180}"],
-            ["apple-touch-icon-180x180.png","${ICON_180}"],
-            ["apple-touch-icon-167x167.png","${ICON_167}"],
-            ["apple-touch-icon-152x152.png","${ICON_152}"],
-            ["icon-192.png","${ICON_192}"],
-            ["icon-512.png","${ICON_512}"]
-          ]);
-
-          function b64ToUint8(b64){
-            const bin = atob(b64);
-            const len = bin.length;
-            const bytes = new Uint8Array(len);
-            for (let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i);
-            return bytes;
+          function generateIconDataURL(size) {
+            const c = document.createElement("canvas");
+            c.width = c.height = size;
+            const ctx = c.getContext("2d");
+            drawIronIcon(ctx, size);
+            return c.toDataURL("image/png");
           }
-          function pngResponse(b64){
-            return new Response(b64ToUint8(b64), {
-              headers: {
-                "Content-Type": "image/png",
-                "Cache-Control": "public, max-age=31536000, immutable"
-              }
+
+          function generateIconB64(size) {
+            const dataURL = generateIconDataURL(size);
+            return dataURL.slice(dataURL.indexOf(",") + 1);
+          }
+
+          generatedIconDataURL = generateIconDataURL(120);
+
+          const ICON_180_URL = generateIconDataURL(180);
+          const ICON_167_URL = generateIconDataURL(167);
+          const ICON_152_URL = generateIconDataURL(152);
+          const ICON_192_URL = generateIconDataURL(192);
+          const ICON_512_URL = generateIconDataURL(512);
+
+          const iconLinks = {
+            'apple-touch-icon-default': ICON_180_URL,
+            'apple-touch-icon-180': ICON_180_URL,
+            'apple-touch-icon-167': ICON_167_URL,
+            'apple-touch-icon-152': ICON_152_URL,
+            'apple-touch-icon-precomposed': ICON_180_URL,
+            'favicon-192': ICON_192_URL,
+            'favicon-512': ICON_512_URL
+          };
+
+          Object.keys(iconLinks).forEach(id => {
+            const link = document.getElementById(id);
+            if (link) {
+              link.href = iconLinks[id];
+            }
+          });
+
+          const ICON_180 = generateIconB64(180);
+          const ICON_167 = generateIconB64(167);
+          const ICON_152 = generateIconB64(152);
+          const ICON_192 = generateIconB64(192);
+          const ICON_512 = generateIconB64(512);
+
+          const manifest = {
+            name: "Fit Forge — Build Iron. Guard Your Spine.",
+            short_name: "Fit Forge",
+            start_url: "./index.html",
+            display: "standalone",
+            background_color: "#0E0E10",
+            theme_color: "#0E0E10",
+            categories: ["health", "fitness", "education"],
+            icons: [
+              { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+              { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
+            ]
+          };
+
+          const m = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+          const mu = URL.createObjectURL(m);
+          const link = document.createElement("link");
+          link.rel = "manifest";
+          link.href = mu;
+          document.head.appendChild(link);
+
+          const sw = `const CACHE="fitforge-v10";const FILE_ICONS=new Map([["apple-touch-icon.png","${ICON_180}"],["apple-touch-icon-precomposed.png","${ICON_180}"],["apple-touch-icon-180x180.png","${ICON_180}"],["apple-touch-icon-167x167.png","${ICON_167}"],["apple-touch-icon-152x152.png","${ICON_152}"],["icon-192.png","${ICON_192}"],["icon-512.png","${ICON_512}"]]);function b64ToUint8(b64){const bin=atob(b64);const len=bin.length;const bytes=new Uint8Array(len);for(let i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);return bytes}function pngResponse(b64){return new Response(b64ToUint8(b64),{headers:{"Content-Type":"image/png","Cache-Control":"public, max-age=31536000, immutable"}})}self.addEventListener("install",(e)=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./index.html"]).catch(()=>{})));self.skipWaiting()});self.addEventListener("activate",(e)=>{e.waitUntil(self.clients.claim())});self.addEventListener("fetch",(e)=>{const url=new URL(e.request.url);const path=url.pathname;const name=path.split("/").pop();if(FILE_ICONS.has(name)){e.respondWith(pngResponse(FILE_ICONS.get(name)));return}if(path==="/"||path.endsWith("/index.html")){e.respondWith(caches.open(CACHE).then(async(c)=>{const cached=await c.match("./index.html");const fetcher=fetch(e.request).then((r)=>{c.put("./index.html",r.clone());return r}).catch(()=>cached);return cached||fetcher}));return}e.respondWith(caches.match(e.request).then((cRes)=>{const net=fetch(e.request).then((nRes)=>{if(nRes&&nRes.status===200&&nRes.type==="basic"){const copy=nRes.clone();caches.open(CACHE).then((c)=>c.put(e.request,copy))}return nRes}).catch(()=>cRes);return cRes||net}))});`;
+
+          if ("serviceWorker" in navigator) {
+            const swu = URL.createObjectURL(new Blob([sw], { type: "text/javascript" }));
+            navigator.serviceWorker.register(swu, { scope: "/" }).catch(() => {
+              navigator.serviceWorker.register(swu).catch(() => {});
             });
           }
-
-          self.addEventListener("install", (e) => {
-            e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./index.html"]).catch(()=>{})));
-            self.skipWaiting();
-          });
-
-          self.addEventListener("activate", (e) => {
-            e.waitUntil(self.clients.claim());
-          });
-
-          self.addEventListener("fetch", (e) => {
-            const url = new URL(e.request.url);
-            const path = url.pathname;
-            const name = path.split("/").pop();
-
-            // Serve any of the icon filenames regardless of folder depth
-            if (FILE_ICONS.has(name)) {
-              e.respondWith(pngResponse(FILE_ICONS.get(name)));
-              return;
-            }
-
-            // Basic app shell caching
-            if (path === "/" || path.endsWith("/index.html")) {
-              e.respondWith(
-                caches.open(CACHE).then(async (c) => {
-                  const cached = await c.match("./index.html");
-                  const fetcher = fetch(e.request).then((r) => {
-                    c.put("./index.html", r.clone());
-                    return r;
-                  }).catch(()=>cached);
-                  return cached || fetcher;
-                })
-              );
-              return;
-            }
-
-            e.respondWith(
-              caches.match(e.request).then((cRes) => {
-                const net = fetch(e.request).then((nRes) => {
-                  if (nRes && nRes.status === 200 && nRes.type === "basic") {
-                    const copy = nRes.clone();
-                    caches.open(CACHE).then((c) => c.put(e.request, copy));
-                  }
-                  return nRes;
-                }).catch(() => cRes);
-                return cRes || net;
-              })
-            );
-          });
-        `;
-        if ("serviceWorker" in navigator) {
-          const swu = URL.createObjectURL(
-            new Blob([sw], { type: "text/javascript" })
-          );
-          // Try to scope to root so icon paths resolve at domain root
-          navigator.serviceWorker.register(swu, { scope: "/" }).catch(() => {
-            // Fallback: default scope (icons still work via filename matching)
-            navigator.serviceWorker.register(swu).catch(() => {});
-          });
+        } catch(e) {
+          console.error("PWA init error:", e);
         }
       })();
 
-      // Utilities
+      // Rest of the app code continues...
       const qs = (s, el = document) => el.querySelector(s);
       const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
       const nowISO = () => new Date().toISOString();
       const todayKey = () => new Date().toISOString().slice(0, 10);
-      const uid = () =>
-        Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
       const Beep = (() => {
         let ctx;
         function ensure() {
-          ctx =
-            ctx ||
-            new (window.AudioContext || window.webkitAudioContext)();
+          ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
         }
         function beep(f = 880, d = 120, v = 0.03) {
           try {
@@ -813,17 +703,8 @@
       function showConfirmDialog(message, onConfirm) {
         const modal = document.createElement("div");
         modal.className = "sheet-backdrop";
-        modal.innerHTML = `
-          <div class="sheet" style="border-radius: 16px; max-width: 400px; padding: 20px;">
-            <div style="font-weight: 700; margin-bottom: 12px;">${message}</div>
-            <div class="row" style="justify-content: flex-end; gap: 12px; margin-top: 16px;">
-              <button class="btn" id="cancelBtn">Cancel</button>
-              <button class="btn primary" id="confirmBtn" style="background: var(--accent);">Delete</button>
-            </div>
-          </div>
-        `;
+        modal.innerHTML = `<div class="sheet" style="border-radius: 16px; max-width: 400px; padding: 20px;"><div style="font-weight: 700; margin-bottom: 12px;">${message}</div><div class="row" style="justify-content: flex-end; gap: 12px; margin-top: 16px;"><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="confirmBtn" style="background: var(--accent);">Delete</button></div></div>`;
         document.body.appendChild(modal);
-
         modal.querySelector("#cancelBtn").onclick = () => modal.remove();
         modal.querySelector("#confirmBtn").onclick = () => {
           modal.remove();
@@ -842,13 +723,12 @@
         return (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
       }
 
-      // Program
       const Warmup = [
         ["Cat-Cow", "5 reps", "Explore range, no forcing."],
         ["Dead Bug", "8/side", "Press back into floor."],
         ["Bird-Dog", "8/side", "Slow, hold 2 sec."],
         ["Glute Bridge", "15 reps", "Squeeze, don't yank."],
-        ["KB Halo", "8/side @ 35 lb", "Wake up the T-spine."],
+        ["KB Halo", "8/side @ 35 lb", "Wake up the T-spine."]
       ];
 
       const Tracks = {
@@ -858,68 +738,14 @@
           subtitle: "The Bodyweight–Iron Mashup",
           restPolicy: "60-90",
           exercises: [
-            {
-              id: "goblet-box-squat",
-              name: "Goblet Box Squat",
-              sets: [3, 4],
-              reps: [8, 12],
-              load: 35,
-              cues: ["Box = depth police.", "Brace down, exhale up."],
-            },
-            {
-              id: "kb-swing",
-              name: "KB Swing",
-              sets: [3, 4],
-              reps: [15, 20],
-              load: 35,
-              cues: [
-                "Hinge, not squat. Butt to wall.",
-                "Arms are ropes. Top = plank.",
-              ],
-              constitution: "swing",
-            },
-            {
-              id: "floor-press",
-              name: "Floor Press",
-              sets: [3, 4],
-              reps: [8, 12],
-              load: 25,
-              cues: ["Controlled pause at floor."],
-            },
-            {
-              id: "sa-db-row",
-              name: "Single-Arm DB Row",
-              sets: [3, 4],
-              reps: [10, 12],
-              load: 25,
-              cues: ["Flat back, brace.", "Elbow back; squeeze blade."],
-              constitution: "row",
-            },
-            {
-              id: "hip-thrust",
-              name: "Hip Thrust",
-              sets: [3, 4],
-              reps: [12, 15],
-              load: 35,
-              cues: ["Lock out with glutes, not low back."],
-            },
-            {
-              id: "hollow-hold",
-              name: "Hollow Body Hold",
-              sets: [3, 3],
-              timeSec: [20, 40],
-              load: 0,
-              cues: ["Posterior tilt. Bend knees if needed."],
-            },
-            {
-              id: "suitcase-carry",
-              name: "Suitcase Carry",
-              sets: [3, 3],
-              timeSec: [45, 60],
-              load: 35,
-              cues: ["No side-bend. Tall. Slow steps."],
-            },
-          ],
+            { id: "goblet-box-squat", name: "Goblet Box Squat", sets: [3, 4], reps: [8, 12], load: 35, cues: ["Box = depth police.", "Brace down, exhale up."] },
+            { id: "kb-swing", name: "KB Swing", sets: [3, 4], reps: [15, 20], load: 35, cues: ["Hinge, not squat. Butt to wall.", "Arms are ropes. Top = plank."], constitution: "swing" },
+            { id: "floor-press", name: "Floor Press", sets: [3, 4], reps: [8, 12], load: 25, cues: ["Controlled pause at floor."] },
+            { id: "sa-db-row", name: "Single-Arm DB Row", sets: [3, 4], reps: [10, 12], load: 25, cues: ["Flat back, brace.", "Elbow back; squeeze blade."], constitution: "row" },
+            { id: "hip-thrust", name: "Hip Thrust", sets: [3, 4], reps: [12, 15], load: 35, cues: ["Lock out with glutes, not low back."] },
+            { id: "hollow-hold", name: "Hollow Body Hold", sets: [3, 3], timeSec: [20, 40], load: 0, cues: ["Posterior tilt. Bend knees if needed."] },
+            { id: "suitcase-carry", name: "Suitcase Carry", sets: [3, 3], timeSec: [45, 60], load: 35, cues: ["No side-bend. Tall. Slow steps."] }
+          ]
         },
         IronFocused: {
           id: "IronFocused",
@@ -927,185 +753,108 @@
           subtitle: "Heavier day, form is king",
           restPolicy: "90-120",
           exercises: [
-            {
-              id: "heavy-goblet-squat",
-              name: "Heavy Goblet Squat",
-              sets: [4, 4],
-              reps: [6, 10],
-              load: 50,
-              cues: ["70 is spicy—only with a steel brace."],
-            },
-            {
-              id: "heavy-kb-swing",
-              name: "Heavy KB Swing",
-              sets: [4, 4],
-              reps: [15, 20],
-              load: 50,
-              cues: ["Form is king. Top = plank."],
-              constitution: "swing",
-            },
-            {
-              id: "floor-press-heavy",
-              name: "Floor Press",
-              sets: [3, 4],
-              reps: [6, 8],
-              load: 35,
-              cues: ["Heavy, controlled pause at chest."],
-            },
-            {
-              id: "bent-over-row",
-              name: "Bent-Over DB Row",
-              sets: [4, 4],
-              reps: [8, 10],
-              load: 35,
-              cues: ["Flat back, deep hinge, brace."],
-              constitution: "row",
-            },
-            {
-              id: "heavy-hip-thrust",
-              name: "Heavy Hip Thrust",
-              sets: [4, 4],
-              reps: [10, 12],
-              load: 50,
-              cues: ["Lock out with glutes, not low back."],
-            },
-            {
-              id: "dead-bug-oh",
-              name: "Dead Bug w/ KB Overhead",
-              sets: [3, 3],
-              reps: [8, 10],
-              load: 15,
-              cues: ["Active spine protection."],
-            },
-            {
-              id: "suitcase-carry-heavy",
-              name: "Suitcase Carry",
-              sets: [3, 3],
-              timeSec: [60, 60],
-              load: 50,
-              cues: ["Grip. Core. Grit."],
-            },
-          ],
+            { id: "heavy-goblet-squat", name: "Heavy Goblet Squat", sets: [4, 4], reps: [6, 10], load: 50, cues: ["70 is spicy—only with a steel brace."] },
+            { id: "heavy-kb-swing", name: "Heavy KB Swing", sets: [4, 4], reps: [15, 20], load: 50, cues: ["Form is king. Top = plank."], constitution: "swing" },
+            { id: "floor-press-heavy", name: "Floor Press", sets: [3, 4], reps: [6, 8], load: 35, cues: ["Heavy, controlled pause at chest."] },
+            { id: "bent-over-row", name: "Bent-Over DB Row", sets: [4, 4], reps: [8, 10], load: 35, cues: ["Flat back, deep hinge, brace."], constitution: "row" },
+            { id: "heavy-hip-thrust", name: "Heavy Hip Thrust", sets: [4, 4], reps: [10, 12], load: 50, cues: ["Lock out with glutes, not low back."] },
+            { id: "dead-bug-oh", name: "Dead Bug w/ KB Overhead", sets: [3, 3], reps: [8, 10], load: 15, cues: ["Active spine protection."] },
+            { id: "suitcase-carry-heavy", name: "Suitcase Carry", sets: [3, 3], timeSec: [60, 60], load: 50, cues: ["Grip. Core. Grit."] }
+          ]
         },
         GrumpyBack: {
           id: "GrumpyBack",
           title: "Grumpy Back Day",
           subtitle: "Plan B: light, spine-friendly swaps",
-          restPolicy: "60-90",
-        },
+          restPolicy: "60-90"
+        }
       };
 
       const Constitution = {
-        swing: [
-          "Hinge at hips; butt to wall.",
-          "Arms as ropes; bell as pendulum.",
-          "Brace before hike. Ribs down.",
-          "Top = plank; bell ≤ chest.",
-          "No rounding at bottom.",
-        ],
-        row: [
-          "Hinge ~45°; feel hamstrings.",
-          "Back flat as a table.",
-          "Inhale, brace, pull; exhale top.",
-          "Elbow drives back; squeeze blade.",
-          "No twisting; drop weight if needed.",
-        ],
+        swing: ["Hinge at hips; butt to wall.", "Arms as ropes; bell as pendulum.", "Brace before hike. Ribs down.", "Top = plank; bell ≤ chest.", "No rounding at bottom."],
+        row: ["Hinge ~45°; feel hamstrings.", "Back flat as a table.", "Inhale, brace, pull; exhale top.", "Elbow drives back; squeeze blade.", "No twisting; drop weight if needed."]
       };
 
-      // Light loads for Grumpy Back
       function lightKbLoad() {
         const s = Store.get();
         const arr = s.profile.equipment.kb || [];
         return arr.length ? Math.min(...arr) : 20;
       }
+
       function lightDbLoad() {
         const s = Store.get();
         const arr = s.profile.equipment.db || [];
         return arr.length ? Math.min(...arr) : 10;
       }
+
       function planBExercises() {
         return [
-          {
-            id: "pb-squat",
-            name: "Goblet Box Squat (light)",
-            sets: [2, 2],
-            reps: [10, 12],
-            load: lightKbLoad(),
-            cues: ["Smooth, no grind."],
-          },
-          {
-            id: "pb-hipthrust",
-            name: "Hip Thrusts",
-            sets: [2, 2],
-            reps: [12, 15],
-            load: lightKbLoad(),
-            cues: ["Squeeze glutes at top."],
-          },
-          {
-            id: "pb-floorpress",
-            name: "Floor Press",
-            sets: [2, 2],
-            reps: [8, 10],
-            load: lightDbLoad(),
-            cues: ["Controlled tempo."],
-          },
-          {
-            id: "pb-deadbug",
-            name: "Dead Bug",
-            sets: [2, 2],
-            reps: [8, 8],
-            load: 0,
-            cues: ["Low back glued to floor."],
-          },
-          {
-            id: "pb-carry",
-            name: "Suitcase Carry (light, slow)",
-            sets: [2, 2],
-            timeSec: [45, 60],
-            load: lightKbLoad(),
-            cues: ["No side-bend. Tall."],
-          },
+          { id: "pb-squat", name: "Goblet Box Squat (light)", sets: [2, 2], reps: [10, 12], load: lightKbLoad(), cues: ["Smooth, no grind."] },
+          { id: "pb-hipthrust", name: "Hip Thrusts", sets: [2, 2], reps: [12, 15], load: lightKbLoad(), cues: ["Squeeze glutes at top."] },
+          { id: "pb-floorpress", name: "Floor Press", sets: [2, 2], reps: [8, 10], load: lightDbLoad(), cues: ["Controlled tempo."] },
+          { id: "pb-deadbug", name: "Dead Bug", sets: [2, 2], reps: [8, 8], load: 0, cues: ["Low back glued to floor."] },
+          { id: "pb-carry", name: "Suitcase Carry (light, slow)", sets: [2, 2], timeSec: [45, 60], load: lightKbLoad(), cues: ["No side-bend. Tall."] }
         ];
       }
 
-      // Store
+      // Theme Management
+      function applyTheme(theme) {
+        const root = document.documentElement;
+        if (theme === "light") {
+          root.classList.add("light");
+        } else if (theme === "dark") {
+          root.classList.remove("light");
+        } else {
+          const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (prefersDark) {
+            root.classList.remove("light");
+          } else {
+            root.classList.add("light");
+          }
+        }
+      }
+
       const Store = (() => {
-        const KEY = "fitforge.v8"; // kept for user data stability
+        const KEY = "fitforge.v8";
         let state = load() || seed();
+
         function seed() {
           return {
             profile: {
               name: "Mateo",
               unit: "lb",
               equipment: { kb: [35, 50, 70], db: [25, 35] },
-              track: "Hybrid", // "Hybrid" | "IronFocused" | "GrumpyBack"
+              track: "Hybrid",
               schedule: [1, 3, 5],
               startDate: nowISO(),
+              theme: "auto",
+              restPreferences: {}
             },
             runtime: {
               warmupDoneKey: null,
               workoutActive: false,
               workoutStart: 0,
               workoutAccum: 0,
-              lastTotalSec: 0,
+              lastTotalSec: 0
             },
-            logs: [], // {id,date,workoutId,totalSec,sets[]}
+            logs: []
           };
         }
+
         function load() {
           try {
-            // eslint-disable-next-line no-restricted-globals
-            const s = localStorage.getItem(KEY);
+            const s = window.localStorage.getItem(KEY);
             return s ? JSON.parse(s) : null;
           } catch {
             return null;
           }
         }
+
         function save() {
-          // eslint-disable-next-line no-restricted-globals
-          localStorage.setItem(KEY, JSON.stringify(state));
+          window.localStorage.setItem(KEY, JSON.stringify(state));
           return state;
         }
+
         return {
           get: () => state,
           patch: (p) => {
@@ -1119,46 +868,23 @@
           reset: () => {
             state = seed();
             return save();
-          },
+          }
         };
       })();
 
-      // Progression (Add-Before-You-Load: simplified)
-      function prescribeNext({
-        week,
-        lastFormAvg = 90,
-        lastRpeAvg = 7,
-        hitTopReps = true,
-        currentSets = 4,
-        currentTempo = "2-0-1",
-        currentWeightLb = 0,
-      }) {
+      function prescribeNext({ week, lastFormAvg = 90, lastRpeAvg = 7, hitTopReps = true, currentSets = 4, currentTempo = "2-0-1", currentWeightLb = 0 }) {
         const perfect = lastFormAvg >= 85 && lastRpeAvg <= 8 && hitTopReps;
-        if (week <= 2) {
-          return {
-            sets: Math.max(3, currentSets),
-            tempo: "2-0-1",
-            weightLb: currentWeightLb,
-          };
-        }
+        if (week <= 2) return { sets: Math.max(3, currentSets), tempo: "2-0-1", weightLb: currentWeightLb };
         if (week <= 4) {
-          if (currentSets < 4 && perfect) {
-            return { sets: 4, tempo: currentTempo, weightLb: currentWeightLb };
-          }
+          if (currentSets < 4 && perfect) return { sets: 4, tempo: currentTempo, weightLb: currentWeightLb };
           return { sets: currentSets, tempo: "4-0-1", weightLb: currentWeightLb };
         }
-        if (perfect) {
-          return {
-            sets: currentSets,
-            tempo: "2-0-1",
-            weightLb: currentWeightLb ? currentWeightLb + 5 : undefined,
-          };
-        }
+        if (perfect) return { sets: currentSets, tempo: "2-0-1", weightLb: currentWeightLb ? currentWeightLb + 5 : undefined };
         return { sets: currentSets, tempo: currentTempo, weightLb: currentWeightLb };
       }
 
-      // Workout Timers (overall)
       let tickId = null;
+
       function startWorkoutTimer() {
         const s = Store.get();
         if (s.runtime.workoutActive) return;
@@ -1169,6 +895,7 @@
         tick();
         toast("Workout timer started.");
       }
+
       function pauseWorkoutTimer() {
         const s = Store.get();
         if (!s.runtime.workoutActive) return;
@@ -1182,12 +909,11 @@
         renderTimerChip();
         toast("Workout paused.");
       }
+
       function stopWorkoutTimer() {
         const s = Store.get();
         let total = s.runtime.workoutAccum;
-        if (s.runtime.workoutActive) {
-          total += Date.now() - s.runtime.workoutStart;
-        }
+        if (s.runtime.workoutActive) total += Date.now() - s.runtime.workoutStart;
         Store.mutate((st) => {
           st.runtime.lastTotalSec = Math.round(total / 1000);
           st.runtime.workoutAccum = 0;
@@ -1197,24 +923,24 @@
         if (tickId) clearInterval(tickId);
         renderTimerChip();
       }
+
       function getWorkoutElapsedMs() {
         const s = Store.get();
         let ms = s.runtime.workoutAccum;
-        if (s.runtime.workoutActive) {
-          ms += Date.now() - s.runtime.workoutStart;
-        }
+        if (s.runtime.workoutActive) ms += Date.now() - s.runtime.workoutStart;
         return ms;
       }
+
       function tick() {
         if (tickId) clearInterval(tickId);
         tickId = setInterval(renderTimerChip, 1000);
       }
 
-      // Per-exercise rest timer
       function restTimer(durationSec, onTick, onDone) {
         const start = Date.now();
         const dur = durationSec * 1000;
         let id = null;
+
         function step() {
           const elapsed = Date.now() - start;
           const left = Math.max(0, dur - elapsed);
@@ -1226,12 +952,12 @@
             onDone && onDone();
           }
         }
+
         step();
         id = setInterval(step, 200);
         return () => clearInterval(id);
       }
 
-      // Rendering
       function render() {
         const root = qs("#app");
         root.innerHTML = "";
@@ -1243,6 +969,8 @@
 
       function appHeader() {
         const h = document.createElement("header");
+        h.style.gridTemplateColumns = "auto 1fr auto";
+
         const left = document.createElement("div");
         left.className = "brand";
         const logo = document.createElement("div");
@@ -1251,21 +979,45 @@
           logo.style.backgroundImage = `url(${generatedIconDataURL})`;
         }
         const t = document.createElement("div");
-        t.innerHTML = `<div class="title">Fit Forge</div>
-          <div class="sub">Build Iron. Guard Your Spine.</div>`;
+        t.innerHTML = `<div class="title">Fit Forge</div><div class="sub">Build Iron. Guard Your Spine.</div>`;
         left.appendChild(logo);
         left.appendChild(t);
 
         const chip = document.createElement("div");
         chip.className = "timer-chip";
         chip.id = "timerChip";
-        chip.innerHTML = `
-          <span id="timerTxt">00:00</span>
-          <button class="btn" id="timerBtn" style="height:32px">Start</button>
-        `;
+        chip.innerHTML = `<span id="timerTxt">00:00</span><button class="btn" id="timerBtn" style="height:32px">Start</button>`;
+
+        const themeBtn = document.createElement("button");
+        themeBtn.className = "btn";
+        themeBtn.style.height = "32px";
+        themeBtn.style.width = "32px";
+        themeBtn.style.padding = "0";
+        themeBtn.style.fontSize = "16px";
+        themeBtn.title = "Toggle theme";
+
+        const s = Store.get();
+        const currentTheme = s.profile.theme || "auto";
+        themeBtn.textContent = currentTheme === "light" ? "🌙" : currentTheme === "dark" ? "☀️" : "🌓";
+
+        themeBtn.onclick = () => {
+          const state = Store.get();
+          const current = state.profile.theme || "auto";
+          let next = "auto";
+          if (current === "auto") next = "light";
+          else if (current === "light") next = "dark";
+          else next = "auto";
+
+          Store.mutate((st) => {
+            st.profile.theme = next;
+          });
+          applyTheme(next);
+          render();
+        };
 
         h.appendChild(left);
         h.appendChild(chip);
+        h.appendChild(themeBtn);
         return h;
       }
 
@@ -1289,7 +1041,7 @@
         const tabs = [
           ["workout", "Workout"],
           ["metrics", "Metrics"],
-          ["learn", "Learn"],
+          ["learn", "Learn"]
         ];
         const cur = location.hash.replace("#", "") || "workout";
         tabs.forEach(([id, label]) => {
@@ -1314,7 +1066,75 @@
         return main;
       }
 
-      // Workout View
+      function openRestCustomization(trackId) {
+        const s = Store.get();
+        // Initialize restPreferences if it doesn't exist
+        if (!s.profile.restPreferences) {
+          Store.mutate((st) => {
+            st.profile.restPreferences = {};
+          });
+        }
+        const currentRest = (s.profile.restPreferences && s.profile.restPreferences[trackId]) || (trackId === "IronFocused" ? 105 : 75);
+
+        const backdrop = document.createElement("div");
+        backdrop.className = "sheet-backdrop";
+        const sheet = document.createElement("div");
+        sheet.className = "sheet";
+
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = "Customize Rest Period";
+
+        const sub = document.createElement("div");
+        sub.className = "sub";
+        sub.style.marginBottom = "12px";
+        sub.textContent = "Set default rest time between sets for this routine";
+
+        const inputWrap = document.createElement("div");
+        const label = document.createElement("div");
+        label.className = "sub";
+        label.textContent = "Rest Duration (seconds)";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.inputmode = "numeric";
+        input.placeholder = String(currentRest);
+        input.value = String(currentRest);
+        inputWrap.appendChild(label);
+        inputWrap.appendChild(input);
+
+        const row = document.createElement("div");
+        row.className = "row";
+        const cancel = document.createElement("button");
+        cancel.className = "btn";
+        cancel.textContent = "Cancel";
+        cancel.onclick = () => backdrop.remove();
+        const save = document.createElement("button");
+        save.className = "btn primary";
+        save.textContent = "Save";
+        save.onclick = () => {
+          const newRest = Number(input.value) || currentRest;
+          Store.mutate((st) => {
+            st.profile.restPreferences[trackId] = newRest;
+          });
+          toast(`Rest period set to ${newRest}s`);
+          backdrop.remove();
+          render();
+        };
+        row.appendChild(cancel);
+        row.appendChild(save);
+
+        sheet.appendChild(title);
+        sheet.appendChild(sub);
+        sheet.appendChild(inputWrap);
+        sheet.appendChild(document.createElement("div")).className = "hr";
+        sheet.appendChild(row);
+        backdrop.appendChild(sheet);
+        backdrop.onclick = (e) => {
+          if (e.target === backdrop) backdrop.remove();
+        };
+        document.body.appendChild(backdrop);
+      }
+
       function viewWorkout() {
         const wrap = document.createElement("div");
         wrap.className = "stack";
@@ -1327,20 +1147,32 @@
         const card = document.createElement("div");
         card.className = "card";
         const s = Store.get();
+        const today = todayKey();
+        const done = s.runtime.warmupDoneKey === today;
 
+        const header = document.createElement("div");
+        header.className = "row";
+        header.style.justifyContent = "space-between";
+        header.style.alignItems = "center";
+
+        const headerText = document.createElement("div");
         const hd = document.createElement("div");
         hd.className = "h";
         hd.textContent = "Warm-Up (Password)";
         const sub = document.createElement("div");
         sub.className = "sub";
-        sub.textContent = "Do this every time. Unlocks the main session.";
+        sub.textContent = done ? "✓ Completed" : "Do this every time. Unlocks the main session.";
+        headerText.appendChild(hd);
+        headerText.appendChild(sub);
+        header.appendChild(headerText);
+
+        const content = document.createElement("div");
+        content.className = "stack";
+        content.style.marginTop = "8px";
 
         const list = document.createElement("div");
         list.className = "stack";
         list.style.marginTop = "4px";
-
-        const today = todayKey();
-        const done = s.runtime.warmupDoneKey === today;
 
         const checks = [];
         Warmup.forEach(([name, rep, cue]) => {
@@ -1349,9 +1181,9 @@
           const chk = document.createElement("input");
           chk.type = "checkbox";
           chk.disabled = done;
+          if (done) chk.checked = true;
           const label = document.createElement("div");
-          label.innerHTML = `<strong>${name}</strong> · ${rep}
-            <div class="sub">${cue}</div>`;
+          label.innerHTML = `<strong>${name}</strong> · ${rep}<div class="sub">${cue}</div>`;
           row.appendChild(chk);
           row.appendChild(label);
           list.appendChild(row);
@@ -1371,17 +1203,38 @@
           Store.mutate((st) => {
             st.runtime.warmupDoneKey = todayKey();
           });
-          if (!Store.get().runtime.workoutActive) {
-            startWorkoutTimer();
-          }
+          if (!Store.get().runtime.workoutActive) startWorkoutTimer();
           toast("Password accepted. Forge time.");
           render();
         };
 
-        card.appendChild(hd);
-        card.appendChild(sub);
-        card.appendChild(list);
-        card.appendChild(gate);
+        content.appendChild(list);
+        content.appendChild(gate);
+
+        if (done) {
+          const toggleBtn = document.createElement("button");
+          toggleBtn.className = "btn";
+          toggleBtn.textContent = "Show";
+          toggleBtn.style.height = "32px";
+          toggleBtn.style.fontSize = "13px";
+          toggleBtn.style.padding = "0 10px";
+          header.appendChild(toggleBtn);
+
+          content.style.display = "none";
+
+          toggleBtn.onclick = () => {
+            if (content.style.display === "none") {
+              content.style.display = "flex";
+              toggleBtn.textContent = "Hide";
+            } else {
+              content.style.display = "none";
+              toggleBtn.textContent = "Show";
+            }
+          };
+        }
+
+        card.appendChild(header);
+        card.appendChild(content);
         return card;
       }
 
@@ -1390,7 +1243,6 @@
         const card = document.createElement("div");
         card.className = "card";
 
-        // Routine selector
         const routineRow = document.createElement("div");
         routineRow.className = "row";
         const routineLabel = document.createElement("div");
@@ -1400,7 +1252,7 @@
         const opts = [
           ["Hybrid", "Hybrid"],
           ["IronFocused", "Iron-Focused: The Backsmith's Anvil Day"],
-          ["GrumpyBack", "Grumpy Back Day"],
+          ["GrumpyBack", "Grumpy Back Day"]
         ];
         opts.forEach(([v, t]) => {
           const op = document.createElement("option");
@@ -1427,20 +1279,22 @@
 
         const sub = document.createElement("div");
         sub.className = "sub";
-        const restHint =
-          track.restPolicy === "90-120"
-            ? "Rest aim: 90–120s."
-            : "Rest aim: 60–90s.";
-        sub.textContent =
-          (track.subtitle ? track.subtitle + " · " : "") +
-          restHint +
-          " Auto rest after every set.";
+        const customRest = s.profile.restPreferences ? s.profile.restPreferences[s.profile.track] : null;
+        const restHint = customRest ? `Custom rest: ${customRest}s.` : (track.restPolicy === "90-120" ? "Rest aim: 90–120s." : "Rest aim: 60–90s.");
+        sub.textContent = (track.subtitle ? track.subtitle + " · " : "") + restHint + " Auto rest after every set.";
+
+        const restBtn = document.createElement("button");
+        restBtn.className = "btn";
+        restBtn.textContent = "Customize Rest";
+        restBtn.style.marginTop = "8px";
+        restBtn.onclick = () => openRestCustomization(s.profile.track);
 
         const warmOK = s.runtime.warmupDoneKey === todayKey();
 
         card.appendChild(routineRow);
         card.appendChild(hd);
         card.appendChild(sub);
+        card.appendChild(restBtn);
         card.appendChild(divider());
 
         if (!warmOK) {
@@ -1455,24 +1309,22 @@
         list.className = "stack";
 
         const week = weekFrom(s.profile.startDate);
-        const restDefault =
-          track.id === "IronFocused" ? 105 : track.id === "Hybrid" ? 75 : 60;
+        const baseRest = track.id === "IronFocused" ? 105 : track.id === "Hybrid" ? 75 : 60;
+        const restDefault = (s.profile.restPreferences && s.profile.restPreferences[s.profile.track]) || baseRest;
 
         if (track.id === "GrumpyBack") {
           const exs = planBExercises();
           exs.forEach((ex) => {
-            list.appendChild(
-              exerciseCard({
-                id: ex.id,
-                name: ex.name,
-                sets: ex.sets[1],
-                reps: ex.reps,
-                timeSec: ex.timeSec,
-                load: ex.load,
-                cues: ex.cues,
-                restSec: restDefault,
-              })
-            );
+            list.appendChild(exerciseCard({
+              id: ex.id,
+              name: ex.name,
+              sets: ex.sets[1],
+              reps: ex.reps,
+              timeSec: ex.timeSec,
+              load: ex.load,
+              cues: ex.cues,
+              restSec: restDefault
+            }));
           });
           list.appendChild(walkCard());
         } else {
@@ -1484,22 +1336,20 @@
               lastRpeAvg: last.rpe,
               hitTopReps: last.hitTop,
               currentSets: ex.sets[1],
-              currentWeightLb: ex.load,
+              currentWeightLb: ex.load
             });
             const sets = clamp(p.sets, ex.sets[0], ex.sets[1]);
-            list.appendChild(
-              exerciseCard({
-                id: ex.id,
-                name: ex.name,
-                sets,
-                reps: ex.reps,
-                timeSec: ex.timeSec,
-                load: p.weightLb || ex.load,
-                cues: ex.cues,
-                constitution: ex.constitution,
-                restSec: restDefault,
-              })
-            );
+            list.appendChild(exerciseCard({
+              id: ex.id,
+              name: ex.name,
+              sets,
+              reps: ex.reps,
+              timeSec: ex.timeSec,
+              load: p.weightLb || ex.load,
+              cues: ex.cues,
+              constitution: ex.constitution,
+              restSec: restDefault
+            }));
           });
         }
 
@@ -1523,10 +1373,7 @@
 
       function lastAverages(exId) {
         const s = Store.get();
-        const sets = s.logs
-          .slice(-10)
-          .flatMap((l) => l.sets)
-          .filter((t) => t.exerciseId === exId);
+        const sets = s.logs.slice(-10).flatMap((l) => l.sets).filter((t) => t.exerciseId === exId);
         if (!sets.length) return { form: 100, rpe: 7, hitTop: true };
         const form = sets.reduce((a, b) => a + (b.formScore || 0), 0) / sets.length;
         const rpe = sets.reduce((a, b) => a + (b.rpe || 7), 0) / sets.length;
@@ -1573,7 +1420,6 @@
         return c;
       }
 
-      // Quick Log bottom sheet
       function openQuickLog({ cfg, setIndex, onSave }) {
         const sKey = cfg.id + "::last";
         window.__lastUsed = window.__lastUsed || {};
@@ -1591,6 +1437,61 @@
         const title = document.createElement("div");
         title.className = "title";
         title.textContent = `${cfg.name} — Set ${setIndex + 1}`;
+
+        let timerSection = null;
+        let stopTimer = null;
+
+        if (isTime) {
+          timerSection = document.createElement("div");
+          timerSection.style.marginBottom = "12px";
+          timerSection.style.textAlign = "center";
+
+          const timerDisplay = document.createElement("div");
+          timerDisplay.style.fontSize = "32px";
+          timerDisplay.style.fontWeight = "800";
+          timerDisplay.style.marginBottom = "8px";
+          timerDisplay.textContent = mmss(defaultReps * 1000);
+
+          const timerBar = document.createElement("div");
+          timerBar.className = "restbar";
+          timerBar.style.marginBottom = "8px";
+          const timerFill = document.createElement("span");
+          timerBar.appendChild(timerFill);
+
+          const timerBtn = document.createElement("button");
+          timerBtn.className = "btn primary";
+          timerBtn.textContent = "Start Timer";
+
+          let isRunning = false;
+          timerBtn.onclick = () => {
+            if (!isRunning) {
+              isRunning = true;
+              timerBtn.textContent = "Stop";
+              timerBtn.classList.remove("primary");
+              const targetSec = Number(repsInput.value || defaultReps);
+              stopTimer = restTimer(targetSec, (secLeft, prog) => {
+                timerDisplay.textContent = mmss(secLeft * 1000);
+                timerFill.style.width = `${Math.floor(prog * 100)}%`;
+              }, () => {
+                isRunning = false;
+                timerBtn.textContent = "Start Timer";
+                timerBtn.classList.add("primary");
+                timerFill.style.width = "0%";
+              });
+            } else {
+              if (stopTimer) stopTimer();
+              isRunning = false;
+              timerBtn.textContent = "Start Timer";
+              timerBtn.classList.add("primary");
+              timerFill.style.width = "0%";
+              timerDisplay.textContent = mmss((Number(repsInput.value || defaultReps)) * 1000);
+            }
+          };
+
+          timerSection.appendChild(timerDisplay);
+          timerSection.appendChild(timerBar);
+          timerSection.appendChild(timerBtn);
+        }
 
         const grid = document.createElement("div");
         grid.className = "grid";
@@ -1624,24 +1525,89 @@
         rWrap.appendChild(repsInput);
         grid.appendChild(rWrap);
 
+        const rpeWrap = document.createElement("div");
+        rpeWrap.style.paddingRight = "8px";
+        const rpeLab = document.createElement("div");
+        rpeLab.className = "sub";
+        rpeLab.textContent = "RPE (1-10)";
+        rpeLab.title = "Rate of Perceived Exertion";
+        const rpeInput = document.createElement("input");
+        rpeInput.type = "range";
+        rpeInput.min = "1";
+        rpeInput.max = "10";
+        rpeInput.step = "0.5";
+        rpeInput.value = String(last.rpe ?? 7);
+        rpeInput.style.width = "calc(100% - 4px)";
+        rpeInput.style.margin = "0 2px";
+        const rpeValue = document.createElement("div");
+        rpeValue.style.textAlign = "center";
+        rpeValue.style.fontWeight = "700";
+        rpeValue.style.fontSize = "18px";
+        rpeValue.style.marginTop = "4px";
+        rpeValue.textContent = rpeInput.value;
+        rpeInput.oninput = () => {
+          rpeValue.textContent = rpeInput.value;
+        };
+        rpeWrap.appendChild(rpeLab);
+        rpeWrap.appendChild(rpeInput);
+        rpeWrap.appendChild(rpeValue);
+        grid.appendChild(rpeWrap);
+
+        const formWrap = document.createElement("div");
+        formWrap.style.paddingRight = "8px";
+        const formLab = document.createElement("div");
+        formLab.className = "sub";
+        formLab.textContent = "Form (%)";
+        formLab.title = "Form Quality";
+        const formInput = document.createElement("input");
+        formInput.type = "range";
+        formInput.min = "0";
+        formInput.max = "100";
+        formInput.step = "5";
+        formInput.value = String(last.formScore ?? 90);
+        formInput.style.width = "calc(100% - 4px)";
+        formInput.style.margin = "0 2px";
+        const formValue = document.createElement("div");
+        formValue.style.textAlign = "center";
+        formValue.style.fontWeight = "700";
+        formValue.style.fontSize = "18px";
+        formValue.style.marginTop = "4px";
+        formValue.textContent = formInput.value + "%";
+        formInput.oninput = () => {
+          formValue.textContent = formInput.value + "%";
+        };
+        formWrap.appendChild(formLab);
+        formWrap.appendChild(formInput);
+        formWrap.appendChild(formValue);
+        grid.appendChild(formWrap);
+
         const row = document.createElement("div");
         row.className = "row";
         const cancel = document.createElement("button");
         cancel.className = "btn";
         cancel.textContent = "Cancel";
-        cancel.onclick = () => backdrop.remove();
+        cancel.onclick = () => {
+          if (stopTimer) stopTimer();
+          backdrop.remove();
+        };
         const save = document.createElement("button");
         save.className = "btn primary";
         save.textContent = "Save";
         save.onclick = () => {
           const w = weightInput ? Number(weightInput.value || defaultWeight) : 0;
           const repOrSec = Number(repsInput.value || defaultReps);
-          window.__lastUsed[sKey] = { weightLb: w, value: repOrSec };
-          onSave({ weightLb: w, repOrSec });
+          const rpe = Number(rpeInput.value || 7);
+          const formScore = Number(formInput.value || 90);
+
+          window.__lastUsed[sKey] = { weightLb: w, value: repOrSec, rpe, formScore };
+
+          if (stopTimer) stopTimer();
+          onSave({ weightLb: w, repOrSec, rpe, formScore });
           backdrop.remove();
         };
 
         sheet.appendChild(title);
+        if (timerSection) sheet.appendChild(timerSection);
         sheet.appendChild(grid);
         sheet.appendChild(document.createElement("div")).className = "hr";
         sheet.appendChild(row);
@@ -1650,12 +1616,14 @@
 
         backdrop.appendChild(sheet);
         backdrop.onclick = (e) => {
-          if (e.target === backdrop) backdrop.remove();
+          if (e.target === backdrop) {
+            if (stopTimer) stopTimer();
+            backdrop.remove();
+          }
         };
         document.body.appendChild(backdrop);
       }
 
-      // Exercise card with set chips -> Quick Log -> rest after EVERY set
       function exerciseCard(cfg) {
         const card = document.createElement("div");
         card.className = "card ex";
@@ -1683,13 +1651,13 @@
             openQuickLog({
               cfg,
               setIndex: i,
-              onSave: ({ weightLb, repOrSec }) => {
+              onSave: ({ weightLb, repOrSec, rpe, formScore }) => {
                 c.dataset.done = "1";
                 c.classList.add("done");
                 Beep.beep(760, 100, 0.04);
-                bufferSetLog(cfg, i, weightLb, repOrSec);
+                bufferSetLog(cfg, i, weightLb, repOrSec, rpe, formScore);
                 autoRest(cfg.restSec, card);
-              },
+              }
             });
           };
           right.appendChild(c);
@@ -1752,14 +1720,10 @@
         parentCard.appendChild(row);
         parentCard.appendChild(bar);
 
-        const stop = restTimer(
-          seconds,
-          (secLeft, prog) => {
-            fill.style.width = `${Math.floor(prog * 100)}%`;
-            left.textContent = mmss(secLeft * 1000);
-          },
-          () => cleanup()
-        );
+        const stop = restTimer(seconds, (secLeft, prog) => {
+          fill.style.width = `${Math.floor(prog * 100)}%`;
+          left.textContent = mmss(secLeft * 1000);
+        }, () => cleanup());
 
         function cleanup() {
           stop();
@@ -1768,20 +1732,22 @@
         }
       }
 
-      // Per-set buffer (session)
-      function bufferSetLog(cfg, setIndex, weightLb, repOrSec) {
+      function bufferSetLog(cfg, setIndex, weightLb, repOrSec, rpe = 7, formScore = 90) {
         window.__sessionBuffer = window.__sessionBuffer || [];
         const isTime = !!cfg.timeSec;
+        const topReps = isTime ? cfg.timeSec[1] : cfg.reps[1];
+        const hitTopRepRange = repOrSec >= topReps;
+
         window.__sessionBuffer.push({
           exerciseId: cfg.id,
           setIndex,
           weightLb: isNaN(weightLb) ? 0 : weightLb,
           reps: isTime ? null : repOrSec,
           seconds: isTime ? repOrSec : null,
-          rpe: 7,
-          formScore: 90,
-          hitTopRepRange: true,
-          notes: "",
+          rpe: isNaN(rpe) ? 7 : rpe,
+          formScore: isNaN(formScore) ? 90 : formScore,
+          hitTopRepRange,
+          notes: ""
         });
       }
 
@@ -1806,7 +1772,7 @@
           workoutId: s.profile.track,
           date: nowISO(),
           totalSec: sec,
-          sets,
+          sets
         };
         Store.mutate((st) => {
           st.logs.push(session);
@@ -1817,16 +1783,359 @@
         render();
       }
 
-      // Metrics — per-routine only, with full set details
+      function openManualEntry() {
+        const s = Store.get();
+        const backdrop = document.createElement("div");
+        backdrop.className = "sheet-backdrop";
+        const sheet = document.createElement("div");
+        sheet.className = "sheet";
+        sheet.style.maxHeight = "85vh";
+        sheet.style.overflowY = "auto";
+        sheet.style.paddingBottom = "calc(20px + var(--pad-bottom))";
+
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = "Log Workout Manually";
+
+        const form = document.createElement("div");
+        form.className = "stack";
+        form.style.gap = "16px";
+
+        const routineRow = document.createElement("div");
+        const routineLabel = document.createElement("div");
+        routineLabel.className = "sub";
+        routineLabel.textContent = "Routine";
+        const routineSel = document.createElement("select");
+        const opts = [
+          ["Hybrid", "Hybrid"],
+          ["IronFocused", "Iron-Focused"],
+          ["GrumpyBack", "Grumpy Back Day"]
+        ];
+        opts.forEach(([v, t]) => {
+          const op = document.createElement("option");
+          op.value = v;
+          op.textContent = t;
+          if (s.profile.track === v) op.selected = true;
+          routineSel.appendChild(op);
+        });
+        routineRow.appendChild(routineLabel);
+        routineRow.appendChild(routineSel);
+
+        const dateRow = document.createElement("div");
+        const dateLabel = document.createElement("div");
+        dateLabel.className = "sub";
+        dateLabel.textContent = "Date";
+        const dateInput = document.createElement("input");
+        dateInput.type = "date";
+        dateInput.value = new Date().toISOString().slice(0, 10);
+        dateRow.appendChild(dateLabel);
+        dateRow.appendChild(dateInput);
+
+        const durRow = document.createElement("div");
+        const durLabel = document.createElement("div");
+        durLabel.className = "sub";
+        durLabel.textContent = "Duration (minutes)";
+        const durInput = document.createElement("input");
+        durInput.type = "number";
+        durInput.inputmode = "numeric";
+        durInput.placeholder = "45";
+        durInput.value = "45";
+        durRow.appendChild(durLabel);
+        durRow.appendChild(durInput);
+
+        const exercisesContainer = document.createElement("div");
+        exercisesContainer.className = "stack";
+        exercisesContainer.style.gap = "10px";
+
+        const exercisesLabel = document.createElement("div");
+        exercisesLabel.className = "sub";
+        exercisesLabel.textContent = "Exercises (fill in what you completed)";
+        exercisesContainer.appendChild(exercisesLabel);
+
+        form.appendChild(routineRow);
+        form.appendChild(dateRow);
+        form.appendChild(durRow);
+        form.appendChild(exercisesContainer);
+
+        function populateInputRows() {
+          setTimeout(() => {
+            const exContainers = exercisesContainer.querySelectorAll("[data-exercise-id]");
+            exContainers.forEach((container) => {
+              const isTime = container.getAttribute("data-is-time") === "1";
+              const hasWeight = container.previousElementSibling.textContent.includes("lb");
+
+              for (let i = 0; i < 4; i++) {
+                addSetInputRow(container, i, isTime, hasWeight);
+              }
+            });
+          }, 10);
+        }
+
+        function renderExerciseTemplate(workoutId) {
+          while (exercisesContainer.children.length > 1) {
+            exercisesContainer.removeChild(exercisesContainer.lastChild);
+          }
+
+          const track = Tracks[workoutId];
+          const exercises = track.id === "GrumpyBack" ? planBExercises() : track.exercises || [];
+
+          exercises.forEach((ex) => {
+            const exCard = document.createElement("div");
+            exCard.className = "card";
+            exCard.style.padding = "10px";
+            exCard.style.background = "var(--card-2)";
+
+            const exName = document.createElement("div");
+            exName.style.fontWeight = "700";
+            exName.style.marginBottom = "6px";
+            exName.textContent = ex.name;
+
+            const exMeta = document.createElement("div");
+            exMeta.className = "sub";
+            exMeta.style.fontSize = "12px";
+            exMeta.style.marginBottom = "8px";
+            const repText = ex.timeSec ? `${ex.timeSec[0]}-${ex.timeSec[1]}s` : `${ex.reps[0]}-${ex.reps[1]} reps`;
+            const maxSets = ex.sets[1] || ex.sets[0] || 4;
+            exMeta.textContent = `Target: ${maxSets} sets × ${repText}${ex.load ? ` @ ${ex.load} lb` : ''}`;
+
+            const setsContainer = document.createElement("div");
+            setsContainer.className = "stack";
+            setsContainer.style.gap = "6px";
+            setsContainer.setAttribute("data-exercise-id", ex.id);
+            setsContainer.setAttribute("data-is-time", ex.timeSec ? "1" : "0");
+
+            exCard.appendChild(exName);
+            exCard.appendChild(exMeta);
+            exCard.appendChild(setsContainer);
+            exercisesContainer.appendChild(exCard);
+          });
+
+          populateInputRows();
+        }
+
+        renderExerciseTemplate(routineSel.value);
+
+        routineSel.onchange = () => {
+          renderExerciseTemplate(routineSel.value);
+        };
+
+        const buttons = document.createElement("div");
+        buttons.className = "row";
+        buttons.style.marginTop = "16px";
+        buttons.style.gap = "12px";
+
+        const cancel = document.createElement("button");
+        cancel.className = "btn";
+        cancel.style.flex = "1";
+        cancel.textContent = "Cancel";
+        cancel.onclick = () => backdrop.remove();
+
+        const save = document.createElement("button");
+        save.className = "btn primary";
+        save.style.flex = "1";
+        save.textContent = "Save Workout";
+        save.onclick = () => {
+          const workoutId = routineSel.value;
+          const date = new Date(dateInput.value + "T12:00:00").toISOString();
+          const totalSec = Number(durInput.value) * 60;
+
+          const allSets = [];
+          const exContainers = exercisesContainer.querySelectorAll("[data-exercise-id]");
+
+          exContainers.forEach((container) => {
+            const exerciseId = container.getAttribute("data-exercise-id");
+            const isTime = container.getAttribute("data-is-time") === "1";
+            const setInputs = container.querySelectorAll(".set-input-row");
+
+            setInputs.forEach((row, setIndex) => {
+              const weightInput = row.querySelector(".weight-input");
+              const repsInput = row.querySelector(".reps-input");
+
+              const weight = weightInput ? Number(weightInput.value) || 0 : 0;
+              const repOrSec = Number(repsInput.value) || 0;
+
+              if (repOrSec > 0 || weight > 0) {
+                allSets.push({
+                  exerciseId,
+                  setIndex,
+                  weightLb: weight,
+                  reps: isTime ? null : repOrSec,
+                  seconds: isTime ? repOrSec : null,
+                  rpe: 7,
+                  formScore: 90,
+                  hitTopRepRange: true,
+                  notes: ""
+                });
+              }
+            });
+          });
+
+          const session = {
+            id: uid(),
+            workoutId,
+            date,
+            totalSec,
+            sets: allSets
+          };
+
+          Store.mutate((st) => {
+            st.logs.push(session);
+          });
+
+          toast(`Workout logged with ${allSets.length} sets!`);
+          backdrop.remove();
+          render();
+        };
+
+        buttons.appendChild(cancel);
+        buttons.appendChild(save);
+
+        sheet.appendChild(title);
+        sheet.appendChild(form);
+        sheet.appendChild(buttons);
+        backdrop.appendChild(sheet);
+
+        backdrop.onclick = (e) => {
+          if (e.target === backdrop) backdrop.remove();
+        };
+
+        document.body.appendChild(backdrop);
+      }
+
+      function addSetInputRow(container, setIndex, isTime, hasWeight) {
+        const row = document.createElement("div");
+        row.className = "set-input-row";
+        row.style.display = "flex";
+        row.style.gap = "8px";
+        row.style.alignItems = "center";
+
+        const setLabel = document.createElement("div");
+        setLabel.className = "sub";
+        setLabel.style.minWidth = "40px";
+        setLabel.style.fontSize = "12px";
+        setLabel.textContent = `Set ${setIndex + 1}:`;
+
+        if (hasWeight) {
+          const weightInput = document.createElement("input");
+          weightInput.type = "number";
+          weightInput.inputmode = "decimal";
+          weightInput.className = "weight-input";
+          weightInput.placeholder = "lb";
+          weightInput.style.width = "70px";
+          weightInput.style.height = "36px";
+          weightInput.style.fontSize = "14px";
+          row.appendChild(setLabel);
+          row.appendChild(weightInput);
+        } else {
+          row.appendChild(setLabel);
+        }
+
+        const repsInput = document.createElement("input");
+        repsInput.type = "number";
+        repsInput.inputmode = "numeric";
+        repsInput.className = "reps-input";
+        repsInput.placeholder = isTime ? "sec" : "reps";
+        repsInput.style.flex = "1";
+        repsInput.style.height = "36px";
+        repsInput.style.fontSize = "14px";
+
+        row.appendChild(repsInput);
+        container.appendChild(row);
+      }
+
       function viewMetrics() {
         const wrap = document.createElement("div");
         wrap.className = "stack";
 
+        const manualCard = document.createElement("div");
+        manualCard.className = "card";
+        const manualBtn = document.createElement("button");
+        manualBtn.className = "btn primary block";
+        manualBtn.textContent = "Log Workout Manually";
+        manualBtn.onclick = () => openManualEntry();
+        manualCard.appendChild(manualBtn);
+        wrap.appendChild(manualCard);
+
+        wrap.appendChild(progressChartCard());
         wrap.appendChild(routineMetricsCard("Hybrid"));
         wrap.appendChild(routineMetricsCard("IronFocused"));
         wrap.appendChild(routineMetricsCard("GrumpyBack"));
 
         return wrap;
+      }
+
+      function progressChartCard() {
+        const s = Store.get();
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const title = document.createElement("div");
+        title.className = "h";
+        title.textContent = "Progress Overview";
+
+        const sub = document.createElement("div");
+        sub.className = "sub";
+        sub.textContent = "Track weight progression for key exercises";
+
+        card.appendChild(title);
+        card.appendChild(sub);
+        card.appendChild(divider());
+
+        const exNames = buildExerciseNameMap();
+        const keyExercises = ["goblet-box-squat", "kb-swing", "floor-press", "sa-db-row", "heavy-goblet-squat", "heavy-kb-swing"];
+
+        keyExercises.forEach((exId) => {
+          const sets = s.logs
+            .flatMap((l) => l.sets || [])
+            .filter((t) => t.exerciseId === exId && t.weightLb > 0)
+            .slice(-10);
+
+          if (sets.length > 1) {
+            const chartDiv = document.createElement("div");
+            chartDiv.style.marginBottom = "16px";
+
+            const exTitle = document.createElement("div");
+            exTitle.style.fontWeight = "700";
+            exTitle.style.marginBottom = "8px";
+            exTitle.textContent = exNames[exId] || exId;
+
+            const stats = document.createElement("div");
+            stats.className = "sub";
+            stats.style.marginBottom = "8px";
+            const weights = sets.map((s) => s.weightLb);
+            const minWeight = Math.min(...weights);
+            const maxWeight = Math.max(...weights);
+            const avgWeight = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
+            const latestWeight = weights[weights.length - 1];
+            stats.textContent = `Latest: ${latestWeight} lb · Range: ${minWeight}–${maxWeight} lb · Avg: ${avgWeight} lb`;
+
+            const barContainer = document.createElement("div");
+            barContainer.style.display = "flex";
+            barContainer.style.gap = "2px";
+            barContainer.style.alignItems = "flex-end";
+            barContainer.style.height = "60px";
+
+            sets.forEach((set, i) => {
+              const bar = document.createElement("div");
+              const heightPercent = ((set.weightLb - minWeight) / (maxWeight - minWeight || 1)) * 100;
+              bar.style.flex = "1";
+              bar.style.background = "linear-gradient(180deg, var(--accent), #991b1b)";
+              bar.style.borderRadius = "4px 4px 0 0";
+              bar.style.height = `${Math.max(heightPercent, 10)}%`;
+              bar.style.minHeight = "8px";
+              bar.style.cursor = "pointer";
+              bar.title = `${set.weightLb} lb`;
+              barContainer.appendChild(bar);
+            });
+
+            chartDiv.appendChild(exTitle);
+            chartDiv.appendChild(stats);
+            chartDiv.appendChild(barContainer);
+            card.appendChild(chartDiv);
+          }
+        });
+
+        return card;
       }
 
       function buildExerciseNameMap() {
@@ -1863,68 +2172,114 @@
           list.appendChild(none);
         } else {
           logs.forEach((l) => {
-            const row = document.createElement("div");
-            row.className = "stack";
+            const wrapper = document.createElement("div");
+            wrapper.className = "card";
+            wrapper.style.padding = "10px";
 
             const summary = document.createElement("div");
             summary.className = "row";
+            summary.style.justifyContent = "space-between";
+            summary.style.alignItems = "center";
+
             const txt = document.createElement("div");
             txt.className = "pill";
-            txt.textContent =
-              new Date(l.date).toLocaleDateString() +
-              " · Sets: " +
-              (l.sets?.length || 0) +
-              " · Time: " +
-              mmss((l.totalSec || 0) * 1000);
+            txt.style.flex = "1";
+            const setInfo = l.manualEntry ? "Manual Entry" : (l.sets?.length || 0) + " sets";
+            txt.textContent = new Date(l.date).toLocaleDateString() + " · " + setInfo + " · " + mmss((l.totalSec || 0) * 1000);
+            if (l.manualNotes) {
+              txt.title = l.manualNotes;
+              txt.style.cursor = "help";
+            }
+
+            const btnGroup = document.createElement("div");
+            btnGroup.className = "row";
+            btnGroup.style.gap = "6px";
+
+            const toggleBtn = document.createElement("button");
+            toggleBtn.className = "btn";
+            toggleBtn.textContent = "Details";
+            toggleBtn.style.height = "32px";
+            toggleBtn.style.fontSize = "13px";
+            toggleBtn.style.padding = "0 10px";
+
             const del = document.createElement("button");
             del.className = "btn";
             del.textContent = "Delete";
+            del.style.height = "32px";
+            del.style.fontSize = "13px";
+            del.style.padding = "0 10px";
             del.onclick = () => {
               showConfirmDialog("Delete this session?", () => {
                 deleteSessionById(l.id);
               });
             };
+
+            btnGroup.appendChild(toggleBtn);
+            btnGroup.appendChild(del);
             summary.appendChild(txt);
-            summary.appendChild(del);
+            summary.appendChild(btnGroup);
 
             const details = document.createElement("div");
             details.className = "stack";
-            const groups = {};
-            (l.sets || []).forEach((t) => {
-              (groups[t.exerciseId] || (groups[t.exerciseId] = [])).push(t);
-            });
+            details.style.display = "none";
+            details.style.marginTop = "10px";
+            details.style.maxHeight = "300px";
+            details.style.overflowY = "auto";
 
-            Object.keys(groups).forEach((exId) => {
-              const sets = groups[exId].sort((a, b) => a.setIndex - b.setIndex);
-              const block = document.createElement("div");
-              block.className = "card";
-              const name = document.createElement("div");
-              name.className = "name";
-              name.textContent = exNames[exId] || exId;
-              const lines = document.createElement("div");
-              lines.className = "stack";
-
-              sets.forEach((t) => {
-                const line = document.createElement("div");
-                line.className = "sub";
-                const w =
-                  t.weightLb && t.weightLb > 0 ? `${t.weightLb} lb` : "BW";
-                const repOrSec =
-                  t.seconds != null
-                    ? `${t.seconds}s${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}`
-                    : `${t.reps} reps${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}`;
-                line.textContent = `S${(t.setIndex || 0) + 1}: ${repOrSec}`;
-                lines.appendChild(line);
+            if (l.manualEntry) {
+              const manualNote = document.createElement("div");
+              manualNote.className = "sub";
+              manualNote.textContent = l.manualNotes || "No details recorded for this manual entry.";
+              details.appendChild(manualNote);
+            } else {
+              const groups = {};
+              (l.sets || []).forEach((t) => {
+                (groups[t.exerciseId] || (groups[t.exerciseId] = [])).push(t);
               });
 
-              block.appendChild(name);
-              block.appendChild(lines);
-              details.appendChild(block);
-            });
+              Object.keys(groups).forEach((exId) => {
+                const sets = groups[exId].sort((a, b) => a.setIndex - b.setIndex);
+                const block = document.createElement("div");
+                block.className = "card";
+                block.style.padding = "8px";
+                const name = document.createElement("div");
+                name.style.fontWeight = "700";
+                name.style.marginBottom = "4px";
+                name.textContent = exNames[exId] || exId;
+                const lines = document.createElement("div");
+                lines.style.display = "flex";
+                lines.style.flexWrap = "wrap";
+                lines.style.gap = "8px";
 
-            row.appendChild(summary);
-            row.appendChild(details);
-            list.appendChild(row);
+                sets.forEach((t) => {
+                  const line = document.createElement("div");
+                  line.className = "sub";
+                  line.style.fontSize = "12px";
+                  const w = t.weightLb && t.weightLb > 0 ? `${t.weightLb} lb` : "BW";
+                  const repOrSec = t.seconds != null ? `${t.seconds}s${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}` : `${t.reps} reps${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}`;
+                  line.textContent = `S${(t.setIndex || 0) + 1}: ${repOrSec}`;
+                  lines.appendChild(line);
+                });
+
+                block.appendChild(name);
+                block.appendChild(lines);
+                details.appendChild(block);
+              });
+            }
+
+            toggleBtn.onclick = () => {
+              if (details.style.display === "none") {
+                details.style.display = "flex";
+                toggleBtn.textContent = "Hide";
+              } else {
+                details.style.display = "none";
+                toggleBtn.textContent = "Details";
+              }
+            };
+
+            wrapper.appendChild(summary);
+            wrapper.appendChild(details);
+            list.appendChild(wrapper);
           });
         }
 
@@ -1956,142 +2311,67 @@
       function downloadRoutineCSV(id) {
         const s = Store.get();
         const rows = [
-          [
-            "sessionId",
-            "date",
-            "workoutId",
-            "totalSec",
-            "exerciseId",
-            "setIndex",
-            "weightLb",
-            "reps",
-            "seconds",
-            "rpe",
-            "formScore",
-          ].join(","),
+          ["sessionId", "date", "workoutId", "totalSec", "exerciseId", "setIndex", "weightLb", "reps", "seconds", "rpe", "formScore"].join(",")
         ];
-        s.logs
-          .filter((l) => l.workoutId === id)
-          .forEach((l) => {
-            if (!l.sets?.length) {
-              rows.push(
-                [l.id, l.date, l.workoutId, l.totalSec || 0, "", "", "", "", "", "", ""].join(",")
-              );
-            } else {
-              l.sets.forEach((t) => {
-                rows.push(
-                  [
-                    l.id,
-                    l.date,
-                    l.workoutId,
-                    l.totalSec || 0,
-                    t.exerciseId,
-                    t.setIndex,
-                    t.weightLb || "",
-                    t.reps || "",
-                    t.seconds || "",
-                    t.rpe || "",
-                    t.formScore || "",
-                  ].join(",")
-                );
-              });
-            }
-          });
+        s.logs.filter((l) => l.workoutId === id).forEach((l) => {
+          if (!l.sets?.length) {
+            rows.push([l.id, l.date, l.workoutId, l.totalSec || 0, "", "", "", "", "", "", ""].join(","));
+          } else {
+            l.sets.forEach((t) => {
+              rows.push([l.id, l.date, l.workoutId, l.totalSec || 0, t.exerciseId, t.setIndex, t.weightLb || "", t.reps || "", t.seconds || "", t.rpe || "", t.formScore || ""].join(","));
+            });
+          }
+        });
         const blob = new Blob([rows.join("\n")], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download =
-          "fitforge-" + (Tracks[id]?.title || id).replace(/\s+/g, "_") + ".csv";
+        a.download = "fitforge-" + (Tracks[id]?.title || id).replace(/\s+/g, "_") + ".csv";
         a.click();
         URL.revokeObjectURL(url);
       }
 
-      // Learn View (essentials)
       function viewLearn() {
         const wrap = document.createElement("div");
         wrap.className = "stack";
 
         const con = document.createElement("div");
         con.className = "card";
-        con.innerHTML = `
-          <div class="h">The Lumbar Constitution</div>
-          <div class="sub">These guard your back on swings and rows.</div>
-          <div class="hr"></div>
-          <div class="h" style="font-weight:700">KB Swings</div>
-          <div class="sub">
-            • Hinge at hips; butt to wall<br/>
-            • Arms = ropes; bell = pendulum<br/>
-            • Brace before hike; ribs down<br/>
-            • Top = plank; bell ≤ chest<br/>
-            • No rounding at bottom
-          </div>
-          <div class="hr"></div>
-          <div class="h" style="font-weight:700">Bent-Over Rows</div>
-          <div class="sub">
-            • Hinge ~45°; feel hamstrings<br/>
-            • Back flat as a table<br/>
-            • Inhale, brace, pull; exhale top<br/>
-            • Elbow drives back; squeeze blade<br/>
-            • No twisting; drop weight if needed
-          </div>
-        `;
+        con.innerHTML = `<div class="h">The Lumbar Constitution</div><div class="sub">These guard your back on swings and rows.</div><div class="hr"></div><div class="h" style="font-weight:700">KB Swings</div><div class="sub">• Hinge at hips; butt to wall<br/>• Arms = ropes; bell = pendulum<br/>• Brace before hike; ribs down<br/>• Top = plank; bell ≤ chest<br/>• No rounding at bottom</div><div class="hr"></div><div class="h" style="font-weight:700">Bent-Over Rows</div><div class="sub">• Hinge ~45°; feel hamstrings<br/>• Back flat as a table<br/>• Inhale, brace, pull; exhale top<br/>• Elbow drives back; squeeze blade<br/>• No twisting; drop weight if needed</div>`;
         wrap.appendChild(con);
 
         const prog = document.createElement("div");
         prog.className = "card";
-        prog.innerHTML = `
-          <div class="h">Progression: Add Before You Load</div>
-          <div class="sub">
-            • Weeks 1–2: Nail form at 35 lb KB / 25 lb DB (aim 12 reps)<br/>
-            • Weeks 3–4: Add a set or 4s eccentric<br/>
-            • Week 5+: +5 lb only if reps are clean (drop to 8, rebuild)
-          </div>
-        `;
+        prog.innerHTML = `<div class="h">Progression: Add Before You Load</div><div class="sub">• Weeks 1–2: Nail form at 35 lb KB / 25 lb DB (aim 12 reps)<br/>• Weeks 3–4: Add a set or 4s eccentric<br/>• Week 5+: +5 lb only if reps are clean (drop to 8, rebuild)</div>`;
         wrap.appendChild(prog);
 
         return wrap;
       }
 
-      // Kickoff + iOS zoom guards
       window.addEventListener("hashchange", render);
       window.addEventListener("load", () => {
+        // Initialize theme
+        const s = Store.get();
+        if (!s.profile.theme) {
+          Store.mutate((st) => {
+            st.profile.theme = "auto";
+          });
+        }
+        applyTheme(s.profile.theme || "auto");
+
         render();
 
-        // iOS: prevent accidental zoom (double-tap / pinch)
         let lastTouchEnd = 0;
-        document.addEventListener(
-          "touchend",
-          (e) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-              e.preventDefault();
-            }
-            lastTouchEnd = now;
-          },
-          { passive: false }
-        );
-        document.addEventListener(
-          "gesturestart",
-          (e) => {
-            e.preventDefault();
-          },
-          { passive: false }
-        );
-        document.addEventListener(
-          "dblclick",
-          (e) => {
-            e.preventDefault();
-          },
-          { passive: false }
-        );
+        document.addEventListener("touchend", (e) => {
+          const now = Date.now();
+          if (now - lastTouchEnd <= 300) e.preventDefault();
+          lastTouchEnd = now;
+        }, { passive: false });
+        document.addEventListener("gesturestart", (e) => { e.preventDefault(); }, { passive: false });
+        document.addEventListener("dblclick", (e) => { e.preventDefault(); }, { passive: false });
 
-        window.addEventListener("offline", () =>
-          toast("Offline: PWA cache active.")
-        );
-        window.addEventListener("online", () =>
-          toast("Online: syncing...")
-        );
+        window.addEventListener("offline", () => toast("Offline: PWA cache active."));
+        window.addEventListener("online", () => toast("Online: syncing..."));
       });
     </script>
   </body>
