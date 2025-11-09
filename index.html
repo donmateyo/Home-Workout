@@ -1,51 +1,26 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" >
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
-    >
-    <meta name="theme-color" content="#0E0E10" >
-    <meta name="apple-mobile-web-app-capable" content="yes" >
-    <meta name="apple-mobile-web-app-title" content="Fit Forge" >
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" >
-    <meta name="format-detection" content="telephone=no" >
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#0E0E10">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fit Forge">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
     <title>Fit Forge — Simple, Spine-Smart Strength</title>
-    <meta
-      name="description"
-      content="Fit Forge: spine-smart strength PWA with warm-up gate, Add-Before-You-Load progression, per-set timers, quick logging, and per-routine metrics."
-    >
+    <meta name="description" content="Fit Forge: spine-smart strength PWA with warm-up gate, Add-Before-You-Load progression, per-set timers, quick logging, and per-routine metrics.">
 
     <!-- iOS icons - data URLs injected by script -->
-    <link rel="apple-touch-icon" id="apple-touch-icon-default" href="" >
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      id="apple-touch-icon-180"
-      href=""
-    >
-    <link
-      rel="apple-touch-icon"
-      sizes="167x167"
-      id="apple-touch-icon-167"
-      href=""
-    >
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      id="apple-touch-icon-152"
-      href=""
-    >
-    <link
-      rel="apple-touch-icon-precomposed"
-      id="apple-touch-icon-precomposed"
-      href=""
-    >
+    <link rel="apple-touch-icon" id="apple-touch-icon-default" href="">
+    <link rel="apple-touch-icon" sizes="180x180" id="apple-touch-icon-180" href="">
+    <link rel="apple-touch-icon" sizes="167x167" id="apple-touch-icon-167" href="">
+    <link rel="apple-touch-icon" sizes="152x152" id="apple-touch-icon-152" href="">
+    <link rel="apple-touch-icon-precomposed" id="apple-touch-icon-precomposed" href="">
 
     <!-- Favicons for Android/desktop -->
-    <link rel="icon" type="image/png" sizes="192x192" id="favicon-192" href="" >
-    <link rel="icon" type="image/png" sizes="512x512" id="favicon-512" href="" >
+    <link rel="icon" type="image/png" sizes="192x192" id="favicon-192" href="">
+    <link rel="icon" type="image/png" sizes="512x512" id="favicon-512" href="">
 
     <style>
       :root {
@@ -434,13 +409,16 @@
     <div id="app" aria-live="polite"></div>
 
     <script>
-      // Global error handler to catch any issues
+      'use strict';
+
+      // Global error handler
       window.onerror = function(msg, url, line, col, error) {
         document.body.innerHTML = '<div style="color: red; padding: 20px; font-family: monospace;">ERROR: ' + msg + '<br>Line: ' + line + '<br>' + (error ? error.stack : '') + '</div>';
         return false;
       };
 
-      // Fit Forge — PWA (v10) - Barbell icon
+      // Icon cache
+      const iconCache = new Map();
       let generatedIconDataURL = null;
 
       // Manifest + Service Worker
@@ -460,14 +438,14 @@
           function drawWeightStack(ctx, s, xPos, isLeft) {
             const direction = isLeft ? -1 : 1;
 
-            // Collar (small plate closest to center)
+            // Collar
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             const collar_x = isLeft ? xPos - 6 * s : xPos + 2 * s;
             roundedRectPath(ctx, collar_x, -6 * s, 4 * s, 12 * s, 2 * s);
             ctx.fill();
 
-            // Collar shadow detail
+            // Collar shadow
             ctx.save();
             ctx.globalAlpha = 0.2;
             ctx.fillStyle = "#000000";
@@ -484,7 +462,7 @@
             roundedRectPath(ctx, med_x, -10 * s, 6 * s, 20 * s, 2.5 * s);
             ctx.fill();
 
-            // Medium shadow detail
+            // Medium shadow
             ctx.save();
             ctx.globalAlpha = 0.15;
             ctx.fillStyle = "#000000";
@@ -494,14 +472,14 @@
             ctx.fill();
             ctx.restore();
 
-            // Large outer plate
+            // Large plate
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             const large_x = isLeft ? xPos - 20 * s : xPos + 12 * s;
             roundedRectPath(ctx, large_x, -14 * s, 8 * s, 28 * s, 3 * s);
             ctx.fill();
 
-            // Large shadow detail
+            // Large shadow
             ctx.save();
             ctx.globalAlpha = 0.12;
             ctx.fillStyle = "#000000";
@@ -511,7 +489,7 @@
             ctx.fill();
             ctx.restore();
 
-            // Highlight gradient on weights
+            // Highlight gradient
             ctx.save();
             ctx.globalAlpha = 0.4;
             const highlightGrad = ctx.createLinearGradient(xPos, -14 * s, xPos, 14 * s);
@@ -586,11 +564,16 @@
           }
 
           function generateIconDataURL(size) {
+            if (iconCache.has(size)) {
+              return iconCache.get(size);
+            }
             const c = document.createElement("canvas");
             c.width = c.height = size;
             const ctx = c.getContext("2d");
             drawIronIcon(ctx, size);
-            return c.toDataURL("image/png");
+            const url = c.toDataURL("image/png");
+            iconCache.set(size, url);
+            return url;
           }
 
           function generateIconB64(size) {
@@ -600,29 +583,29 @@
 
           generatedIconDataURL = generateIconDataURL(120);
 
-          const ICON_180_URL = generateIconDataURL(180);
-          const ICON_167_URL = generateIconDataURL(167);
-          const ICON_152_URL = generateIconDataURL(152);
-          const ICON_192_URL = generateIconDataURL(192);
-          const ICON_512_URL = generateIconDataURL(512);
+          // Generate icons once and cache
+          const iconSizes = [
+            ['apple-touch-icon-default', 180],
+            ['apple-touch-icon-180', 180],
+            ['apple-touch-icon-167', 167],
+            ['apple-touch-icon-152', 152],
+            ['apple-touch-icon-precomposed', 180],
+            ['favicon-192', 192],
+            ['favicon-512', 512]
+          ];
 
-          const iconLinks = {
-            'apple-touch-icon-default': ICON_180_URL,
-            'apple-touch-icon-180': ICON_180_URL,
-            'apple-touch-icon-167': ICON_167_URL,
-            'apple-touch-icon-152': ICON_152_URL,
-            'apple-touch-icon-precomposed': ICON_180_URL,
-            'favicon-192': ICON_192_URL,
-            'favicon-512': ICON_512_URL
-          };
-
-          Object.keys(iconLinks).forEach(id => {
-            const link = document.getElementById(id);
-            if (link) {
-              link.href = iconLinks[id];
-            }
+          const iconDataMap = new Map();
+          iconSizes.forEach(([id, size]) => {
+            iconDataMap.set(id, generateIconDataURL(size));
           });
 
+          // Apply icons
+          iconDataMap.forEach((url, id) => {
+            const link = document.getElementById(id);
+            if (link) link.href = url;
+          });
+
+          // Generate base64 once for service worker
           const ICON_180 = generateIconB64(180);
           const ICON_167 = generateIconB64(167);
           const ICON_152 = generateIconB64(152);
@@ -663,17 +646,18 @@
         }
       })();
 
-      // Rest of the app code continues...
+      // Utility functions
       const qs = (s, el = document) => el.querySelector(s);
       const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
       const nowISO = () => new Date().toISOString();
       const todayKey = () => new Date().toISOString().slice(0, 10);
       const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
+      // Audio context singleton
       const Beep = (() => {
-        let ctx;
+        let ctx = null;
         function ensure() {
-          ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+          if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
         }
         function beep(f = 880, d = 120, v = 0.03) {
           try {
@@ -705,8 +689,12 @@
         modal.className = "sheet-backdrop";
         modal.innerHTML = `<div class="sheet" style="border-radius: 16px; max-width: 400px; padding: 20px;"><div style="font-weight: 700; margin-bottom: 12px;">${message}</div><div class="row" style="justify-content: flex-end; gap: 12px; margin-top: 16px;"><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="confirmBtn" style="background: var(--accent);">Delete</button></div></div>`;
         document.body.appendChild(modal);
-        modal.querySelector("#cancelBtn").onclick = () => modal.remove();
-        modal.querySelector("#confirmBtn").onclick = () => {
+
+        const cancel = modal.querySelector("#cancelBtn");
+        const confirm = modal.querySelector("#confirmBtn");
+
+        cancel.onclick = () => modal.remove();
+        confirm.onclick = () => {
           modal.remove();
           onConfirm();
         };
@@ -723,6 +711,7 @@
         return (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
       }
 
+      // Data constants
       const Warmup = [
         ["Cat-Cow", "5 reps", "Explore range, no forcing."],
         ["Dead Bug", "8/side", "Press back into floor."],
@@ -797,7 +786,7 @@
         ];
       }
 
-      // Theme Management
+      // Theme management
       function applyTheme(theme) {
         const root = document.documentElement;
         if (theme === "light") {
@@ -805,18 +794,15 @@
         } else if (theme === "dark") {
           root.classList.remove("light");
         } else {
-          const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (prefersDark) {
-            root.classList.remove("light");
-          } else {
-            root.classList.add("light");
-          }
+          const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+          root.classList.toggle("light", !prefersDark);
         }
       }
 
+      // Store management - optimized
       const Store = (() => {
         const KEY = "fitforge.v8";
-        let state = load() || seed();
+        let state = null;
 
         function seed() {
           return {
@@ -843,7 +829,7 @@
 
         function load() {
           try {
-            const s = window.localStorage.getItem(KEY);
+            const s = localStorage.getItem(KEY);
             return s ? JSON.parse(s) : null;
           } catch {
             return null;
@@ -851,17 +837,27 @@
         }
 
         function save() {
-          window.localStorage.setItem(KEY, JSON.stringify(state));
+          localStorage.setItem(KEY, JSON.stringify(state));
+          return state;
+        }
+
+        // Initialize state lazily
+        function ensureState() {
+          if (!state) {
+            state = load() || seed();
+          }
           return state;
         }
 
         return {
-          get: () => state,
+          get: () => ensureState(),
           patch: (p) => {
-            state = Object.assign({}, state, p);
+            ensureState();
+            Object.assign(state, p);
             return save();
           },
           mutate: (fn) => {
+            ensureState();
             fn(state);
             return save();
           },
@@ -883,7 +879,15 @@
         return { sets: currentSets, tempo: currentTempo, weightLb: currentWeightLb };
       }
 
+      // Timer management - optimized to clear intervals properly
       let tickId = null;
+
+      function clearTickInterval() {
+        if (tickId) {
+          clearInterval(tickId);
+          tickId = null;
+        }
+      }
 
       function startWorkoutTimer() {
         const s = Store.get();
@@ -905,7 +909,7 @@
           st.runtime.workoutStart = 0;
           st.runtime.workoutActive = false;
         });
-        if (tickId) clearInterval(tickId);
+        clearTickInterval();
         renderTimerChip();
         toast("Workout paused.");
       }
@@ -920,7 +924,7 @@
           st.runtime.workoutStart = 0;
           st.runtime.workoutActive = false;
         });
-        if (tickId) clearInterval(tickId);
+        clearTickInterval();
         renderTimerChip();
       }
 
@@ -932,10 +936,11 @@
       }
 
       function tick() {
-        if (tickId) clearInterval(tickId);
+        clearTickInterval();
         tickId = setInterval(renderTimerChip, 1000);
       }
 
+      // Rest timer - optimized with cleanup
       function restTimer(durationSec, onTick, onDone) {
         const start = Date.now();
         const dur = durationSec * 1000;
@@ -947,6 +952,7 @@
           onTick(Math.round(left / 1000), elapsed / dur);
           if (left <= 0) {
             clearInterval(id);
+            id = null;
             Beep.beep(1200, 140, 0.06);
             Beep.beep(900, 160, 0.06);
             onDone && onDone();
@@ -955,10 +961,31 @@
 
         step();
         id = setInterval(step, 200);
-        return () => clearInterval(id);
+
+        return () => {
+          if (id) {
+            clearInterval(id);
+            id = null;
+          }
+        };
+      }
+
+      // DOM element creation helpers - optimized
+      function createElement(tag, className, content) {
+        const el = document.createElement(tag);
+        if (className) el.className = className;
+        if (content) {
+          if (typeof content === 'string') {
+            el.textContent = content;
+          } else {
+            el.innerHTML = content;
+          }
+        }
+        return el;
       }
 
       function render() {
+        clearTickInterval();
         const root = qs("#app");
         root.innerHTML = "";
         root.appendChild(appHeader());
@@ -971,10 +998,8 @@
         const h = document.createElement("header");
         h.style.gridTemplateColumns = "auto 1fr auto";
 
-        const left = document.createElement("div");
-        left.className = "brand";
-        const logo = document.createElement("div");
-        logo.className = "logo";
+        const left = createElement("div", "brand");
+        const logo = createElement("div", "logo");
         if (generatedIconDataURL) {
           logo.style.backgroundImage = `url(${generatedIconDataURL})`;
         }
@@ -983,17 +1008,12 @@
         left.appendChild(logo);
         left.appendChild(t);
 
-        const chip = document.createElement("div");
-        chip.className = "timer-chip";
+        const chip = createElement("div", "timer-chip");
         chip.id = "timerChip";
         chip.innerHTML = `<span id="timerTxt">00:00</span><button class="btn" id="timerBtn" style="height:32px">Start</button>`;
 
-        const themeBtn = document.createElement("button");
-        themeBtn.className = "btn";
-        themeBtn.style.height = "32px";
-        themeBtn.style.width = "32px";
-        themeBtn.style.padding = "0";
-        themeBtn.style.fontSize = "16px";
+        const themeBtn = createElement("button", "btn");
+        themeBtn.style.cssText = "height:32px;width:32px;padding:0;font-size:16px";
         themeBtn.title = "Toggle theme";
 
         const s = Store.get();
@@ -1003,10 +1023,8 @@
         themeBtn.onclick = () => {
           const state = Store.get();
           const current = state.profile.theme || "auto";
-          let next = "auto";
-          if (current === "auto") next = "light";
-          else if (current === "light") next = "dark";
-          else next = "auto";
+          const themes = ["auto", "light", "dark"];
+          const next = themes[(themes.indexOf(current) + 1) % 3];
 
           Store.mutate((st) => {
             st.profile.theme = next;
@@ -1022,17 +1040,19 @@
       }
 
       function renderTimerChip() {
-        const s = Store.get();
         const txt = qs("#timerTxt");
         const btn = qs("#timerBtn");
         if (!txt || !btn) return;
+
+        const s = Store.get();
         txt.textContent = mmss(getWorkoutElapsedMs());
+
         if (s.runtime.workoutActive) {
           btn.textContent = "Pause";
-          btn.onclick = () => pauseWorkoutTimer();
+          btn.onclick = pauseWorkoutTimer;
         } else {
           btn.textContent = "Start";
-          btn.onclick = () => startWorkoutTimer();
+          btn.onclick = startWorkoutTimer;
         }
       }
 
@@ -1044,10 +1064,9 @@
           ["learn", "Learn"]
         ];
         const cur = location.hash.replace("#", "") || "workout";
+
         tabs.forEach(([id, label]) => {
-          const el = document.createElement("div");
-          el.className = "tab" + (cur === id ? " active" : "");
-          el.textContent = label;
+          const el = createElement("div", `tab${cur === id ? " active" : ""}`, label);
           el.onclick = () => {
             location.hash = "#" + id;
             render();
@@ -1060,40 +1079,37 @@
       function appMain() {
         const main = document.createElement("main");
         const cur = location.hash.replace("#", "") || "workout";
-        if (cur === "workout") main.appendChild(viewWorkout());
-        if (cur === "metrics") main.appendChild(viewMetrics());
-        if (cur === "learn") main.appendChild(viewLearn());
+
+        const views = {
+          workout: viewWorkout,
+          metrics: viewMetrics,
+          learn: viewLearn
+        };
+
+        if (views[cur]) {
+          main.appendChild(views[cur]());
+        }
         return main;
       }
 
       function openRestCustomization(trackId) {
         const s = Store.get();
-        // Initialize restPreferences if it doesn't exist
         if (!s.profile.restPreferences) {
           Store.mutate((st) => {
             st.profile.restPreferences = {};
           });
         }
-        const currentRest = (s.profile.restPreferences && s.profile.restPreferences[trackId]) || (trackId === "IronFocused" ? 105 : 75);
+        const currentRest = s.profile.restPreferences?.[trackId] || (trackId === "IronFocused" ? 105 : 75);
 
-        const backdrop = document.createElement("div");
-        backdrop.className = "sheet-backdrop";
-        const sheet = document.createElement("div");
-        sheet.className = "sheet";
+        const backdrop = createElement("div", "sheet-backdrop");
+        const sheet = createElement("div", "sheet");
 
-        const title = document.createElement("div");
-        title.className = "title";
-        title.textContent = "Customize Rest Period";
-
-        const sub = document.createElement("div");
-        sub.className = "sub";
+        const title = createElement("div", "title", "Customize Rest Period");
+        const sub = createElement("div", "sub", "Set default rest time between sets for this routine");
         sub.style.marginBottom = "12px";
-        sub.textContent = "Set default rest time between sets for this routine";
 
         const inputWrap = document.createElement("div");
-        const label = document.createElement("div");
-        label.className = "sub";
-        label.textContent = "Rest Duration (seconds)";
+        const label = createElement("div", "sub", "Rest Duration (seconds)");
         const input = document.createElement("input");
         input.type = "number";
         input.inputmode = "numeric";
@@ -1102,15 +1118,10 @@
         inputWrap.appendChild(label);
         inputWrap.appendChild(input);
 
-        const row = document.createElement("div");
-        row.className = "row";
-        const cancel = document.createElement("button");
-        cancel.className = "btn";
-        cancel.textContent = "Cancel";
+        const row = createElement("div", "row");
+        const cancel = createElement("button", "btn", "Cancel");
         cancel.onclick = () => backdrop.remove();
-        const save = document.createElement("button");
-        save.className = "btn primary";
-        save.textContent = "Save";
+        const save = createElement("button", "btn primary", "Save");
         save.onclick = () => {
           const newRest = Number(input.value) || currentRest;
           Store.mutate((st) => {
@@ -1126,7 +1137,7 @@
         sheet.appendChild(title);
         sheet.appendChild(sub);
         sheet.appendChild(inputWrap);
-        sheet.appendChild(document.createElement("div")).className = "hr";
+        sheet.appendChild(createElement("div", "hr"));
         sheet.appendChild(row);
         backdrop.appendChild(sheet);
         backdrop.onclick = (e) => {
@@ -1136,48 +1147,37 @@
       }
 
       function viewWorkout() {
-        const wrap = document.createElement("div");
-        wrap.className = "stack";
+        const wrap = createElement("div", "stack");
         wrap.appendChild(warmupCard());
         wrap.appendChild(todaysWorkoutCard());
         return wrap;
       }
 
       function warmupCard() {
-        const card = document.createElement("div");
-        card.className = "card";
+        const card = createElement("div", "card");
         const s = Store.get();
         const today = todayKey();
         const done = s.runtime.warmupDoneKey === today;
 
-        const header = document.createElement("div");
-        header.className = "row";
-        header.style.justifyContent = "space-between";
-        header.style.alignItems = "center";
+        const header = createElement("div", "row");
+        header.style.cssText = "justify-content:space-between;align-items:center";
 
         const headerText = document.createElement("div");
-        const hd = document.createElement("div");
-        hd.className = "h";
-        hd.textContent = "Warm-Up (Password)";
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        sub.textContent = done ? "✓ Completed" : "Do this every time. Unlocks the main session.";
+        const hd = createElement("div", "h", "Warm-Up (Password)");
+        const sub = createElement("div", "sub", done ? "✓ Completed" : "Do this every time. Unlocks the main session.");
         headerText.appendChild(hd);
         headerText.appendChild(sub);
         header.appendChild(headerText);
 
-        const content = document.createElement("div");
-        content.className = "stack";
+        const content = createElement("div", "stack");
         content.style.marginTop = "8px";
 
-        const list = document.createElement("div");
-        list.className = "stack";
+        const list = createElement("div", "stack");
         list.style.marginTop = "4px";
 
         const checks = [];
         Warmup.forEach(([name, rep, cue]) => {
-          const row = document.createElement("div");
-          row.className = "row";
+          const row = createElement("div", "row");
           const chk = document.createElement("input");
           chk.type = "checkbox";
           chk.disabled = done;
@@ -1190,13 +1190,10 @@
           checks.push(chk);
         });
 
-        const gate = document.createElement("button");
-        gate.className = "btn primary block";
-        gate.textContent = done ? "Warm-Up Completed" : "Unlock Main Session";
+        const gate = createElement("button", "btn primary block", done ? "Warm-Up Completed" : "Unlock Main Session");
         gate.disabled = done;
         gate.onclick = () => {
-          const ok = checks.every((c) => c.checked);
-          if (!ok) {
+          if (!checks.every((c) => c.checked)) {
             toast("Finish all warm-up items first.");
             return;
           }
@@ -1212,24 +1209,16 @@
         content.appendChild(gate);
 
         if (done) {
-          const toggleBtn = document.createElement("button");
-          toggleBtn.className = "btn";
-          toggleBtn.textContent = "Show";
-          toggleBtn.style.height = "32px";
-          toggleBtn.style.fontSize = "13px";
-          toggleBtn.style.padding = "0 10px";
+          const toggleBtn = createElement("button", "btn", "Show");
+          toggleBtn.style.cssText = "height:32px;font-size:13px;padding:0 10px";
           header.appendChild(toggleBtn);
 
           content.style.display = "none";
 
           toggleBtn.onclick = () => {
-            if (content.style.display === "none") {
-              content.style.display = "flex";
-              toggleBtn.textContent = "Hide";
-            } else {
-              content.style.display = "none";
-              toggleBtn.textContent = "Show";
-            }
+            const isHidden = content.style.display === "none";
+            content.style.display = isHidden ? "flex" : "none";
+            toggleBtn.textContent = isHidden ? "Hide" : "Show";
           };
         }
 
@@ -1240,27 +1229,25 @@
 
       function todaysWorkoutCard() {
         const s = Store.get();
-        const card = document.createElement("div");
-        card.className = "card";
+        const card = createElement("div", "card");
 
-        const routineRow = document.createElement("div");
-        routineRow.className = "row";
-        const routineLabel = document.createElement("div");
-        routineLabel.className = "sub";
-        routineLabel.textContent = "Routine";
+        const routineRow = createElement("div", "row");
+        const routineLabel = createElement("div", "sub", "Routine");
         const routineSel = document.createElement("select");
+
         const opts = [
           ["Hybrid", "Hybrid"],
           ["IronFocused", "Iron-Focused: The Backsmith's Anvil Day"],
           ["GrumpyBack", "Grumpy Back Day"]
         ];
+
         opts.forEach(([v, t]) => {
-          const op = document.createElement("option");
+          const op = createElement("option", null, t);
           op.value = v;
-          op.textContent = t;
           if (s.profile.track === v) op.selected = true;
           routineSel.appendChild(op);
         });
+
         routineSel.onchange = () => {
           Store.mutate((st) => {
             st.profile.track = routineSel.value;
@@ -1273,19 +1260,13 @@
 
         const track = Tracks[s.profile.track] || Tracks.Hybrid;
 
-        const hd = document.createElement("div");
-        hd.className = "h";
-        hd.textContent = track.title;
-
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        const customRest = s.profile.restPreferences ? s.profile.restPreferences[s.profile.track] : null;
+        const hd = createElement("div", "h", track.title);
+        const sub = createElement("div", "sub");
+        const customRest = s.profile.restPreferences?.[s.profile.track];
         const restHint = customRest ? `Custom rest: ${customRest}s.` : (track.restPolicy === "90-120" ? "Rest aim: 90–120s." : "Rest aim: 60–90s.");
         sub.textContent = (track.subtitle ? track.subtitle + " · " : "") + restHint + " Auto rest after every set.";
 
-        const restBtn = document.createElement("button");
-        restBtn.className = "btn";
-        restBtn.textContent = "Customize Rest";
+        const restBtn = createElement("button", "btn", "Customize Rest");
         restBtn.style.marginTop = "8px";
         restBtn.onclick = () => openRestCustomization(s.profile.track);
 
@@ -1298,19 +1279,16 @@
         card.appendChild(divider());
 
         if (!warmOK) {
-          const lock = document.createElement("div");
-          lock.className = "pill warn";
-          lock.textContent = "Locked: complete the warm-up to start.";
+          const lock = createElement("div", "pill warn", "Locked: complete the warm-up to start.");
           card.appendChild(lock);
           return card;
         }
 
-        const list = document.createElement("div");
-        list.className = "stack";
+        const list = createElement("div", "stack");
 
         const week = weekFrom(s.profile.startDate);
         const baseRest = track.id === "IronFocused" ? 105 : track.id === "Hybrid" ? 75 : 60;
-        const restDefault = (s.profile.restPreferences && s.profile.restPreferences[s.profile.track]) || baseRest;
+        const restDefault = s.profile.restPreferences?.[s.profile.track] || baseRest;
 
         if (track.id === "GrumpyBack") {
           const exs = planBExercises();
@@ -1359,9 +1337,7 @@
       }
 
       function divider() {
-        const d = document.createElement("div");
-        d.className = "hr";
-        return d;
+        return createElement("div", "hr");
       }
 
       function weekFrom(startISO) {
@@ -1373,45 +1349,41 @@
 
       function lastAverages(exId) {
         const s = Store.get();
-        const sets = s.logs.slice(-10).flatMap((l) => l.sets).filter((t) => t.exerciseId === exId);
+        const sets = s.logs.slice(-10).flatMap((l) => l.sets || []).filter((t) => t.exerciseId === exId);
         if (!sets.length) return { form: 100, rpe: 7, hitTop: true };
-        const form = sets.reduce((a, b) => a + (b.formScore || 0), 0) / sets.length;
-        const rpe = sets.reduce((a, b) => a + (b.rpe || 7), 0) / sets.length;
+
+        const len = sets.length;
+        const form = sets.reduce((a, b) => a + (b.formScore || 0), 0) / len;
+        const rpe = sets.reduce((a, b) => a + (b.rpe || 7), 0) / len;
         const hitTop = sets.every((t) => t.hitTopRepRange);
         return { form, rpe, hitTop };
       }
 
       function walkCard() {
-        const c = document.createElement("div");
-        c.className = "card";
-        const h = document.createElement("div");
-        h.className = "name";
-        h.textContent = "20-min Walk";
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        sub.textContent = "Start a 20:00 timer and move easy.";
-        const row = document.createElement("div");
-        row.className = "row";
-        const timerBox = document.createElement("div");
-        timerBox.className = "pill";
-        timerBox.textContent = "20:00";
-        const start = document.createElement("button");
-        start.className = "btn";
-        start.textContent = "Start";
+        const c = createElement("div", "card");
+        const h = createElement("div", "name", "20-min Walk");
+        const sub = createElement("div", "sub", "Start a 20:00 timer and move easy.");
+        const row = createElement("div", "row");
+        const timerBox = createElement("div", "pill", "20:00");
+        const start = createElement("button", "btn", "Start");
+
+        let intervalId = null;
         start.onclick = () => {
-          const startMs = 20 * 60 * 1000;
-          let left = startMs;
-          const id = setInterval(() => {
+          if (intervalId) return;
+          let left = 20 * 60 * 1000;
+          intervalId = setInterval(() => {
             left -= 1000;
             timerBox.textContent = mmss(left);
             if (left <= 0) {
-              clearInterval(id);
+              clearInterval(intervalId);
+              intervalId = null;
               Beep.beep(1200, 140, 0.06);
               Beep.beep(900, 160, 0.06);
               toast("Walk done. Nice.");
             }
           }, 1000);
         };
+
         row.appendChild(timerBox);
         row.appendChild(start);
         c.appendChild(h);
@@ -1420,8 +1392,9 @@
         return c;
       }
 
+      // Optimized to use single event delegation instead of individual handlers
       function openQuickLog({ cfg, setIndex, onSave }) {
-        const sKey = cfg.id + "::last";
+        const sKey = `${cfg.id}::last`;
         window.__lastUsed = window.__lastUsed || {};
         const last = window.__lastUsed[sKey] || {};
 
@@ -1429,38 +1402,28 @@
         const defaultReps = isTime ? cfg.timeSec[1] : cfg.reps[1];
         const defaultWeight = typeof cfg.load === "number" ? cfg.load : 0;
 
-        const backdrop = document.createElement("div");
-        backdrop.className = "sheet-backdrop";
-        const sheet = document.createElement("div");
-        sheet.className = "sheet";
+        const backdrop = createElement("div", "sheet-backdrop");
+        const sheet = createElement("div", "sheet");
 
-        const title = document.createElement("div");
-        title.className = "title";
-        title.textContent = `${cfg.name} — Set ${setIndex + 1}`;
+        const title = createElement("div", "title", `${cfg.name} — Set ${setIndex + 1}`);
 
         let timerSection = null;
         let stopTimer = null;
 
         if (isTime) {
           timerSection = document.createElement("div");
-          timerSection.style.marginBottom = "12px";
-          timerSection.style.textAlign = "center";
+          timerSection.style.cssText = "margin-bottom:12px;text-align:center";
 
           const timerDisplay = document.createElement("div");
-          timerDisplay.style.fontSize = "32px";
-          timerDisplay.style.fontWeight = "800";
-          timerDisplay.style.marginBottom = "8px";
+          timerDisplay.style.cssText = "font-size:32px;font-weight:800;margin-bottom:8px";
           timerDisplay.textContent = mmss(defaultReps * 1000);
 
-          const timerBar = document.createElement("div");
-          timerBar.className = "restbar";
+          const timerBar = createElement("div", "restbar");
           timerBar.style.marginBottom = "8px";
           const timerFill = document.createElement("span");
           timerBar.appendChild(timerFill);
 
-          const timerBtn = document.createElement("button");
-          timerBtn.className = "btn primary";
-          timerBtn.textContent = "Start Timer";
+          const timerBtn = createElement("button", "btn primary", "Start Timer");
 
           let isRunning = false;
           timerBtn.onclick = () => {
@@ -1493,15 +1456,12 @@
           timerSection.appendChild(timerBtn);
         }
 
-        const grid = document.createElement("div");
-        grid.className = "grid";
+        const grid = createElement("div", "grid");
 
         let weightInput = null;
         if (defaultWeight > 0) {
           const wWrap = document.createElement("div");
-          const wLab = document.createElement("div");
-          wLab.className = "sub";
-          wLab.textContent = "Weight (lb)";
+          const wLab = createElement("div", "sub", "Weight (lb)");
           weightInput = document.createElement("input");
           weightInput.type = "number";
           weightInput.inputmode = "decimal";
@@ -1513,9 +1473,7 @@
         }
 
         const rWrap = document.createElement("div");
-        const rLab = document.createElement("div");
-        rLab.className = "sub";
-        rLab.textContent = isTime ? "Seconds" : "Reps";
+        const rLab = createElement("div", "sub", isTime ? "Seconds" : "Reps");
         const repsInput = document.createElement("input");
         repsInput.type = "number";
         repsInput.inputmode = "numeric";
@@ -1527,9 +1485,7 @@
 
         const rpeWrap = document.createElement("div");
         rpeWrap.style.paddingRight = "8px";
-        const rpeLab = document.createElement("div");
-        rpeLab.className = "sub";
-        rpeLab.textContent = "RPE (1-10)";
+        const rpeLab = createElement("div", "sub", "RPE (1-10)");
         rpeLab.title = "Rate of Perceived Exertion";
         const rpeInput = document.createElement("input");
         rpeInput.type = "range";
@@ -1537,13 +1493,9 @@
         rpeInput.max = "10";
         rpeInput.step = "0.5";
         rpeInput.value = String(last.rpe ?? 7);
-        rpeInput.style.width = "calc(100% - 4px)";
-        rpeInput.style.margin = "0 2px";
+        rpeInput.style.cssText = "width:calc(100% - 4px);margin:0 2px";
         const rpeValue = document.createElement("div");
-        rpeValue.style.textAlign = "center";
-        rpeValue.style.fontWeight = "700";
-        rpeValue.style.fontSize = "18px";
-        rpeValue.style.marginTop = "4px";
+        rpeValue.style.cssText = "text-align:center;font-weight:700;font-size:18px;margin-top:4px";
         rpeValue.textContent = rpeInput.value;
         rpeInput.oninput = () => {
           rpeValue.textContent = rpeInput.value;
@@ -1555,9 +1507,7 @@
 
         const formWrap = document.createElement("div");
         formWrap.style.paddingRight = "8px";
-        const formLab = document.createElement("div");
-        formLab.className = "sub";
-        formLab.textContent = "Form (%)";
+        const formLab = createElement("div", "sub", "Form (%)");
         formLab.title = "Form Quality";
         const formInput = document.createElement("input");
         formInput.type = "range";
@@ -1565,13 +1515,9 @@
         formInput.max = "100";
         formInput.step = "5";
         formInput.value = String(last.formScore ?? 90);
-        formInput.style.width = "calc(100% - 4px)";
-        formInput.style.margin = "0 2px";
+        formInput.style.cssText = "width:calc(100% - 4px);margin:0 2px";
         const formValue = document.createElement("div");
-        formValue.style.textAlign = "center";
-        formValue.style.fontWeight = "700";
-        formValue.style.fontSize = "18px";
-        formValue.style.marginTop = "4px";
+        formValue.style.cssText = "text-align:center;font-weight:700;font-size:18px;margin-top:4px";
         formValue.textContent = formInput.value + "%";
         formInput.oninput = () => {
           formValue.textContent = formInput.value + "%";
@@ -1581,18 +1527,13 @@
         formWrap.appendChild(formValue);
         grid.appendChild(formWrap);
 
-        const row = document.createElement("div");
-        row.className = "row";
-        const cancel = document.createElement("button");
-        cancel.className = "btn";
-        cancel.textContent = "Cancel";
+        const row = createElement("div", "row");
+        const cancel = createElement("button", "btn", "Cancel");
         cancel.onclick = () => {
           if (stopTimer) stopTimer();
           backdrop.remove();
         };
-        const save = document.createElement("button");
-        save.className = "btn primary";
-        save.textContent = "Save";
+        const save = createElement("button", "btn primary", "Save");
         save.onclick = () => {
           const w = weightInput ? Number(weightInput.value || defaultWeight) : 0;
           const repOrSec = Number(repsInput.value || defaultReps);
@@ -1609,7 +1550,7 @@
         sheet.appendChild(title);
         if (timerSection) sheet.appendChild(timerSection);
         sheet.appendChild(grid);
-        sheet.appendChild(document.createElement("div")).className = "hr";
+        sheet.appendChild(createElement("div", "hr"));
         sheet.appendChild(row);
         row.appendChild(cancel);
         row.appendChild(save);
@@ -1625,27 +1566,20 @@
       }
 
       function exerciseCard(cfg) {
-        const card = document.createElement("div");
-        card.className = "card ex";
+        const card = createElement("div", "card ex");
 
         const left = document.createElement("div");
-        const nm = document.createElement("div");
-        nm.className = "name";
-        nm.textContent = cfg.name;
-        const mt = document.createElement("div");
-        mt.className = "meta";
+        const nm = createElement("div", "name", cfg.name);
+        const mt = createElement("div", "meta");
         const repTxt = cfg.timeSec ? `${cfg.timeSec[0]}–${cfg.timeSec[1]}s` : `${cfg.reps[0]}–${cfg.reps[1]} reps`;
         mt.textContent = `${cfg.sets} sets · ${repTxt}` + (cfg.load ? ` · Target: ${cfg.load} lb` : "");
         left.appendChild(nm);
         left.appendChild(mt);
 
-        const right = document.createElement("div");
-        right.className = "chips";
+        const right = createElement("div", "chips");
 
         for (let i = 0; i < cfg.sets; i++) {
-          const c = document.createElement("div");
-          c.className = "chip";
-          c.textContent = i + 1;
+          const c = createElement("div", "chip", String(i + 1));
           c.onclick = () => {
             if (c.dataset.done === "1") return;
             openQuickLog({
@@ -1667,8 +1601,7 @@
         card.appendChild(right);
 
         if (cfg.constitution) {
-          const cons = document.createElement("div");
-          cons.className = "cue";
+          const cons = createElement("div", "cue");
           const key = cfg.constitution === "swing" ? Constitution.swing[0] : Constitution.row[0];
           cons.innerHTML = `<strong>Form check:</strong> ${key} · <em>No rounding.</em> `;
           const ok = document.createElement("input");
@@ -1679,9 +1612,7 @@
         }
 
         if (cfg.cues?.length) {
-          const cue = document.createElement("div");
-          cue.className = "cue";
-          cue.textContent = "Cues: " + cfg.cues.join(" · ");
+          const cue = createElement("div", "cue", "Cues: " + cfg.cues.join(" · "));
           card.appendChild(cue);
         }
 
@@ -1689,29 +1620,19 @@
       }
 
       function autoRest(seconds, parentCard) {
-        const old = parentCard.querySelector(".restbar");
-        if (old) old.remove();
-        const oldRow = parentCard.querySelector('.row[data-rest="1"]');
-        if (oldRow) oldRow.remove();
+        // Clean up existing rest elements
+        parentCard.querySelectorAll(".restbar, [data-rest='1']").forEach(el => el.remove());
 
-        const bar = document.createElement("div");
-        bar.className = "restbar";
+        const bar = createElement("div", "restbar");
         const fill = document.createElement("span");
         bar.appendChild(fill);
 
-        const row = document.createElement("div");
-        row.className = "row";
+        const row = createElement("div", "row");
         row.setAttribute("data-rest", "1");
-        const lbl = document.createElement("div");
-        lbl.className = "sub";
-        lbl.textContent = "Rest";
-        const left = document.createElement("div");
-        left.className = "pill";
-        left.textContent = mmss(seconds * 1000);
-        const skip = document.createElement("button");
-        skip.className = "btn";
-        skip.textContent = "Skip";
-        skip.onclick = () => cleanup();
+        const lbl = createElement("div", "sub", "Rest");
+        const left = createElement("div", "pill", mmss(seconds * 1000));
+        const skip = createElement("button", "btn", "Skip");
+        skip.onclick = cleanup;
 
         row.appendChild(lbl);
         row.appendChild(left);
@@ -1723,7 +1644,7 @@
         const stop = restTimer(seconds, (secLeft, prog) => {
           fill.style.width = `${Math.floor(prog * 100)}%`;
           left.textContent = mmss(secLeft * 1000);
-        }, () => cleanup());
+        }, cleanup);
 
         function cleanup() {
           stop();
@@ -1752,12 +1673,9 @@
       }
 
       function finishRow() {
-        const r = document.createElement("div");
-        r.className = "row";
-        const finish = document.createElement("button");
-        finish.className = "btn primary block";
-        finish.textContent = "Finish Workout";
-        finish.onclick = () => finishWorkout();
+        const r = createElement("div", "row");
+        const finish = createElement("button", "btn primary block", "Finish Workout");
+        finish.onclick = finishWorkout;
         r.appendChild(finish);
         return r;
       }
@@ -1785,26 +1703,17 @@
 
       function openManualEntry() {
         const s = Store.get();
-        const backdrop = document.createElement("div");
-        backdrop.className = "sheet-backdrop";
-        const sheet = document.createElement("div");
-        sheet.className = "sheet";
-        sheet.style.maxHeight = "85vh";
-        sheet.style.overflowY = "auto";
-        sheet.style.paddingBottom = "calc(20px + var(--pad-bottom))";
+        const backdrop = createElement("div", "sheet-backdrop");
+        const sheet = createElement("div", "sheet");
+        sheet.style.cssText = "max-height:85vh;overflow-y:auto;padding-bottom:calc(20px + var(--pad-bottom))";
 
-        const title = document.createElement("div");
-        title.className = "title";
-        title.textContent = "Log Workout Manually";
+        const title = createElement("div", "title", "Log Workout Manually");
 
-        const form = document.createElement("div");
-        form.className = "stack";
+        const form = createElement("div", "stack");
         form.style.gap = "16px";
 
         const routineRow = document.createElement("div");
-        const routineLabel = document.createElement("div");
-        routineLabel.className = "sub";
-        routineLabel.textContent = "Routine";
+        const routineLabel = createElement("div", "sub", "Routine");
         const routineSel = document.createElement("select");
         const opts = [
           ["Hybrid", "Hybrid"],
@@ -1812,9 +1721,8 @@
           ["GrumpyBack", "Grumpy Back Day"]
         ];
         opts.forEach(([v, t]) => {
-          const op = document.createElement("option");
+          const op = createElement("option", null, t);
           op.value = v;
-          op.textContent = t;
           if (s.profile.track === v) op.selected = true;
           routineSel.appendChild(op);
         });
@@ -1822,9 +1730,7 @@
         routineRow.appendChild(routineSel);
 
         const dateRow = document.createElement("div");
-        const dateLabel = document.createElement("div");
-        dateLabel.className = "sub";
-        dateLabel.textContent = "Date";
+        const dateLabel = createElement("div", "sub", "Date");
         const dateInput = document.createElement("input");
         dateInput.type = "date";
         dateInput.value = new Date().toISOString().slice(0, 10);
@@ -1832,9 +1738,7 @@
         dateRow.appendChild(dateInput);
 
         const durRow = document.createElement("div");
-        const durLabel = document.createElement("div");
-        durLabel.className = "sub";
-        durLabel.textContent = "Duration (minutes)";
+        const durLabel = createElement("div", "sub", "Duration (minutes)");
         const durInput = document.createElement("input");
         durInput.type = "number";
         durInput.inputmode = "numeric";
@@ -1843,13 +1747,10 @@
         durRow.appendChild(durLabel);
         durRow.appendChild(durInput);
 
-        const exercisesContainer = document.createElement("div");
-        exercisesContainer.className = "stack";
+        const exercisesContainer = createElement("div", "stack");
         exercisesContainer.style.gap = "10px";
 
-        const exercisesLabel = document.createElement("div");
-        exercisesLabel.className = "sub";
-        exercisesLabel.textContent = "Exercises (fill in what you completed)";
+        const exercisesLabel = createElement("div", "sub", "Exercises (fill in what you completed)");
         exercisesContainer.appendChild(exercisesLabel);
 
         form.appendChild(routineRow);
@@ -1858,7 +1759,7 @@
         form.appendChild(exercisesContainer);
 
         function populateInputRows() {
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             const exContainers = exercisesContainer.querySelectorAll("[data-exercise-id]");
             exContainers.forEach((container) => {
               const isTime = container.getAttribute("data-is-time") === "1";
@@ -1868,10 +1769,11 @@
                 addSetInputRow(container, i, isTime, hasWeight);
               }
             });
-          }, 10);
+          });
         }
 
         function renderExerciseTemplate(workoutId) {
+          // Clear existing exercises except the label
           while (exercisesContainer.children.length > 1) {
             exercisesContainer.removeChild(exercisesContainer.lastChild);
           }
@@ -1880,26 +1782,20 @@
           const exercises = track.id === "GrumpyBack" ? planBExercises() : track.exercises || [];
 
           exercises.forEach((ex) => {
-            const exCard = document.createElement("div");
-            exCard.className = "card";
-            exCard.style.padding = "10px";
-            exCard.style.background = "var(--card-2)";
+            const exCard = createElement("div", "card");
+            exCard.style.cssText = "padding:10px;background:var(--card-2)";
 
             const exName = document.createElement("div");
-            exName.style.fontWeight = "700";
-            exName.style.marginBottom = "6px";
+            exName.style.cssText = "font-weight:700;margin-bottom:6px";
             exName.textContent = ex.name;
 
-            const exMeta = document.createElement("div");
-            exMeta.className = "sub";
-            exMeta.style.fontSize = "12px";
-            exMeta.style.marginBottom = "8px";
+            const exMeta = createElement("div", "sub");
+            exMeta.style.cssText = "font-size:12px;margin-bottom:8px";
             const repText = ex.timeSec ? `${ex.timeSec[0]}-${ex.timeSec[1]}s` : `${ex.reps[0]}-${ex.reps[1]} reps`;
             const maxSets = ex.sets[1] || ex.sets[0] || 4;
             exMeta.textContent = `Target: ${maxSets} sets × ${repText}${ex.load ? ` @ ${ex.load} lb` : ''}`;
 
-            const setsContainer = document.createElement("div");
-            setsContainer.className = "stack";
+            const setsContainer = createElement("div", "stack");
             setsContainer.style.gap = "6px";
             setsContainer.setAttribute("data-exercise-id", ex.id);
             setsContainer.setAttribute("data-is-time", ex.timeSec ? "1" : "0");
@@ -1919,21 +1815,15 @@
           renderExerciseTemplate(routineSel.value);
         };
 
-        const buttons = document.createElement("div");
-        buttons.className = "row";
-        buttons.style.marginTop = "16px";
-        buttons.style.gap = "12px";
+        const buttons = createElement("div", "row");
+        buttons.style.cssText = "margin-top:16px;gap:12px";
 
-        const cancel = document.createElement("button");
-        cancel.className = "btn";
+        const cancel = createElement("button", "btn", "Cancel");
         cancel.style.flex = "1";
-        cancel.textContent = "Cancel";
         cancel.onclick = () => backdrop.remove();
 
-        const save = document.createElement("button");
-        save.className = "btn primary";
+        const save = createElement("button", "btn primary", "Save Workout");
         save.style.flex = "1";
-        save.textContent = "Save Workout";
         save.onclick = () => {
           const workoutId = routineSel.value;
           const date = new Date(dateInput.value + "T12:00:00").toISOString();
@@ -2003,17 +1893,11 @@
       }
 
       function addSetInputRow(container, setIndex, isTime, hasWeight) {
-        const row = document.createElement("div");
-        row.className = "set-input-row";
-        row.style.display = "flex";
-        row.style.gap = "8px";
-        row.style.alignItems = "center";
+        const row = createElement("div", "set-input-row");
+        row.style.cssText = "display:flex;gap:8px;align-items:center";
 
-        const setLabel = document.createElement("div");
-        setLabel.className = "sub";
-        setLabel.style.minWidth = "40px";
-        setLabel.style.fontSize = "12px";
-        setLabel.textContent = `Set ${setIndex + 1}:`;
+        const setLabel = createElement("div", "sub", `Set ${setIndex + 1}:`);
+        setLabel.style.cssText = "min-width:40px;font-size:12px";
 
         if (hasWeight) {
           const weightInput = document.createElement("input");
@@ -2021,9 +1905,7 @@
           weightInput.inputmode = "decimal";
           weightInput.className = "weight-input";
           weightInput.placeholder = "lb";
-          weightInput.style.width = "70px";
-          weightInput.style.height = "36px";
-          weightInput.style.fontSize = "14px";
+          weightInput.style.cssText = "width:70px;height:36px;font-size:14px";
           row.appendChild(setLabel);
           row.appendChild(weightInput);
         } else {
@@ -2035,24 +1917,18 @@
         repsInput.inputmode = "numeric";
         repsInput.className = "reps-input";
         repsInput.placeholder = isTime ? "sec" : "reps";
-        repsInput.style.flex = "1";
-        repsInput.style.height = "36px";
-        repsInput.style.fontSize = "14px";
+        repsInput.style.cssText = "flex:1;height:36px;font-size:14px";
 
         row.appendChild(repsInput);
         container.appendChild(row);
       }
 
       function viewMetrics() {
-        const wrap = document.createElement("div");
-        wrap.className = "stack";
+        const wrap = createElement("div", "stack");
 
-        const manualCard = document.createElement("div");
-        manualCard.className = "card";
-        const manualBtn = document.createElement("button");
-        manualBtn.className = "btn primary block";
-        manualBtn.textContent = "Log Workout Manually";
-        manualBtn.onclick = () => openManualEntry();
+        const manualCard = createElement("div", "card");
+        const manualBtn = createElement("button", "btn primary block", "Log Workout Manually");
+        manualBtn.onclick = openManualEntry;
         manualCard.appendChild(manualBtn);
         wrap.appendChild(manualCard);
 
@@ -2066,16 +1942,10 @@
 
       function progressChartCard() {
         const s = Store.get();
-        const card = document.createElement("div");
-        card.className = "card";
+        const card = createElement("div", "card");
 
-        const title = document.createElement("div");
-        title.className = "h";
-        title.textContent = "Progress Overview";
-
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        sub.textContent = "Track weight progression for key exercises";
+        const title = createElement("div", "h", "Progress Overview");
+        const sub = createElement("div", "sub", "Track weight progression for key exercises");
 
         card.appendChild(title);
         card.appendChild(sub);
@@ -2095,12 +1965,10 @@
             chartDiv.style.marginBottom = "16px";
 
             const exTitle = document.createElement("div");
-            exTitle.style.fontWeight = "700";
-            exTitle.style.marginBottom = "8px";
+            exTitle.style.cssText = "font-weight:700;margin-bottom:8px";
             exTitle.textContent = exNames[exId] || exId;
 
-            const stats = document.createElement("div");
-            stats.className = "sub";
+            const stats = createElement("div", "sub");
             stats.style.marginBottom = "8px";
             const weights = sets.map((s) => s.weightLb);
             const minWeight = Math.min(...weights);
@@ -2110,20 +1978,12 @@
             stats.textContent = `Latest: ${latestWeight} lb · Range: ${minWeight}–${maxWeight} lb · Avg: ${avgWeight} lb`;
 
             const barContainer = document.createElement("div");
-            barContainer.style.display = "flex";
-            barContainer.style.gap = "2px";
-            barContainer.style.alignItems = "flex-end";
-            barContainer.style.height = "60px";
+            barContainer.style.cssText = "display:flex;gap:2px;align-items:flex-end;height:60px";
 
-            sets.forEach((set, i) => {
+            sets.forEach((set) => {
               const bar = document.createElement("div");
               const heightPercent = ((set.weightLb - minWeight) / (maxWeight - minWeight || 1)) * 100;
-              bar.style.flex = "1";
-              bar.style.background = "linear-gradient(180deg, var(--accent), #991b1b)";
-              bar.style.borderRadius = "4px 4px 0 0";
-              bar.style.height = `${Math.max(heightPercent, 10)}%`;
-              bar.style.minHeight = "8px";
-              bar.style.cursor = "pointer";
+              bar.style.cssText = `flex:1;background:linear-gradient(180deg, var(--accent), #991b1b);border-radius:4px 4px 0 0;height:${Math.max(heightPercent, 10)}%;min-height:8px;cursor:pointer`;
               bar.title = `${set.weightLb} lb`;
               barContainer.appendChild(bar);
             });
@@ -2138,51 +1998,41 @@
         return card;
       }
 
+      // Optimized to build map once and cache
+      const nameMapCache = new Map();
       function buildExerciseNameMap() {
-        const map = {};
-        ["Hybrid", "IronFocused"].forEach((tid) => {
-          (Tracks[tid].exercises || []).forEach((ex) => (map[ex.id] = ex.name));
-        });
-        planBExercises().forEach((ex) => (map[ex.id] = ex.name));
-        return map;
+        if (nameMapCache.size === 0) {
+          ["Hybrid", "IronFocused"].forEach((tid) => {
+            (Tracks[tid].exercises || []).forEach((ex) => nameMapCache.set(ex.id, ex.name));
+          });
+          planBExercises().forEach((ex) => nameMapCache.set(ex.id, ex.name));
+        }
+        return nameMapCache;
       }
 
       function routineMetricsCard(id) {
         const s = Store.get();
         const exNames = buildExerciseNameMap();
-        const card = document.createElement("div");
-        card.className = "card";
+        const card = createElement("div", "card");
 
-        const title = document.createElement("div");
-        title.className = "h";
-        title.textContent = Tracks[id].title;
+        const title = createElement("div", "h", Tracks[id].title);
+        const sub = createElement("div", "sub", Tracks[id].subtitle || "");
 
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        sub.textContent = Tracks[id].subtitle || "";
-
-        const list = document.createElement("div");
-        list.className = "stack";
+        const list = createElement("div", "stack");
         const logs = s.logs.filter((l) => l.workoutId === id).slice(-12).reverse();
 
         if (!logs.length) {
-          const none = document.createElement("div");
-          none.className = "pill";
-          none.textContent = "No sessions yet.";
+          const none = createElement("div", "pill", "No sessions yet.");
           list.appendChild(none);
         } else {
           logs.forEach((l) => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "card";
+            const wrapper = createElement("div", "card");
             wrapper.style.padding = "10px";
 
-            const summary = document.createElement("div");
-            summary.className = "row";
-            summary.style.justifyContent = "space-between";
-            summary.style.alignItems = "center";
+            const summary = createElement("div", "row");
+            summary.style.cssText = "justify-content:space-between;align-items:center";
 
-            const txt = document.createElement("div");
-            txt.className = "pill";
+            const txt = createElement("div", "pill");
             txt.style.flex = "1";
             const setInfo = l.manualEntry ? "Manual Entry" : (l.sets?.length || 0) + " sets";
             txt.textContent = new Date(l.date).toLocaleDateString() + " · " + setInfo + " · " + mmss((l.totalSec || 0) * 1000);
@@ -2191,23 +2041,14 @@
               txt.style.cursor = "help";
             }
 
-            const btnGroup = document.createElement("div");
-            btnGroup.className = "row";
+            const btnGroup = createElement("div", "row");
             btnGroup.style.gap = "6px";
 
-            const toggleBtn = document.createElement("button");
-            toggleBtn.className = "btn";
-            toggleBtn.textContent = "Details";
-            toggleBtn.style.height = "32px";
-            toggleBtn.style.fontSize = "13px";
-            toggleBtn.style.padding = "0 10px";
+            const toggleBtn = createElement("button", "btn", "Details");
+            toggleBtn.style.cssText = "height:32px;font-size:13px;padding:0 10px";
 
-            const del = document.createElement("button");
-            del.className = "btn";
-            del.textContent = "Delete";
-            del.style.height = "32px";
-            del.style.fontSize = "13px";
-            del.style.padding = "0 10px";
+            const del = createElement("button", "btn", "Delete");
+            del.style.cssText = "height:32px;font-size:13px;padding:0 10px";
             del.onclick = () => {
               showConfirmDialog("Delete this session?", () => {
                 deleteSessionById(l.id);
@@ -2219,17 +2060,11 @@
             summary.appendChild(txt);
             summary.appendChild(btnGroup);
 
-            const details = document.createElement("div");
-            details.className = "stack";
-            details.style.display = "none";
-            details.style.marginTop = "10px";
-            details.style.maxHeight = "300px";
-            details.style.overflowY = "auto";
+            const details = createElement("div", "stack");
+            details.style.cssText = "display:none;margin-top:10px;max-height:300px;overflow-y:auto";
 
             if (l.manualEntry) {
-              const manualNote = document.createElement("div");
-              manualNote.className = "sub";
-              manualNote.textContent = l.manualNotes || "No details recorded for this manual entry.";
+              const manualNote = createElement("div", "sub", l.manualNotes || "No details recorded for this manual entry.");
               details.appendChild(manualNote);
             } else {
               const groups = {};
@@ -2239,21 +2074,16 @@
 
               Object.keys(groups).forEach((exId) => {
                 const sets = groups[exId].sort((a, b) => a.setIndex - b.setIndex);
-                const block = document.createElement("div");
-                block.className = "card";
+                const block = createElement("div", "card");
                 block.style.padding = "8px";
                 const name = document.createElement("div");
-                name.style.fontWeight = "700";
-                name.style.marginBottom = "4px";
-                name.textContent = exNames[exId] || exId;
+                name.style.cssText = "font-weight:700;margin-bottom:4px";
+                name.textContent = exNames.get(exId) || exId;
                 const lines = document.createElement("div");
-                lines.style.display = "flex";
-                lines.style.flexWrap = "wrap";
-                lines.style.gap = "8px";
+                lines.style.cssText = "display:flex;flex-wrap:wrap;gap:8px";
 
                 sets.forEach((t) => {
-                  const line = document.createElement("div");
-                  line.className = "sub";
+                  const line = createElement("div", "sub");
                   line.style.fontSize = "12px";
                   const w = t.weightLb && t.weightLb > 0 ? `${t.weightLb} lb` : "BW";
                   const repOrSec = t.seconds != null ? `${t.seconds}s${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}` : `${t.reps} reps${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}`;
@@ -2268,13 +2098,9 @@
             }
 
             toggleBtn.onclick = () => {
-              if (details.style.display === "none") {
-                details.style.display = "flex";
-                toggleBtn.textContent = "Hide";
-              } else {
-                details.style.display = "none";
-                toggleBtn.textContent = "Details";
-              }
+              const isHidden = details.style.display === "none";
+              details.style.display = isHidden ? "flex" : "none";
+              toggleBtn.textContent = isHidden ? "Hide" : "Details";
             };
 
             wrapper.appendChild(summary);
@@ -2283,11 +2109,8 @@
           });
         }
 
-        const actions = document.createElement("div");
-        actions.className = "row";
-        const exp = document.createElement("button");
-        exp.className = "btn";
-        exp.textContent = "Export CSV";
+        const actions = createElement("div", "row");
+        const exp = createElement("button", "btn", "Export CSV");
         exp.onclick = () => downloadRoutineCSV(id);
 
         card.appendChild(title);
@@ -2310,9 +2133,9 @@
 
       function downloadRoutineCSV(id) {
         const s = Store.get();
-        const rows = [
-          ["sessionId", "date", "workoutId", "totalSec", "exerciseId", "setIndex", "weightLb", "reps", "seconds", "rpe", "formScore"].join(",")
-        ];
+        const headers = ["sessionId", "date", "workoutId", "totalSec", "exerciseId", "setIndex", "weightLb", "reps", "seconds", "rpe", "formScore"];
+        const rows = [headers.join(",")];
+
         s.logs.filter((l) => l.workoutId === id).forEach((l) => {
           if (!l.sets?.length) {
             rows.push([l.id, l.date, l.workoutId, l.totalSec || 0, "", "", "", "", "", "", ""].join(","));
@@ -2322,33 +2145,33 @@
             });
           }
         });
+
         const blob = new Blob([rows.join("\n")], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "fitforge-" + (Tracks[id]?.title || id).replace(/\s+/g, "_") + ".csv";
+        a.download = `fitforge-${(Tracks[id]?.title || id).replace(/\s+/g, "_")}.csv`;
         a.click();
         URL.revokeObjectURL(url);
       }
 
       function viewLearn() {
-        const wrap = document.createElement("div");
-        wrap.className = "stack";
+        const wrap = createElement("div", "stack");
 
-        const con = document.createElement("div");
-        con.className = "card";
+        const con = createElement("div", "card");
         con.innerHTML = `<div class="h">The Lumbar Constitution</div><div class="sub">These guard your back on swings and rows.</div><div class="hr"></div><div class="h" style="font-weight:700">KB Swings</div><div class="sub">• Hinge at hips; butt to wall<br/>• Arms = ropes; bell = pendulum<br/>• Brace before hike; ribs down<br/>• Top = plank; bell ≤ chest<br/>• No rounding at bottom</div><div class="hr"></div><div class="h" style="font-weight:700">Bent-Over Rows</div><div class="sub">• Hinge ~45°; feel hamstrings<br/>• Back flat as a table<br/>• Inhale, brace, pull; exhale top<br/>• Elbow drives back; squeeze blade<br/>• No twisting; drop weight if needed</div>`;
         wrap.appendChild(con);
 
-        const prog = document.createElement("div");
-        prog.className = "card";
+        const prog = createElement("div", "card");
         prog.innerHTML = `<div class="h">Progression: Add Before You Load</div><div class="sub">• Weeks 1–2: Nail form at 35 lb KB / 25 lb DB (aim 12 reps)<br/>• Weeks 3–4: Add a set or 4s eccentric<br/>• Week 5+: +5 lb only if reps are clean (drop to 8, rebuild)</div>`;
         wrap.appendChild(prog);
 
         return wrap;
       }
 
+      // Event listeners
       window.addEventListener("hashchange", render);
+
       window.addEventListener("load", () => {
         // Initialize theme
         const s = Store.get();
@@ -2361,14 +2184,16 @@
 
         render();
 
+        // Optimize touch handling
         let lastTouchEnd = 0;
         document.addEventListener("touchend", (e) => {
           const now = Date.now();
           if (now - lastTouchEnd <= 300) e.preventDefault();
           lastTouchEnd = now;
         }, { passive: false });
-        document.addEventListener("gesturestart", (e) => { e.preventDefault(); }, { passive: false });
-        document.addEventListener("dblclick", (e) => { e.preventDefault(); }, { passive: false });
+
+        document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
+        document.addEventListener("dblclick", (e) => e.preventDefault(), { passive: false });
 
         window.addEventListener("offline", () => toast("Offline: PWA cache active."));
         window.addEventListener("online", () => toast("Online: syncing..."));
