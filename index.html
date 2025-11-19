@@ -1,2203 +1,731 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#0E0E10">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Fit Forge">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no">
-    <title>Fit Forge — Simple, Spine-Smart Strength</title>
-    <meta name="description" content="Fit Forge: spine-smart strength PWA with warm-up gate, Add-Before-You-Load progression, per-set timers, quick logging, and per-routine metrics.">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Iron & Bell Tracker</title>
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIklyb24gJiBCZWxsIiwKICAic2hvcnRfbmFtZSI6ICJJcm9uIEJlWxsrIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxYTIwMmMiLAogICJ0aGVtZV9jb2xvciI6ICIjMWEyMDJjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS9mbHVlbmN5Lzk2L2tldHRsZWJlbGwucG5nIiwKICAgICAgInNpemVzIjogIjk2eDk2IiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/96/kettlebell.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
 
-    <!-- iOS icons - data URLs injected by script -->
-    <link rel="apple-touch-icon" id="apple-touch-icon-default" href="">
-    <link rel="apple-touch-icon" sizes="180x180" id="apple-touch-icon-180" href="">
-    <link rel="apple-touch-icon" sizes="167x167" id="apple-touch-icon-167" href="">
-    <link rel="apple-touch-icon" sizes="152x152" id="apple-touch-icon-152" href="">
-    <link rel="apple-touch-icon-precomposed" id="apple-touch-icon-precomposed" href="">
-
-    <!-- Favicons for Android/desktop -->
-    <link rel="icon" type="image/png" sizes="192x192" id="favicon-192" href="">
-    <link rel="icon" type="image/png" sizes="512x512" id="favicon-512" href="">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-      :root {
-        --bg: #0e0e10;
-        --surface: #141419;
-        --card: #17171d;
-        --card-2: #1b1c22;
-        --line: #262833;
-        --text: #e6e7eb;
-        --muted: #9aa3ad;
-        --accent: #ef4444;
-        --ok: #22c55e;
-        --warn: #f59e0b;
-
-        --pad-top: calc(env(safe-area-inset-top, 0px) + 8px);
-        --pad-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-        --touch: 48px;
-        --radius: 14px;
-      }
-
-      :root.light {
-        --bg: #f5f5f7;
-        --surface: #ffffff;
-        --card: #ffffff;
-        --card-2: #f5f5f7;
-        --line: #d1d1d6;
-        --text: #1d1d1f;
-        --muted: #6e6e73;
-        --accent: #ef4444;
-        --ok: #22c55e;
-        --warn: #f59e0b;
-      }
-
-      * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      html,
-      body {
-        height: 100%;
-      }
-
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica,
-          Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      }
-
-      #app {
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        height: 100dvh;
-        width: 100vw;
-        overflow: hidden;
-      }
-
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 5;
-        background: var(--surface);
-        border-bottom: 1px solid var(--line);
-        padding: var(--pad-top) 14px 8px 14px;
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .logo {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        background-size: cover;
-        background-position: center;
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-      }
-
-      .title {
-        font-weight: 800;
-        letter-spacing: 0.2px;
-      }
-
-      .timer-chip {
-        justify-self: end;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: var(--card);
-        border: 1px solid var(--line);
-        font-variant-numeric: tabular-nums;
-      }
-
-      main {
-        overflow: auto;
-        padding: 10px 14px;
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        padding: 12px;
-      }
-
-      .stack {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .h {
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-
-      .sub {
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .pill {
-        border: 1px solid var(--line);
-        background: var(--card-2);
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 13px;
-      }
-
-      .btn {
-        height: var(--touch);
-        padding: 0 14px;
-        border-radius: 12px;
-        border: 1px solid var(--line);
-        background: var(--card-2);
-        color: var(--text);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        cursor: pointer;
-        user-select: none;
-        touch-action: manipulation;
-        font-size: 16px;
-      }
-
-      .btn.primary {
-        background: var(--accent);
-        border-color: #b91c1c;
-        color: #fff;
-      }
-
-      .btn.block {
-        width: 100%;
-      }
-
-      input,
-      select,
-      button {
-        background: var(--surface);
-        color: var(--text);
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        height: var(--touch);
-        padding: 0 12px;
-        font-size: 16px;
-      }
-
-      button {
-        background: var(--card-2);
-        border: 1px solid var(--line);
-      }
-
-      input[type="checkbox"] {
-        appearance: none;
-        -webkit-appearance: none;
-        width: 48px;
-        height: 48px;
-        border: 2px solid var(--line);
-        border-radius: 12px;
-        background: var(--surface);
-        cursor: pointer;
-        position: relative;
-        flex-shrink: 0;
-      }
-
-      input[type="checkbox"]:checked {
-        background: #ef4444;
-        border-color: #991b1b;
-      }
-
-      input[type="checkbox"]:checked::after {
-        content: "✓";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: #ffffff;
-        font-size: 28px;
-        font-weight: 700;
-      }
-
-      input[type="checkbox"]:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .hr {
-        height: 1px;
-        background: var(--line);
-        border-radius: 1px;
-        margin: 6px 0;
-      }
-
-      .warn {
-        color: var(--warn);
-      }
-
-      nav {
-        position: sticky;
-        bottom: 0;
-        z-index: 4;
-        background: var(--surface);
-        border-top: 1px solid var(--line);
-        padding: 6px 8px calc(6px + var(--pad-bottom)) 8px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-      }
-
-      .tab {
-        text-align: center;
-        padding: 10px 6px;
-        border-radius: 12px;
-        color: var(--muted);
-        user-select: none;
-        touch-action: manipulation;
-      }
-
-      .tab.active {
-        background: rgba(255, 255, 255, 0.05);
-        color: #fff;
-      }
-
-      .ex {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-      }
-
-      .ex .name {
-        font-weight: 700;
-      }
-
-      .ex .meta {
-        grid-column: 1 / -1;
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .chips {
-        display: inline-flex;
-        gap: 6px;
-        align-items: center;
-      }
-
-      .chip {
-        width: 28px;
-        height: 28px;
-        border-radius: 14px;
-        border: 1px solid var(--line);
-        background: var(--surface);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        cursor: pointer;
-        user-select: none;
-        touch-action: manipulation;
-      }
-
-      .chip.done {
-        background: #ef4444;
-        color: #ffffff;
-        border-color: #991b1b;
-      }
-
-      .cue {
-        font-size: 13px;
-        background: var(--card-2);
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 8px;
-        color: var(--muted);
-      }
-
-      .restbar {
-        height: 12px;
-        background: #111216;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        overflow: hidden;
-      }
-
-      .restbar span {
-        display: block;
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, #f87171, #ef4444);
-        transition: width 0.25s linear;
-      }
-
-      .toast {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: calc(80px + var(--pad-bottom));
-        background: var(--surface);
-        border: 1px solid var(--line);
-        color: var(--text);
-        padding: 10px 14px;
-        border-radius: 12px;
-        z-index: 1000;
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
-      }
-
-      .sheet-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        z-index: 1001;
-      }
-
-      .sheet {
-        width: 100%;
-        background: var(--card);
-        border-top-left-radius: 16px;
-        border-top-right-radius: 16px;
-        border: 1px solid var(--line);
-        padding: 12px;
-        padding-bottom: calc(12px + var(--pad-bottom));
-      }
-
-      .sheet .title {
-        font-weight: 800;
-        margin-bottom: 8px;
-      }
-
-      .sheet .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .sheet .row {
-        justify-content: space-between;
-      }
-
-      .sheet .btn {
-        flex: 1;
-      }
+        body {
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: env(safe-area-inset-bottom);
+            overscroll-behavior-y: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+        .active-tab {
+            color: #fbbf24; /* Amber 400 */
+            position: relative;
+        }
+        .active-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        @keyframes pulse-amber {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); border-color: rgba(251, 191, 36, 0.6); }
+            50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0); border-color: rgba(251, 191, 36, 1); }
+        }
+        .timer-active {
+            animation: pulse-amber 2s infinite;
+        }
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
-  </head>
-  <body>
-    <div id="app" aria-live="polite"></div>
+</head>
+<body>
+    <div id="root"></div>
 
-    <script>
-      'use strict';
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
 
-      // Global error handler
-      window.onerror = function(msg, url, line, col, error) {
-        document.body.innerHTML = '<div style="color: red; padding: 20px; font-family: monospace;">ERROR: ' + msg + '<br>Line: ' + line + '<br>' + (error ? error.stack : '') + '</div>';
-        return false;
-      };
-
-      // Icon cache
-      const iconCache = new Map();
-      let generatedIconDataURL = null;
-
-      // Manifest + Service Worker
-      (function pwa() {
-        try {
-          function roundedRectPath(ctx, x, y, w, h, r) {
-            const rr = Math.min(r, w / 2, h / 2);
-            ctx.beginPath();
-            ctx.moveTo(x + rr, y);
-            ctx.arcTo(x + w, y, x + w, y + h, rr);
-            ctx.arcTo(x + w, y + h, x, y + h, rr);
-            ctx.arcTo(x, y + h, x, y, rr);
-            ctx.arcTo(x, y, x + w, y, rr);
-            ctx.closePath();
-          }
-
-          function drawWeightStack(ctx, s, xPos, isLeft) {
-            const direction = isLeft ? -1 : 1;
-
-            // Collar
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            const collar_x = isLeft ? xPos - 6 * s : xPos + 2 * s;
-            roundedRectPath(ctx, collar_x, -6 * s, 4 * s, 12 * s, 2 * s);
-            ctx.fill();
-
-            // Collar shadow
-            ctx.save();
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = "#000000";
-            ctx.beginPath();
-            const shadow1_x = isLeft ? xPos - 5.5 * s : xPos + 2.5 * s;
-            roundedRectPath(ctx, shadow1_x, -5.5 * s, 3 * s, 11 * s, 1.5 * s);
-            ctx.fill();
-            ctx.restore();
-
-            // Medium plate
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            const med_x = isLeft ? xPos - 12 * s : xPos + 6 * s;
-            roundedRectPath(ctx, med_x, -10 * s, 6 * s, 20 * s, 2.5 * s);
-            ctx.fill();
-
-            // Medium shadow
-            ctx.save();
-            ctx.globalAlpha = 0.15;
-            ctx.fillStyle = "#000000";
-            ctx.beginPath();
-            const shadow2_x = isLeft ? xPos - 11.3 * s : xPos + 6.8 * s;
-            roundedRectPath(ctx, shadow2_x, -9 * s, 4.5 * s, 18 * s, 2 * s);
-            ctx.fill();
-            ctx.restore();
-
-            // Large plate
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            const large_x = isLeft ? xPos - 20 * s : xPos + 12 * s;
-            roundedRectPath(ctx, large_x, -14 * s, 8 * s, 28 * s, 3 * s);
-            ctx.fill();
-
-            // Large shadow
-            ctx.save();
-            ctx.globalAlpha = 0.12;
-            ctx.fillStyle = "#000000";
-            ctx.beginPath();
-            const shadow3_x = isLeft ? xPos - 19 * s : xPos + 13 * s;
-            roundedRectPath(ctx, shadow3_x, -12.5 * s, 6 * s, 25 * s, 2.5 * s);
-            ctx.fill();
-            ctx.restore();
-
-            // Highlight gradient
-            ctx.save();
-            ctx.globalAlpha = 0.4;
-            const highlightGrad = ctx.createLinearGradient(xPos, -14 * s, xPos, 14 * s);
-            highlightGrad.addColorStop(0, "rgba(255,255,255,1)");
-            highlightGrad.addColorStop(0.3, "rgba(255,255,255,0.3)");
-            highlightGrad.addColorStop(0.7, "rgba(255,255,255,0)");
-            highlightGrad.addColorStop(1, "rgba(0,0,0,0.1)");
-            ctx.fillStyle = highlightGrad;
-            ctx.beginPath();
-            roundedRectPath(ctx, large_x, -14 * s, 8 * s, 28 * s, 3 * s);
-            ctx.fill();
-            ctx.restore();
-          }
-
-          function drawIronIcon(ctx, size) {
-            const s = size / 100;
-            ctx.save();
-
-            const bg = ctx.createLinearGradient(0, 0, size, size);
-            bg.addColorStop(0, "#dc2626");
-            bg.addColorStop(0.5, "#991b1b");
-            bg.addColorStop(1, "#7f1d1d");
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, size, size);
-
-            ctx.save();
-            ctx.globalAlpha = 0.03;
-            for (let i = 0; i < 200; i++) {
-              ctx.fillStyle = Math.random() > 0.5 ? "#ffffff" : "#000000";
-              ctx.fillRect(Math.random() * size, Math.random() * size, 1, 1);
-            }
-            ctx.restore();
-
-            ctx.translate(size * 0.5, size * 0.5);
-
-            ctx.save();
-            ctx.shadowColor = "rgba(0,0,0,0.4)";
-            ctx.shadowBlur = 8 * s;
-            ctx.shadowOffsetY = 2 * s;
-
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            roundedRectPath(ctx, -32 * s, -2 * s, 64 * s, 4 * s, 2 * s);
-            ctx.fill();
-
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            const barGrad = ctx.createLinearGradient(0, -2 * s, 0, 2 * s);
-            barGrad.addColorStop(0, "rgba(255,255,255,1)");
-            barGrad.addColorStop(0.5, "rgba(255,255,255,0)");
-            barGrad.addColorStop(1, "rgba(0,0,0,0.2)");
-            ctx.fillStyle = barGrad;
-            roundedRectPath(ctx, -32 * s, -2 * s, 64 * s, 4 * s, 2 * s);
-            ctx.fill();
-            ctx.restore();
-
-            drawWeightStack(ctx, s, -32 * s, true);
-            drawWeightStack(ctx, s, 32 * s, false);
-
-            ctx.restore();
-
-            ctx.save();
-            ctx.globalAlpha = 0.15;
-            const glow = ctx.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 0.6);
-            glow.addColorStop(0, "rgba(255,255,255,0.3)");
-            glow.addColorStop(1, "rgba(255,255,255,0)");
-            ctx.fillStyle = glow;
-            ctx.fillRect(-size * 0.5, -size * 0.5, size, size);
-            ctx.restore();
-
-            ctx.restore();
-          }
-
-          function generateIconDataURL(size) {
-            if (iconCache.has(size)) {
-              return iconCache.get(size);
-            }
-            const c = document.createElement("canvas");
-            c.width = c.height = size;
-            const ctx = c.getContext("2d");
-            drawIronIcon(ctx, size);
-            const url = c.toDataURL("image/png");
-            iconCache.set(size, url);
-            return url;
-          }
-
-          function generateIconB64(size) {
-            const dataURL = generateIconDataURL(size);
-            return dataURL.slice(dataURL.indexOf(",") + 1);
-          }
-
-          generatedIconDataURL = generateIconDataURL(120);
-
-          // Generate icons once and cache
-          const iconSizes = [
-            ['apple-touch-icon-default', 180],
-            ['apple-touch-icon-180', 180],
-            ['apple-touch-icon-167', 167],
-            ['apple-touch-icon-152', 152],
-            ['apple-touch-icon-precomposed', 180],
-            ['favicon-192', 192],
-            ['favicon-512', 512]
-          ];
-
-          const iconDataMap = new Map();
-          iconSizes.forEach(([id, size]) => {
-            iconDataMap.set(id, generateIconDataURL(size));
-          });
-
-          // Apply icons
-          iconDataMap.forEach((url, id) => {
-            const link = document.getElementById(id);
-            if (link) link.href = url;
-          });
-
-          // Generate base64 once for service worker
-          const ICON_180 = generateIconB64(180);
-          const ICON_167 = generateIconB64(167);
-          const ICON_152 = generateIconB64(152);
-          const ICON_192 = generateIconB64(192);
-          const ICON_512 = generateIconB64(512);
-
-          const manifest = {
-            name: "Fit Forge — Build Iron. Guard Your Spine.",
-            short_name: "Fit Forge",
-            start_url: "./index.html",
-            display: "standalone",
-            background_color: "#0E0E10",
-            theme_color: "#0E0E10",
-            categories: ["health", "fitness", "education"],
-            icons: [
-              { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-              { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
-            ]
-          };
-
-          const m = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-          const mu = URL.createObjectURL(m);
-          const link = document.createElement("link");
-          link.rel = "manifest";
-          link.href = mu;
-          document.head.appendChild(link);
-
-          const sw = `const CACHE="fitforge-v10";const FILE_ICONS=new Map([["apple-touch-icon.png","${ICON_180}"],["apple-touch-icon-precomposed.png","${ICON_180}"],["apple-touch-icon-180x180.png","${ICON_180}"],["apple-touch-icon-167x167.png","${ICON_167}"],["apple-touch-icon-152x152.png","${ICON_152}"],["icon-192.png","${ICON_192}"],["icon-512.png","${ICON_512}"]]);function b64ToUint8(b64){const bin=atob(b64);const len=bin.length;const bytes=new Uint8Array(len);for(let i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);return bytes}function pngResponse(b64){return new Response(b64ToUint8(b64),{headers:{"Content-Type":"image/png","Cache-Control":"public, max-age=31536000, immutable"}})}self.addEventListener("install",(e)=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./index.html"]).catch(()=>{})));self.skipWaiting()});self.addEventListener("activate",(e)=>{e.waitUntil(self.clients.claim())});self.addEventListener("fetch",(e)=>{const url=new URL(e.request.url);const path=url.pathname;const name=path.split("/").pop();if(FILE_ICONS.has(name)){e.respondWith(pngResponse(FILE_ICONS.get(name)));return}if(path==="/"||path.endsWith("/index.html")){e.respondWith(caches.open(CACHE).then(async(c)=>{const cached=await c.match("./index.html");const fetcher=fetch(e.request).then((r)=>{c.put("./index.html",r.clone());return r}).catch(()=>cached);return cached||fetcher}));return}e.respondWith(caches.match(e.request).then((cRes)=>{const net=fetch(e.request).then((nRes)=>{if(nRes&&nRes.status===200&&nRes.type==="basic"){const copy=nRes.clone();caches.open(CACHE).then((c)=>c.put(e.request,copy))}return nRes}).catch(()=>cRes);return cRes||net}))});`;
-
-          if ("serviceWorker" in navigator) {
-            const swu = URL.createObjectURL(new Blob([sw], { type: "text/javascript" }));
-            navigator.serviceWorker.register(swu, { scope: "/" }).catch(() => {
-              navigator.serviceWorker.register(swu).catch(() => {});
-            });
-          }
-        } catch(e) {
-          console.error("PWA init error:", e);
-        }
-      })();
-
-      // Utility functions
-      const qs = (s, el = document) => el.querySelector(s);
-      const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-      const nowISO = () => new Date().toISOString();
-      const todayKey = () => new Date().toISOString().slice(0, 10);
-      const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
-
-      // Audio context singleton
-      const Beep = (() => {
-        let ctx = null;
-        function ensure() {
-          if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        function beep(f = 880, d = 120, v = 0.03) {
-          try {
-            ensure();
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.type = "sine";
-            o.frequency.value = f;
-            g.gain.value = v;
-            o.connect(g);
-            g.connect(ctx.destination);
-            o.start();
-            setTimeout(() => o.stop(), d);
-          } catch {}
-        }
-        return { beep };
-      })();
-
-      function toast(msg, ms = 2200) {
-        const t = document.createElement("div");
-        t.className = "toast";
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), ms);
-      }
-
-      function showConfirmDialog(message, onConfirm) {
-        const modal = document.createElement("div");
-        modal.className = "sheet-backdrop";
-        modal.innerHTML = `<div class="sheet" style="border-radius: 16px; max-width: 400px; padding: 20px;"><div style="font-weight: 700; margin-bottom: 12px;">${message}</div><div class="row" style="justify-content: flex-end; gap: 12px; margin-top: 16px;"><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="confirmBtn" style="background: var(--accent);">Delete</button></div></div>`;
-        document.body.appendChild(modal);
-
-        const cancel = modal.querySelector("#cancelBtn");
-        const confirm = modal.querySelector("#confirmBtn");
-
-        cancel.onclick = () => modal.remove();
-        confirm.onclick = () => {
-          modal.remove();
-          onConfirm();
-        };
-        modal.onclick = (e) => {
-          if (e.target === modal) modal.remove();
-        };
-      }
-
-      function mmss(ms) {
-        const t = Math.max(0, Math.floor(ms / 1000));
-        const h = Math.floor(t / 3600);
-        const m = Math.floor((h ? t - h * 3600 : t) / 60);
-        const s = t % 60;
-        return (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-      }
-
-      // Data constants
-      const Warmup = [
-        ["Cat-Cow", "5 reps", "Explore range, no forcing."],
-        ["Dead Bug", "8/side", "Press back into floor."],
-        ["Bird-Dog", "8/side", "Slow, hold 2 sec."],
-        ["Glute Bridge", "15 reps", "Squeeze, don't yank."],
-        ["KB Halo", "8/side @ 35 lb", "Wake up the T-spine."]
-      ];
-
-      const Tracks = {
-        Hybrid: {
-          id: "Hybrid",
-          title: "Hybrid",
-          subtitle: "The Bodyweight–Iron Mashup",
-          restPolicy: "60-90",
-          exercises: [
-            { id: "goblet-box-squat", name: "Goblet Box Squat", sets: [3, 4], reps: [8, 12], load: 35, cues: ["Box = depth police.", "Brace down, exhale up."] },
-            { id: "kb-swing", name: "KB Swing", sets: [3, 4], reps: [15, 20], load: 35, cues: ["Hinge, not squat. Butt to wall.", "Arms are ropes. Top = plank."], constitution: "swing" },
-            { id: "floor-press", name: "Floor Press", sets: [3, 4], reps: [8, 12], load: 25, cues: ["Controlled pause at floor."] },
-            { id: "sa-db-row", name: "Single-Arm DB Row", sets: [3, 4], reps: [10, 12], load: 25, cues: ["Flat back, brace.", "Elbow back; squeeze blade."], constitution: "row" },
-            { id: "hip-thrust", name: "Hip Thrust", sets: [3, 4], reps: [12, 15], load: 35, cues: ["Lock out with glutes, not low back."] },
-            { id: "hollow-hold", name: "Hollow Body Hold", sets: [3, 3], timeSec: [20, 40], load: 0, cues: ["Posterior tilt. Bend knees if needed."] },
-            { id: "suitcase-carry", name: "Suitcase Carry", sets: [3, 3], timeSec: [45, 60], load: 35, cues: ["No side-bend. Tall. Slow steps."] }
-          ]
-        },
-        IronFocused: {
-          id: "IronFocused",
-          title: "Iron-Focused: The Backsmith's Anvil Day",
-          subtitle: "Heavier day, form is king",
-          restPolicy: "90-120",
-          exercises: [
-            { id: "heavy-goblet-squat", name: "Heavy Goblet Squat", sets: [4, 4], reps: [6, 10], load: 50, cues: ["70 is spicy—only with a steel brace."] },
-            { id: "heavy-kb-swing", name: "Heavy KB Swing", sets: [4, 4], reps: [15, 20], load: 50, cues: ["Form is king. Top = plank."], constitution: "swing" },
-            { id: "floor-press-heavy", name: "Floor Press", sets: [3, 4], reps: [6, 8], load: 35, cues: ["Heavy, controlled pause at chest."] },
-            { id: "bent-over-row", name: "Bent-Over DB Row", sets: [4, 4], reps: [8, 10], load: 35, cues: ["Flat back, deep hinge, brace."], constitution: "row" },
-            { id: "heavy-hip-thrust", name: "Heavy Hip Thrust", sets: [4, 4], reps: [10, 12], load: 50, cues: ["Lock out with glutes, not low back."] },
-            { id: "dead-bug-oh", name: "Dead Bug w/ KB Overhead", sets: [3, 3], reps: [8, 10], load: 15, cues: ["Active spine protection."] },
-            { id: "suitcase-carry-heavy", name: "Suitcase Carry", sets: [3, 3], timeSec: [60, 60], load: 50, cues: ["Grip. Core. Grit."] }
-          ]
-        },
-        GrumpyBack: {
-          id: "GrumpyBack",
-          title: "Grumpy Back Day",
-          subtitle: "Plan B: light, spine-friendly swaps",
-          restPolicy: "60-90"
-        }
-      };
-
-      const Constitution = {
-        swing: ["Hinge at hips; butt to wall.", "Arms as ropes; bell as pendulum.", "Brace before hike. Ribs down.", "Top = plank; bell ≤ chest.", "No rounding at bottom."],
-        row: ["Hinge ~45°; feel hamstrings.", "Back flat as a table.", "Inhale, brace, pull; exhale top.", "Elbow drives back; squeeze blade.", "No twisting; drop weight if needed."]
-      };
-
-      function lightKbLoad() {
-        const s = Store.get();
-        const arr = s.profile.equipment.kb || [];
-        return arr.length ? Math.min(...arr) : 20;
-      }
-
-      function lightDbLoad() {
-        const s = Store.get();
-        const arr = s.profile.equipment.db || [];
-        return arr.length ? Math.min(...arr) : 10;
-      }
-
-      function planBExercises() {
-        return [
-          { id: "pb-squat", name: "Goblet Box Squat (light)", sets: [2, 2], reps: [10, 12], load: lightKbLoad(), cues: ["Smooth, no grind."] },
-          { id: "pb-hipthrust", name: "Hip Thrusts", sets: [2, 2], reps: [12, 15], load: lightKbLoad(), cues: ["Squeeze glutes at top."] },
-          { id: "pb-floorpress", name: "Floor Press", sets: [2, 2], reps: [8, 10], load: lightDbLoad(), cues: ["Controlled tempo."] },
-          { id: "pb-deadbug", name: "Dead Bug", sets: [2, 2], reps: [8, 8], load: 0, cues: ["Low back glued to floor."] },
-          { id: "pb-carry", name: "Suitcase Carry (light, slow)", sets: [2, 2], timeSec: [45, 60], load: lightKbLoad(), cues: ["No side-bend. Tall."] }
-        ];
-      }
-
-      // Theme management
-      function applyTheme(theme) {
-        const root = document.documentElement;
-        if (theme === "light") {
-          root.classList.add("light");
-        } else if (theme === "dark") {
-          root.classList.remove("light");
-        } else {
-          const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-          root.classList.toggle("light", !prefersDark);
-        }
-      }
-
-      // Store management - optimized
-      const Store = (() => {
-        const KEY = "fitforge.v8";
-        let state = null;
-
-        function seed() {
-          return {
-            profile: {
-              name: "Mateo",
-              unit: "lb",
-              equipment: { kb: [35, 50, 70], db: [25, 35] },
-              track: "Hybrid",
-              schedule: [1, 3, 5],
-              startDate: nowISO(),
-              theme: "auto",
-              restPreferences: {}
+        // --- DATA CONFIG ---
+        const ROUTINES = {
+            WARMUP: {
+                id: 'warmup',
+                title: 'RAMP Warm-Up',
+                subtitle: 'Prepare & Mobilize',
+                exercises: [
+                    { id: 'w1', name: 'Cat-Cow & Rotation', sets: 1, reps: '60 sec', note: 'Arch up, sink down, then rotate.' },
+                    { id: 'w2', name: '90/90 Hip Switches', sets: 1, reps: '60 sec', note: 'Sit on floor, rotate hips side to side.' },
+                    { id: 'w3', name: 'Deadbugs', sets: 3, reps: '10 reps', note: 'Keep lower back glued to floor.' },
+                    { id: 'w4', name: 'Kettlebell Halo', sets: 1, reps: '10/side', note: 'Circle around head. Ribs down.' },
+                    { id: 'w5', name: 'Goblet Squat Prying', sets: 1, reps: '30 sec', note: 'Sit in squat. Push knees out.' }
+                ]
             },
-            runtime: {
-              warmupDoneKey: null,
-              workoutActive: false,
-              workoutStart: 0,
-              workoutAccum: 0,
-              lastTotalSec: 0
+            WORKOUT_A: {
+                id: 'workout_a',
+                title: 'Workout A: Strength',
+                subtitle: 'Heavy & Explosive',
+                exercises: [
+                    { id: 'a1', name: 'Heavy Goblet Squat', sets: 4, reps: '6-8', weightRec: '50 or 70 lb KB', note: 'Pause 1s at bottom. Chest tall.' },
+                    { id: 'a2', name: 'Kettlebell Swing', sets: 4, reps: '15-20', weightRec: '50 or 70 lb KB', note: 'Explosive hinge. Snap glutes.' },
+                    { id: 'a3', name: 'Floor Press', sets: 3, reps: '8-12', weightRec: '35lb DBs / 50lb KB', note: 'Elbows 45 degrees.' },
+                    { id: 'a4', name: 'Gorilla Row', sets: 3, reps: '8-10', weightRec: '50 or 70 lb KB', note: 'Wide stance. Alternate pulls.' },
+                    { id: 'a5', name: 'Farmer\'s Carry', sets: 3, reps: '40 yds', weightRec: '50 + 70 lb KB', note: 'Walk tall. Switch halfway.' }
+                ]
             },
-            logs: []
-          };
-        }
-
-        function load() {
-          try {
-            const s = localStorage.getItem(KEY);
-            return s ? JSON.parse(s) : null;
-          } catch {
-            return null;
-          }
-        }
-
-        function save() {
-          localStorage.setItem(KEY, JSON.stringify(state));
-          return state;
-        }
-
-        // Initialize state lazily
-        function ensureState() {
-          if (!state) {
-            state = load() || seed();
-          }
-          return state;
-        }
-
-        return {
-          get: () => ensureState(),
-          patch: (p) => {
-            ensureState();
-            Object.assign(state, p);
-            return save();
-          },
-          mutate: (fn) => {
-            ensureState();
-            fn(state);
-            return save();
-          },
-          reset: () => {
-            state = seed();
-            return save();
-          }
-        };
-      })();
-
-      function prescribeNext({ week, lastFormAvg = 90, lastRpeAvg = 7, hitTopReps = true, currentSets = 4, currentTempo = "2-0-1", currentWeightLb = 0 }) {
-        const perfect = lastFormAvg >= 85 && lastRpeAvg <= 8 && hitTopReps;
-        if (week <= 2) return { sets: Math.max(3, currentSets), tempo: "2-0-1", weightLb: currentWeightLb };
-        if (week <= 4) {
-          if (currentSets < 4 && perfect) return { sets: 4, tempo: currentTempo, weightLb: currentWeightLb };
-          return { sets: currentSets, tempo: "4-0-1", weightLb: currentWeightLb };
-        }
-        if (perfect) return { sets: currentSets, tempo: "2-0-1", weightLb: currentWeightLb ? currentWeightLb + 5 : undefined };
-        return { sets: currentSets, tempo: currentTempo, weightLb: currentWeightLb };
-      }
-
-      // Timer management - optimized to clear intervals properly
-      let tickId = null;
-
-      function clearTickInterval() {
-        if (tickId) {
-          clearInterval(tickId);
-          tickId = null;
-        }
-      }
-
-      function startWorkoutTimer() {
-        const s = Store.get();
-        if (s.runtime.workoutActive) return;
-        Store.mutate((st) => {
-          st.runtime.workoutActive = true;
-          st.runtime.workoutStart = Date.now();
-        });
-        tick();
-        toast("Workout timer started.");
-      }
-
-      function pauseWorkoutTimer() {
-        const s = Store.get();
-        if (!s.runtime.workoutActive) return;
-        Store.mutate((st) => {
-          const elapsed = Date.now() - st.runtime.workoutStart;
-          st.runtime.workoutAccum += elapsed;
-          st.runtime.workoutStart = 0;
-          st.runtime.workoutActive = false;
-        });
-        clearTickInterval();
-        renderTimerChip();
-        toast("Workout paused.");
-      }
-
-      function stopWorkoutTimer() {
-        const s = Store.get();
-        let total = s.runtime.workoutAccum;
-        if (s.runtime.workoutActive) total += Date.now() - s.runtime.workoutStart;
-        Store.mutate((st) => {
-          st.runtime.lastTotalSec = Math.round(total / 1000);
-          st.runtime.workoutAccum = 0;
-          st.runtime.workoutStart = 0;
-          st.runtime.workoutActive = false;
-        });
-        clearTickInterval();
-        renderTimerChip();
-      }
-
-      function getWorkoutElapsedMs() {
-        const s = Store.get();
-        let ms = s.runtime.workoutAccum;
-        if (s.runtime.workoutActive) ms += Date.now() - s.runtime.workoutStart;
-        return ms;
-      }
-
-      function tick() {
-        clearTickInterval();
-        tickId = setInterval(renderTimerChip, 1000);
-      }
-
-      // Rest timer - optimized with cleanup
-      function restTimer(durationSec, onTick, onDone) {
-        const start = Date.now();
-        const dur = durationSec * 1000;
-        let id = null;
-
-        function step() {
-          const elapsed = Date.now() - start;
-          const left = Math.max(0, dur - elapsed);
-          onTick(Math.round(left / 1000), elapsed / dur);
-          if (left <= 0) {
-            clearInterval(id);
-            id = null;
-            Beep.beep(1200, 140, 0.06);
-            Beep.beep(900, 160, 0.06);
-            onDone && onDone();
-          }
-        }
-
-        step();
-        id = setInterval(step, 200);
-
-        return () => {
-          if (id) {
-            clearInterval(id);
-            id = null;
-          }
-        };
-      }
-
-      // DOM element creation helpers - optimized
-      function createElement(tag, className, content) {
-        const el = document.createElement(tag);
-        if (className) el.className = className;
-        if (content) {
-          if (typeof content === 'string') {
-            el.textContent = content;
-          } else {
-            el.innerHTML = content;
-          }
-        }
-        return el;
-      }
-
-      function render() {
-        clearTickInterval();
-        const root = qs("#app");
-        root.innerHTML = "";
-        root.appendChild(appHeader());
-        root.appendChild(appMain());
-        root.appendChild(appNav());
-        renderTimerChip();
-      }
-
-      function appHeader() {
-        const h = document.createElement("header");
-        h.style.gridTemplateColumns = "auto 1fr auto";
-
-        const left = createElement("div", "brand");
-        const logo = createElement("div", "logo");
-        if (generatedIconDataURL) {
-          logo.style.backgroundImage = `url(${generatedIconDataURL})`;
-        }
-        const t = document.createElement("div");
-        t.innerHTML = `<div class="title">Fit Forge</div><div class="sub">Build Iron. Guard Your Spine.</div>`;
-        left.appendChild(logo);
-        left.appendChild(t);
-
-        const chip = createElement("div", "timer-chip");
-        chip.id = "timerChip";
-        chip.innerHTML = `<span id="timerTxt">00:00</span><button class="btn" id="timerBtn" style="height:32px">Start</button>`;
-
-        const themeBtn = createElement("button", "btn");
-        themeBtn.style.cssText = "height:32px;width:32px;padding:0;font-size:16px";
-        themeBtn.title = "Toggle theme";
-
-        const s = Store.get();
-        const currentTheme = s.profile.theme || "auto";
-        themeBtn.textContent = currentTheme === "light" ? "🌙" : currentTheme === "dark" ? "☀️" : "🌓";
-
-        themeBtn.onclick = () => {
-          const state = Store.get();
-          const current = state.profile.theme || "auto";
-          const themes = ["auto", "light", "dark"];
-          const next = themes[(themes.indexOf(current) + 1) % 3];
-
-          Store.mutate((st) => {
-            st.profile.theme = next;
-          });
-          applyTheme(next);
-          render();
-        };
-
-        h.appendChild(left);
-        h.appendChild(chip);
-        h.appendChild(themeBtn);
-        return h;
-      }
-
-      function renderTimerChip() {
-        const txt = qs("#timerTxt");
-        const btn = qs("#timerBtn");
-        if (!txt || !btn) return;
-
-        const s = Store.get();
-        txt.textContent = mmss(getWorkoutElapsedMs());
-
-        if (s.runtime.workoutActive) {
-          btn.textContent = "Pause";
-          btn.onclick = pauseWorkoutTimer;
-        } else {
-          btn.textContent = "Start";
-          btn.onclick = startWorkoutTimer;
-        }
-      }
-
-      function appNav() {
-        const nav = document.createElement("nav");
-        const tabs = [
-          ["workout", "Workout"],
-          ["metrics", "Metrics"],
-          ["learn", "Learn"]
-        ];
-        const cur = location.hash.replace("#", "") || "workout";
-
-        tabs.forEach(([id, label]) => {
-          const el = createElement("div", `tab${cur === id ? " active" : ""}`, label);
-          el.onclick = () => {
-            location.hash = "#" + id;
-            render();
-          };
-          nav.appendChild(el);
-        });
-        return nav;
-      }
-
-      function appMain() {
-        const main = document.createElement("main");
-        const cur = location.hash.replace("#", "") || "workout";
-
-        const views = {
-          workout: viewWorkout,
-          metrics: viewMetrics,
-          learn: viewLearn
-        };
-
-        if (views[cur]) {
-          main.appendChild(views[cur]());
-        }
-        return main;
-      }
-
-      function openRestCustomization(trackId) {
-        const s = Store.get();
-        if (!s.profile.restPreferences) {
-          Store.mutate((st) => {
-            st.profile.restPreferences = {};
-          });
-        }
-        const currentRest = s.profile.restPreferences?.[trackId] || (trackId === "IronFocused" ? 105 : 75);
-
-        const backdrop = createElement("div", "sheet-backdrop");
-        const sheet = createElement("div", "sheet");
-
-        const title = createElement("div", "title", "Customize Rest Period");
-        const sub = createElement("div", "sub", "Set default rest time between sets for this routine");
-        sub.style.marginBottom = "12px";
-
-        const inputWrap = document.createElement("div");
-        const label = createElement("div", "sub", "Rest Duration (seconds)");
-        const input = document.createElement("input");
-        input.type = "number";
-        input.inputmode = "numeric";
-        input.placeholder = String(currentRest);
-        input.value = String(currentRest);
-        inputWrap.appendChild(label);
-        inputWrap.appendChild(input);
-
-        const row = createElement("div", "row");
-        const cancel = createElement("button", "btn", "Cancel");
-        cancel.onclick = () => backdrop.remove();
-        const save = createElement("button", "btn primary", "Save");
-        save.onclick = () => {
-          const newRest = Number(input.value) || currentRest;
-          Store.mutate((st) => {
-            st.profile.restPreferences[trackId] = newRest;
-          });
-          toast(`Rest period set to ${newRest}s`);
-          backdrop.remove();
-          render();
-        };
-        row.appendChild(cancel);
-        row.appendChild(save);
-
-        sheet.appendChild(title);
-        sheet.appendChild(sub);
-        sheet.appendChild(inputWrap);
-        sheet.appendChild(createElement("div", "hr"));
-        sheet.appendChild(row);
-        backdrop.appendChild(sheet);
-        backdrop.onclick = (e) => {
-          if (e.target === backdrop) backdrop.remove();
-        };
-        document.body.appendChild(backdrop);
-      }
-
-      function viewWorkout() {
-        const wrap = createElement("div", "stack");
-        wrap.appendChild(warmupCard());
-        wrap.appendChild(todaysWorkoutCard());
-        return wrap;
-      }
-
-      function warmupCard() {
-        const card = createElement("div", "card");
-        const s = Store.get();
-        const today = todayKey();
-        const done = s.runtime.warmupDoneKey === today;
-
-        const header = createElement("div", "row");
-        header.style.cssText = "justify-content:space-between;align-items:center";
-
-        const headerText = document.createElement("div");
-        const hd = createElement("div", "h", "Warm-Up (Password)");
-        const sub = createElement("div", "sub", done ? "✓ Completed" : "Do this every time. Unlocks the main session.");
-        headerText.appendChild(hd);
-        headerText.appendChild(sub);
-        header.appendChild(headerText);
-
-        const content = createElement("div", "stack");
-        content.style.marginTop = "8px";
-
-        const list = createElement("div", "stack");
-        list.style.marginTop = "4px";
-
-        const checks = [];
-        Warmup.forEach(([name, rep, cue]) => {
-          const row = createElement("div", "row");
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.disabled = done;
-          if (done) chk.checked = true;
-          const label = document.createElement("div");
-          label.innerHTML = `<strong>${name}</strong> · ${rep}<div class="sub">${cue}</div>`;
-          row.appendChild(chk);
-          row.appendChild(label);
-          list.appendChild(row);
-          checks.push(chk);
-        });
-
-        const gate = createElement("button", "btn primary block", done ? "Warm-Up Completed" : "Unlock Main Session");
-        gate.disabled = done;
-        gate.onclick = () => {
-          if (!checks.every((c) => c.checked)) {
-            toast("Finish all warm-up items first.");
-            return;
-          }
-          Store.mutate((st) => {
-            st.runtime.warmupDoneKey = todayKey();
-          });
-          if (!Store.get().runtime.workoutActive) startWorkoutTimer();
-          toast("Password accepted. Forge time.");
-          render();
-        };
-
-        content.appendChild(list);
-        content.appendChild(gate);
-
-        if (done) {
-          const toggleBtn = createElement("button", "btn", "Show");
-          toggleBtn.style.cssText = "height:32px;font-size:13px;padding:0 10px";
-          header.appendChild(toggleBtn);
-
-          content.style.display = "none";
-
-          toggleBtn.onclick = () => {
-            const isHidden = content.style.display === "none";
-            content.style.display = isHidden ? "flex" : "none";
-            toggleBtn.textContent = isHidden ? "Hide" : "Show";
-          };
-        }
-
-        card.appendChild(header);
-        card.appendChild(content);
-        return card;
-      }
-
-      function todaysWorkoutCard() {
-        const s = Store.get();
-        const card = createElement("div", "card");
-
-        const routineRow = createElement("div", "row");
-        const routineLabel = createElement("div", "sub", "Routine");
-        const routineSel = document.createElement("select");
-
-        const opts = [
-          ["Hybrid", "Hybrid"],
-          ["IronFocused", "Iron-Focused: The Backsmith's Anvil Day"],
-          ["GrumpyBack", "Grumpy Back Day"]
-        ];
-
-        opts.forEach(([v, t]) => {
-          const op = createElement("option", null, t);
-          op.value = v;
-          if (s.profile.track === v) op.selected = true;
-          routineSel.appendChild(op);
-        });
-
-        routineSel.onchange = () => {
-          Store.mutate((st) => {
-            st.profile.track = routineSel.value;
-          });
-          toast("Routine switched.");
-          render();
-        };
-        routineRow.appendChild(routineLabel);
-        routineRow.appendChild(routineSel);
-
-        const track = Tracks[s.profile.track] || Tracks.Hybrid;
-
-        const hd = createElement("div", "h", track.title);
-        const sub = createElement("div", "sub");
-        const customRest = s.profile.restPreferences?.[s.profile.track];
-        const restHint = customRest ? `Custom rest: ${customRest}s.` : (track.restPolicy === "90-120" ? "Rest aim: 90–120s." : "Rest aim: 60–90s.");
-        sub.textContent = (track.subtitle ? track.subtitle + " · " : "") + restHint + " Auto rest after every set.";
-
-        const restBtn = createElement("button", "btn", "Customize Rest");
-        restBtn.style.marginTop = "8px";
-        restBtn.onclick = () => openRestCustomization(s.profile.track);
-
-        const warmOK = s.runtime.warmupDoneKey === todayKey();
-
-        card.appendChild(routineRow);
-        card.appendChild(hd);
-        card.appendChild(sub);
-        card.appendChild(restBtn);
-        card.appendChild(divider());
-
-        if (!warmOK) {
-          const lock = createElement("div", "pill warn", "Locked: complete the warm-up to start.");
-          card.appendChild(lock);
-          return card;
-        }
-
-        const list = createElement("div", "stack");
-
-        const week = weekFrom(s.profile.startDate);
-        const baseRest = track.id === "IronFocused" ? 105 : track.id === "Hybrid" ? 75 : 60;
-        const restDefault = s.profile.restPreferences?.[s.profile.track] || baseRest;
-
-        if (track.id === "GrumpyBack") {
-          const exs = planBExercises();
-          exs.forEach((ex) => {
-            list.appendChild(exerciseCard({
-              id: ex.id,
-              name: ex.name,
-              sets: ex.sets[1],
-              reps: ex.reps,
-              timeSec: ex.timeSec,
-              load: ex.load,
-              cues: ex.cues,
-              restSec: restDefault
-            }));
-          });
-          list.appendChild(walkCard());
-        } else {
-          track.exercises.forEach((ex) => {
-            const last = lastAverages(ex.id);
-            const p = prescribeNext({
-              week,
-              lastFormAvg: last.form,
-              lastRpeAvg: last.rpe,
-              hitTopReps: last.hitTop,
-              currentSets: ex.sets[1],
-              currentWeightLb: ex.load
-            });
-            const sets = clamp(p.sets, ex.sets[0], ex.sets[1]);
-            list.appendChild(exerciseCard({
-              id: ex.id,
-              name: ex.name,
-              sets,
-              reps: ex.reps,
-              timeSec: ex.timeSec,
-              load: p.weightLb || ex.load,
-              cues: ex.cues,
-              constitution: ex.constitution,
-              restSec: restDefault
-            }));
-          });
-        }
-
-        list.appendChild(finishRow());
-        card.appendChild(list);
-        return card;
-      }
-
-      function divider() {
-        return createElement("div", "hr");
-      }
-
-      function weekFrom(startISO) {
-        const start = new Date(startISO);
-        const now = new Date();
-        const diff = now - start;
-        return Math.max(1, Math.ceil(diff / (7 * 86400000)));
-      }
-
-      function lastAverages(exId) {
-        const s = Store.get();
-        const sets = s.logs.slice(-10).flatMap((l) => l.sets || []).filter((t) => t.exerciseId === exId);
-        if (!sets.length) return { form: 100, rpe: 7, hitTop: true };
-
-        const len = sets.length;
-        const form = sets.reduce((a, b) => a + (b.formScore || 0), 0) / len;
-        const rpe = sets.reduce((a, b) => a + (b.rpe || 7), 0) / len;
-        const hitTop = sets.every((t) => t.hitTopRepRange);
-        return { form, rpe, hitTop };
-      }
-
-      function walkCard() {
-        const c = createElement("div", "card");
-        const h = createElement("div", "name", "20-min Walk");
-        const sub = createElement("div", "sub", "Start a 20:00 timer and move easy.");
-        const row = createElement("div", "row");
-        const timerBox = createElement("div", "pill", "20:00");
-        const start = createElement("button", "btn", "Start");
-
-        let intervalId = null;
-        start.onclick = () => {
-          if (intervalId) return;
-          let left = 20 * 60 * 1000;
-          intervalId = setInterval(() => {
-            left -= 1000;
-            timerBox.textContent = mmss(left);
-            if (left <= 0) {
-              clearInterval(intervalId);
-              intervalId = null;
-              Beep.beep(1200, 140, 0.06);
-              Beep.beep(900, 160, 0.06);
-              toast("Walk done. Nice.");
+            WORKOUT_B: {
+                id: 'workout_b',
+                title: 'Workout B: Hypertrophy',
+                subtitle: 'Volume & Stability',
+                exercises: [
+                    { id: 'b1', name: 'Reverse Lunges', sets: 3, reps: '8-10/leg', weightRec: '25/35 lb DBs', note: 'Knee gently touches floor.' },
+                    { id: 'b2', name: 'Single-Leg RDL', sets: 3, reps: '8-10/leg', weightRec: '35/50 lb KB', note: 'Opposite hand to working leg.' },
+                    { id: 'b3', name: 'Overhead Press', sets: 3, reps: '8-12', weightRec: '25/35 lb DBs', note: 'Brace core. No arching.' },
+                    { id: 'b4', name: '3-Point Row', sets: 3, reps: '10-12', weightRec: '50 lb KB', note: 'Hand on bench. Pull to hip.' },
+                    { id: 'b5', name: 'Hollow Pullover', sets: 3, reps: '12-15', weightRec: '25/35 lb DB', note: 'Legs up. Stretch lat.' }
+                ]
             }
-          }, 1000);
         };
 
-        row.appendChild(timerBox);
-        row.appendChild(start);
-        c.appendChild(h);
-        c.appendChild(sub);
-        c.appendChild(row);
-        return c;
-      }
+        // --- COMPONENTS ---
 
-      // Optimized to use single event delegation instead of individual handlers
-      function openQuickLog({ cfg, setIndex, onSave }) {
-        const sKey = `${cfg.id}::last`;
-        window.__lastUsed = window.__lastUsed || {};
-        const last = window.__lastUsed[sKey] || {};
-
-        const isTime = !!cfg.timeSec;
-        const defaultReps = isTime ? cfg.timeSec[1] : cfg.reps[1];
-        const defaultWeight = typeof cfg.load === "number" ? cfg.load : 0;
-
-        const backdrop = createElement("div", "sheet-backdrop");
-        const sheet = createElement("div", "sheet");
-
-        const title = createElement("div", "title", `${cfg.name} — Set ${setIndex + 1}`);
-
-        let timerSection = null;
-        let stopTimer = null;
-
-        if (isTime) {
-          timerSection = document.createElement("div");
-          timerSection.style.cssText = "margin-bottom:12px;text-align:center";
-
-          const timerDisplay = document.createElement("div");
-          timerDisplay.style.cssText = "font-size:32px;font-weight:800;margin-bottom:8px";
-          timerDisplay.textContent = mmss(defaultReps * 1000);
-
-          const timerBar = createElement("div", "restbar");
-          timerBar.style.marginBottom = "8px";
-          const timerFill = document.createElement("span");
-          timerBar.appendChild(timerFill);
-
-          const timerBtn = createElement("button", "btn primary", "Start Timer");
-
-          let isRunning = false;
-          timerBtn.onclick = () => {
-            if (!isRunning) {
-              isRunning = true;
-              timerBtn.textContent = "Stop";
-              timerBtn.classList.remove("primary");
-              const targetSec = Number(repsInput.value || defaultReps);
-              stopTimer = restTimer(targetSec, (secLeft, prog) => {
-                timerDisplay.textContent = mmss(secLeft * 1000);
-                timerFill.style.width = `${Math.floor(prog * 100)}%`;
-              }, () => {
-                isRunning = false;
-                timerBtn.textContent = "Start Timer";
-                timerBtn.classList.add("primary");
-                timerFill.style.width = "0%";
-              });
-            } else {
-              if (stopTimer) stopTimer();
-              isRunning = false;
-              timerBtn.textContent = "Start Timer";
-              timerBtn.classList.add("primary");
-              timerFill.style.width = "0%";
-              timerDisplay.textContent = mmss((Number(repsInput.value || defaultReps)) * 1000);
-            }
-          };
-
-          timerSection.appendChild(timerDisplay);
-          timerSection.appendChild(timerBar);
-          timerSection.appendChild(timerBtn);
-        }
-
-        const grid = createElement("div", "grid");
-
-        let weightInput = null;
-        if (defaultWeight > 0) {
-          const wWrap = document.createElement("div");
-          const wLab = createElement("div", "sub", "Weight (lb)");
-          weightInput = document.createElement("input");
-          weightInput.type = "number";
-          weightInput.inputmode = "decimal";
-          weightInput.placeholder = String(defaultWeight);
-          weightInput.value = String(last.weightLb ?? defaultWeight);
-          wWrap.appendChild(wLab);
-          wWrap.appendChild(weightInput);
-          grid.appendChild(wWrap);
-        }
-
-        const rWrap = document.createElement("div");
-        const rLab = createElement("div", "sub", isTime ? "Seconds" : "Reps");
-        const repsInput = document.createElement("input");
-        repsInput.type = "number";
-        repsInput.inputmode = "numeric";
-        repsInput.placeholder = String(defaultReps);
-        repsInput.value = String(last.value ?? defaultReps);
-        rWrap.appendChild(rLab);
-        rWrap.appendChild(repsInput);
-        grid.appendChild(rWrap);
-
-        const rpeWrap = document.createElement("div");
-        rpeWrap.style.paddingRight = "8px";
-        const rpeLab = createElement("div", "sub", "RPE (1-10)");
-        rpeLab.title = "Rate of Perceived Exertion";
-        const rpeInput = document.createElement("input");
-        rpeInput.type = "range";
-        rpeInput.min = "1";
-        rpeInput.max = "10";
-        rpeInput.step = "0.5";
-        rpeInput.value = String(last.rpe ?? 7);
-        rpeInput.style.cssText = "width:calc(100% - 4px);margin:0 2px";
-        const rpeValue = document.createElement("div");
-        rpeValue.style.cssText = "text-align:center;font-weight:700;font-size:18px;margin-top:4px";
-        rpeValue.textContent = rpeInput.value;
-        rpeInput.oninput = () => {
-          rpeValue.textContent = rpeInput.value;
-        };
-        rpeWrap.appendChild(rpeLab);
-        rpeWrap.appendChild(rpeInput);
-        rpeWrap.appendChild(rpeValue);
-        grid.appendChild(rpeWrap);
-
-        const formWrap = document.createElement("div");
-        formWrap.style.paddingRight = "8px";
-        const formLab = createElement("div", "sub", "Form (%)");
-        formLab.title = "Form Quality";
-        const formInput = document.createElement("input");
-        formInput.type = "range";
-        formInput.min = "0";
-        formInput.max = "100";
-        formInput.step = "5";
-        formInput.value = String(last.formScore ?? 90);
-        formInput.style.cssText = "width:calc(100% - 4px);margin:0 2px";
-        const formValue = document.createElement("div");
-        formValue.style.cssText = "text-align:center;font-weight:700;font-size:18px;margin-top:4px";
-        formValue.textContent = formInput.value + "%";
-        formInput.oninput = () => {
-          formValue.textContent = formInput.value + "%";
-        };
-        formWrap.appendChild(formLab);
-        formWrap.appendChild(formInput);
-        formWrap.appendChild(formValue);
-        grid.appendChild(formWrap);
-
-        const row = createElement("div", "row");
-        const cancel = createElement("button", "btn", "Cancel");
-        cancel.onclick = () => {
-          if (stopTimer) stopTimer();
-          backdrop.remove();
-        };
-        const save = createElement("button", "btn primary", "Save");
-        save.onclick = () => {
-          const w = weightInput ? Number(weightInput.value || defaultWeight) : 0;
-          const repOrSec = Number(repsInput.value || defaultReps);
-          const rpe = Number(rpeInput.value || 7);
-          const formScore = Number(formInput.value || 90);
-
-          window.__lastUsed[sKey] = { weightLb: w, value: repOrSec, rpe, formScore };
-
-          if (stopTimer) stopTimer();
-          onSave({ weightLb: w, repOrSec, rpe, formScore });
-          backdrop.remove();
+        const Icon = ({ name, size = 20, color = "currentColor", className = "" }) => {
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} width={size} height={size} className={className} style={{color}}></i>;
         };
 
-        sheet.appendChild(title);
-        if (timerSection) sheet.appendChild(timerSection);
-        sheet.appendChild(grid);
-        sheet.appendChild(createElement("div", "hr"));
-        sheet.appendChild(row);
-        row.appendChild(cancel);
-        row.appendChild(save);
-
-        backdrop.appendChild(sheet);
-        backdrop.onclick = (e) => {
-          if (e.target === backdrop) {
-            if (stopTimer) stopTimer();
-            backdrop.remove();
-          }
-        };
-        document.body.appendChild(backdrop);
-      }
-
-      function exerciseCard(cfg) {
-        const card = createElement("div", "card ex");
-
-        const left = document.createElement("div");
-        const nm = createElement("div", "name", cfg.name);
-        const mt = createElement("div", "meta");
-        const repTxt = cfg.timeSec ? `${cfg.timeSec[0]}–${cfg.timeSec[1]}s` : `${cfg.reps[0]}–${cfg.reps[1]} reps`;
-        mt.textContent = `${cfg.sets} sets · ${repTxt}` + (cfg.load ? ` · Target: ${cfg.load} lb` : "");
-        left.appendChild(nm);
-        left.appendChild(mt);
-
-        const right = createElement("div", "chips");
-
-        for (let i = 0; i < cfg.sets; i++) {
-          const c = createElement("div", "chip", String(i + 1));
-          c.onclick = () => {
-            if (c.dataset.done === "1") return;
-            openQuickLog({
-              cfg,
-              setIndex: i,
-              onSave: ({ weightLb, repOrSec, rpe, formScore }) => {
-                c.dataset.done = "1";
-                c.classList.add("done");
-                Beep.beep(760, 100, 0.04);
-                bufferSetLog(cfg, i, weightLb, repOrSec, rpe, formScore);
-                autoRest(cfg.restSec, card);
-              }
-            });
-          };
-          right.appendChild(c);
-        }
-
-        card.appendChild(left);
-        card.appendChild(right);
-
-        if (cfg.constitution) {
-          const cons = createElement("div", "cue");
-          const key = cfg.constitution === "swing" ? Constitution.swing[0] : Constitution.row[0];
-          cons.innerHTML = `<strong>Form check:</strong> ${key} · <em>No rounding.</em> `;
-          const ok = document.createElement("input");
-          ok.type = "checkbox";
-          ok.style.marginLeft = "8px";
-          cons.appendChild(ok);
-          card.appendChild(cons);
-        }
-
-        if (cfg.cues?.length) {
-          const cue = createElement("div", "cue", "Cues: " + cfg.cues.join(" · "));
-          card.appendChild(cue);
-        }
-
-        return card;
-      }
-
-      function autoRest(seconds, parentCard) {
-        // Clean up existing rest elements
-        parentCard.querySelectorAll(".restbar, [data-rest='1']").forEach(el => el.remove());
-
-        const bar = createElement("div", "restbar");
-        const fill = document.createElement("span");
-        bar.appendChild(fill);
-
-        const row = createElement("div", "row");
-        row.setAttribute("data-rest", "1");
-        const lbl = createElement("div", "sub", "Rest");
-        const left = createElement("div", "pill", mmss(seconds * 1000));
-        const skip = createElement("button", "btn", "Skip");
-        skip.onclick = cleanup;
-
-        row.appendChild(lbl);
-        row.appendChild(left);
-        row.appendChild(skip);
-
-        parentCard.appendChild(row);
-        parentCard.appendChild(bar);
-
-        const stop = restTimer(seconds, (secLeft, prog) => {
-          fill.style.width = `${Math.floor(prog * 100)}%`;
-          left.textContent = mmss(secLeft * 1000);
-        }, cleanup);
-
-        function cleanup() {
-          stop();
-          bar.remove();
-          row.remove();
-        }
-      }
-
-      function bufferSetLog(cfg, setIndex, weightLb, repOrSec, rpe = 7, formScore = 90) {
-        window.__sessionBuffer = window.__sessionBuffer || [];
-        const isTime = !!cfg.timeSec;
-        const topReps = isTime ? cfg.timeSec[1] : cfg.reps[1];
-        const hitTopRepRange = repOrSec >= topReps;
-
-        window.__sessionBuffer.push({
-          exerciseId: cfg.id,
-          setIndex,
-          weightLb: isNaN(weightLb) ? 0 : weightLb,
-          reps: isTime ? null : repOrSec,
-          seconds: isTime ? repOrSec : null,
-          rpe: isNaN(rpe) ? 7 : rpe,
-          formScore: isNaN(formScore) ? 90 : formScore,
-          hitTopRepRange,
-          notes: ""
-        });
-      }
-
-      function finishRow() {
-        const r = createElement("div", "row");
-        const finish = createElement("button", "btn primary block", "Finish Workout");
-        finish.onclick = finishWorkout;
-        r.appendChild(finish);
-        return r;
-      }
-
-      function finishWorkout() {
-        stopWorkoutTimer();
-        const s = Store.get();
-        const sec = s.runtime.lastTotalSec;
-        const sets = window.__sessionBuffer || [];
-        const session = {
-          id: uid(),
-          workoutId: s.profile.track,
-          date: nowISO(),
-          totalSec: sec,
-          sets
-        };
-        Store.mutate((st) => {
-          st.logs.push(session);
-          st.runtime.warmupDoneKey = null;
-        });
-        window.__sessionBuffer = [];
-        toast("Session saved. Total: " + mmss(sec * 1000));
-        render();
-      }
-
-      function openManualEntry() {
-        const s = Store.get();
-        const backdrop = createElement("div", "sheet-backdrop");
-        const sheet = createElement("div", "sheet");
-        sheet.style.cssText = "max-height:85vh;overflow-y:auto;padding-bottom:calc(20px + var(--pad-bottom))";
-
-        const title = createElement("div", "title", "Log Workout Manually");
-
-        const form = createElement("div", "stack");
-        form.style.gap = "16px";
-
-        const routineRow = document.createElement("div");
-        const routineLabel = createElement("div", "sub", "Routine");
-        const routineSel = document.createElement("select");
-        const opts = [
-          ["Hybrid", "Hybrid"],
-          ["IronFocused", "Iron-Focused"],
-          ["GrumpyBack", "Grumpy Back Day"]
-        ];
-        opts.forEach(([v, t]) => {
-          const op = createElement("option", null, t);
-          op.value = v;
-          if (s.profile.track === v) op.selected = true;
-          routineSel.appendChild(op);
-        });
-        routineRow.appendChild(routineLabel);
-        routineRow.appendChild(routineSel);
-
-        const dateRow = document.createElement("div");
-        const dateLabel = createElement("div", "sub", "Date");
-        const dateInput = document.createElement("input");
-        dateInput.type = "date";
-        dateInput.value = new Date().toISOString().slice(0, 10);
-        dateRow.appendChild(dateLabel);
-        dateRow.appendChild(dateInput);
-
-        const durRow = document.createElement("div");
-        const durLabel = createElement("div", "sub", "Duration (minutes)");
-        const durInput = document.createElement("input");
-        durInput.type = "number";
-        durInput.inputmode = "numeric";
-        durInput.placeholder = "45";
-        durInput.value = "45";
-        durRow.appendChild(durLabel);
-        durRow.appendChild(durInput);
-
-        const exercisesContainer = createElement("div", "stack");
-        exercisesContainer.style.gap = "10px";
-
-        const exercisesLabel = createElement("div", "sub", "Exercises (fill in what you completed)");
-        exercisesContainer.appendChild(exercisesLabel);
-
-        form.appendChild(routineRow);
-        form.appendChild(dateRow);
-        form.appendChild(durRow);
-        form.appendChild(exercisesContainer);
-
-        function populateInputRows() {
-          requestAnimationFrame(() => {
-            const exContainers = exercisesContainer.querySelectorAll("[data-exercise-id]");
-            exContainers.forEach((container) => {
-              const isTime = container.getAttribute("data-is-time") === "1";
-              const hasWeight = container.previousElementSibling.textContent.includes("lb");
-
-              for (let i = 0; i < 4; i++) {
-                addSetInputRow(container, i, isTime, hasWeight);
-              }
-            });
-          });
-        }
-
-        function renderExerciseTemplate(workoutId) {
-          // Clear existing exercises except the label
-          while (exercisesContainer.children.length > 1) {
-            exercisesContainer.removeChild(exercisesContainer.lastChild);
-          }
-
-          const track = Tracks[workoutId];
-          const exercises = track.id === "GrumpyBack" ? planBExercises() : track.exercises || [];
-
-          exercises.forEach((ex) => {
-            const exCard = createElement("div", "card");
-            exCard.style.cssText = "padding:10px;background:var(--card-2)";
-
-            const exName = document.createElement("div");
-            exName.style.cssText = "font-weight:700;margin-bottom:6px";
-            exName.textContent = ex.name;
-
-            const exMeta = createElement("div", "sub");
-            exMeta.style.cssText = "font-size:12px;margin-bottom:8px";
-            const repText = ex.timeSec ? `${ex.timeSec[0]}-${ex.timeSec[1]}s` : `${ex.reps[0]}-${ex.reps[1]} reps`;
-            const maxSets = ex.sets[1] || ex.sets[0] || 4;
-            exMeta.textContent = `Target: ${maxSets} sets × ${repText}${ex.load ? ` @ ${ex.load} lb` : ''}`;
-
-            const setsContainer = createElement("div", "stack");
-            setsContainer.style.gap = "6px";
-            setsContainer.setAttribute("data-exercise-id", ex.id);
-            setsContainer.setAttribute("data-is-time", ex.timeSec ? "1" : "0");
-
-            exCard.appendChild(exName);
-            exCard.appendChild(exMeta);
-            exCard.appendChild(setsContainer);
-            exercisesContainer.appendChild(exCard);
-          });
-
-          populateInputRows();
-        }
-
-        renderExerciseTemplate(routineSel.value);
-
-        routineSel.onchange = () => {
-          renderExerciseTemplate(routineSel.value);
+        // FORMAT HELPERS
+        const formatDuration = (ms) => {
+            if (!ms) return '0m';
+            const minutes = Math.floor(ms / 60000);
+            return `${minutes}m`;
         };
 
-        const buttons = createElement("div", "row");
-        buttons.style.cssText = "margin-top:16px;gap:12px";
-
-        const cancel = createElement("button", "btn", "Cancel");
-        cancel.style.flex = "1";
-        cancel.onclick = () => backdrop.remove();
-
-        const save = createElement("button", "btn primary", "Save Workout");
-        save.style.flex = "1";
-        save.onclick = () => {
-          const workoutId = routineSel.value;
-          const date = new Date(dateInput.value + "T12:00:00").toISOString();
-          const totalSec = Number(durInput.value) * 60;
-
-          const allSets = [];
-          const exContainers = exercisesContainer.querySelectorAll("[data-exercise-id]");
-
-          exContainers.forEach((container) => {
-            const exerciseId = container.getAttribute("data-exercise-id");
-            const isTime = container.getAttribute("data-is-time") === "1";
-            const setInputs = container.querySelectorAll(".set-input-row");
-
-            setInputs.forEach((row, setIndex) => {
-              const weightInput = row.querySelector(".weight-input");
-              const repsInput = row.querySelector(".reps-input");
-
-              const weight = weightInput ? Number(weightInput.value) || 0 : 0;
-              const repOrSec = Number(repsInput.value) || 0;
-
-              if (repOrSec > 0 || weight > 0) {
-                allSets.push({
-                  exerciseId,
-                  setIndex,
-                  weightLb: weight,
-                  reps: isTime ? null : repOrSec,
-                  seconds: isTime ? repOrSec : null,
-                  rpe: 7,
-                  formScore: 90,
-                  hitTopRepRange: true,
-                  notes: ""
-                });
-              }
-            });
-          });
-
-          const session = {
-            id: uid(),
-            workoutId,
-            date,
-            totalSec,
-            sets: allSets
-          };
-
-          Store.mutate((st) => {
-            st.logs.push(session);
-          });
-
-          toast(`Workout logged with ${allSets.length} sets!`);
-          backdrop.remove();
-          render();
+        const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         };
 
-        buttons.appendChild(cancel);
-        buttons.appendChild(save);
+        // 1. SMALL SESSION TIMER (Header)
+        const SessionTimer = ({ startTime }) => {
+            const [elapsed, setElapsed] = useState(0);
 
-        sheet.appendChild(title);
-        sheet.appendChild(form);
-        sheet.appendChild(buttons);
-        backdrop.appendChild(sheet);
+            useEffect(() => {
+                if (!startTime) return;
+                setElapsed(Date.now() - startTime);
+                const interval = setInterval(() => setElapsed(Date.now() - startTime), 1000);
+                return () => clearInterval(interval);
+            }, [startTime]);
 
-        backdrop.onclick = (e) => {
-          if (e.target === backdrop) backdrop.remove();
+            return (
+                <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1 rounded-full border border-amber-500/20">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                    <span className="font-mono text-amber-400 font-bold text-sm">{formatTime(Math.floor(elapsed / 1000))}</span>
+                </div>
+            );
         };
 
-        document.body.appendChild(backdrop);
-      }
+        // 2. REST TIMER (Floating)
+        const RestTimer = ({ isOpen, onClose, autoStartTrigger }) => {
+            const [time, setTime] = useState(0);
+            const [isRunning, setIsRunning] = useState(false);
 
-      function addSetInputRow(container, setIndex, isTime, hasWeight) {
-        const row = createElement("div", "set-input-row");
-        row.style.cssText = "display:flex;gap:8px;align-items:center";
+            useEffect(() => {
+                if (autoStartTrigger) {
+                    setTime(0);
+                    setIsRunning(true);
+                }
+            }, [autoStartTrigger]);
 
-        const setLabel = createElement("div", "sub", `Set ${setIndex + 1}:`);
-        setLabel.style.cssText = "min-width:40px;font-size:12px";
+            useEffect(() => {
+                let interval;
+                if (isRunning) {
+                    interval = setInterval(() => setTime(t => t + 1), 1000);
+                }
+                return () => clearInterval(interval);
+            }, [isRunning]);
 
-        if (hasWeight) {
-          const weightInput = document.createElement("input");
-          weightInput.type = "number";
-          weightInput.inputmode = "decimal";
-          weightInput.className = "weight-input";
-          weightInput.placeholder = "lb";
-          weightInput.style.cssText = "width:70px;height:36px;font-size:14px";
-          row.appendChild(setLabel);
-          row.appendChild(weightInput);
-        } else {
-          row.appendChild(setLabel);
-        }
+            if (!isOpen) return null;
 
-        const repsInput = document.createElement("input");
-        repsInput.type = "number";
-        repsInput.inputmode = "numeric";
-        repsInput.className = "reps-input";
-        repsInput.placeholder = isTime ? "sec" : "reps";
-        repsInput.style.cssText = "flex:1;height:36px;font-size:14px";
+            return (
+                <div className="fixed bottom-24 right-4 z-50 animate-slide-up">
+                    <div className={`glass-panel p-4 rounded-2xl shadow-2xl flex flex-col items-center w-48 transition-all duration-300 ${isRunning ? 'border-amber-500/50 timer-active' : 'border-slate-700'}`}>
+                        <div className="flex justify-between w-full items-center mb-2">
+                            <span className="text-amber-400 text-[10px] font-bold tracking-widest uppercase">{isRunning ? 'Resting' : 'Paused'}</span>
+                            <button onClick={onClose}><Icon name="x" size={14} className="text-slate-400 hover:text-white" /></button>
+                        </div>
+                        <div className="text-4xl font-mono font-bold text-white mb-4 tabular-nums">{formatTime(time)}</div>
+                        <div className="flex gap-2 w-full">
+                            <button 
+                                onClick={() => setIsRunning(!isRunning)} 
+                                className={`flex-1 py-2 rounded-lg font-bold text-xs transition-colors ${isRunning ? 'bg-slate-700 text-slate-300' : 'bg-amber-500 text-slate-900'}`}
+                            >
+                                {isRunning ? 'PAUSE' : 'RESUME'}
+                            </button>
+                            <button 
+                                onClick={() => { setIsRunning(false); setTime(0); }}
+                                className="p-2 bg-slate-700 rounded-lg text-slate-300 hover:bg-slate-600"
+                            >
+                                <Icon name="rotate-ccw" size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-        row.appendChild(repsInput);
-        container.appendChild(row);
-      }
+        // 3. EXERCISE CARD
+        const ExerciseCard = ({ exercise, logs, onLog, isWorkoutActive }) => {
+            const [isExpanded, setIsExpanded] = useState(false);
+            const [inputWeight, setInputWeight] = useState('');
+            const [inputReps, setInputReps] = useState('');
+            
+            const exerciseLogs = logs.filter(l => l.exerciseId === exercise.id);
+            const setsCompletedCount = exerciseLogs.length;
+            const isComplete = setsCompletedCount >= exercise.sets;
+            const lastLog = exerciseLogs.length > 0 ? exerciseLogs[exerciseLogs.length - 1] : null;
 
-      function viewMetrics() {
-        const wrap = createElement("div", "stack");
-
-        const manualCard = createElement("div", "card");
-        const manualBtn = createElement("button", "btn primary block", "Log Workout Manually");
-        manualBtn.onclick = openManualEntry;
-        manualCard.appendChild(manualBtn);
-        wrap.appendChild(manualCard);
-
-        wrap.appendChild(progressChartCard());
-        wrap.appendChild(routineMetricsCard("Hybrid"));
-        wrap.appendChild(routineMetricsCard("IronFocused"));
-        wrap.appendChild(routineMetricsCard("GrumpyBack"));
-
-        return wrap;
-      }
-
-      function progressChartCard() {
-        const s = Store.get();
-        const card = createElement("div", "card");
-
-        const title = createElement("div", "h", "Progress Overview");
-        const sub = createElement("div", "sub", "Track weight progression for key exercises");
-
-        card.appendChild(title);
-        card.appendChild(sub);
-        card.appendChild(divider());
-
-        const exNames = buildExerciseNameMap();
-        const keyExercises = ["goblet-box-squat", "kb-swing", "floor-press", "sa-db-row", "heavy-goblet-squat", "heavy-kb-swing"];
-
-        keyExercises.forEach((exId) => {
-          const sets = s.logs
-            .flatMap((l) => l.sets || [])
-            .filter((t) => t.exerciseId === exId && t.weightLb > 0)
-            .slice(-10);
-
-          if (sets.length > 1) {
-            const chartDiv = document.createElement("div");
-            chartDiv.style.marginBottom = "16px";
-
-            const exTitle = document.createElement("div");
-            exTitle.style.cssText = "font-weight:700;margin-bottom:8px";
-            exTitle.textContent = exNames[exId] || exId;
-
-            const stats = createElement("div", "sub");
-            stats.style.marginBottom = "8px";
-            const weights = sets.map((s) => s.weightLb);
-            const minWeight = Math.min(...weights);
-            const maxWeight = Math.max(...weights);
-            const avgWeight = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
-            const latestWeight = weights[weights.length - 1];
-            stats.textContent = `Latest: ${latestWeight} lb · Range: ${minWeight}–${maxWeight} lb · Avg: ${avgWeight} lb`;
-
-            const barContainer = document.createElement("div");
-            barContainer.style.cssText = "display:flex;gap:2px;align-items:flex-end;height:60px";
-
-            sets.forEach((set) => {
-              const bar = document.createElement("div");
-              const heightPercent = ((set.weightLb - minWeight) / (maxWeight - minWeight || 1)) * 100;
-              bar.style.cssText = `flex:1;background:linear-gradient(180deg, var(--accent), #991b1b);border-radius:4px 4px 0 0;height:${Math.max(heightPercent, 10)}%;min-height:8px;cursor:pointer`;
-              bar.title = `${set.weightLb} lb`;
-              barContainer.appendChild(bar);
-            });
-
-            chartDiv.appendChild(exTitle);
-            chartDiv.appendChild(stats);
-            chartDiv.appendChild(barContainer);
-            card.appendChild(chartDiv);
-          }
-        });
-
-        return card;
-      }
-
-      // Optimized to build map once and cache
-      const nameMapCache = new Map();
-      function buildExerciseNameMap() {
-        if (nameMapCache.size === 0) {
-          ["Hybrid", "IronFocused"].forEach((tid) => {
-            (Tracks[tid].exercises || []).forEach((ex) => nameMapCache.set(ex.id, ex.name));
-          });
-          planBExercises().forEach((ex) => nameMapCache.set(ex.id, ex.name));
-        }
-        return nameMapCache;
-      }
-
-      function routineMetricsCard(id) {
-        const s = Store.get();
-        const exNames = buildExerciseNameMap();
-        const card = createElement("div", "card");
-
-        const title = createElement("div", "h", Tracks[id].title);
-        const sub = createElement("div", "sub", Tracks[id].subtitle || "");
-
-        const list = createElement("div", "stack");
-        const logs = s.logs.filter((l) => l.workoutId === id).slice(-12).reverse();
-
-        if (!logs.length) {
-          const none = createElement("div", "pill", "No sessions yet.");
-          list.appendChild(none);
-        } else {
-          logs.forEach((l) => {
-            const wrapper = createElement("div", "card");
-            wrapper.style.padding = "10px";
-
-            const summary = createElement("div", "row");
-            summary.style.cssText = "justify-content:space-between;align-items:center";
-
-            const txt = createElement("div", "pill");
-            txt.style.flex = "1";
-            const setInfo = l.manualEntry ? "Manual Entry" : (l.sets?.length || 0) + " sets";
-            txt.textContent = new Date(l.date).toLocaleDateString() + " · " + setInfo + " · " + mmss((l.totalSec || 0) * 1000);
-            if (l.manualNotes) {
-              txt.title = l.manualNotes;
-              txt.style.cursor = "help";
-            }
-
-            const btnGroup = createElement("div", "row");
-            btnGroup.style.gap = "6px";
-
-            const toggleBtn = createElement("button", "btn", "Details");
-            toggleBtn.style.cssText = "height:32px;font-size:13px;padding:0 10px";
-
-            const del = createElement("button", "btn", "Delete");
-            del.style.cssText = "height:32px;font-size:13px;padding:0 10px";
-            del.onclick = () => {
-              showConfirmDialog("Delete this session?", () => {
-                deleteSessionById(l.id);
-              });
+            const handleSave = (e) => {
+                e.stopPropagation();
+                if (!isWorkoutActive) {
+                    // Simple toast replacement (alert is fallback, but logic below ensures flow)
+                    alert("Please tap 'Start Workout' first!");
+                    return;
+                }
+                if (inputWeight && inputReps) {
+                    onLog(exercise.id, { 
+                        weight: inputWeight, 
+                        reps: inputReps,
+                        exerciseName: exercise.name 
+                    });
+                }
             };
 
-            btnGroup.appendChild(toggleBtn);
-            btnGroup.appendChild(del);
-            summary.appendChild(txt);
-            summary.appendChild(btnGroup);
+            return (
+                <div className={`mb-3 rounded-xl border overflow-hidden transition-all duration-300 glass-card ${isComplete ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+                    <div className="p-4 relative overflow-hidden" onClick={() => setIsExpanded(!isExpanded)}>
+                        <div className="absolute left-0 top-0 bottom-0 bg-amber-500/10 transition-all duration-500" style={{ width: `${(setsCompletedCount / exercise.sets) * 100}%` }} />
+                        <div className="flex items-start justify-between mb-2 relative z-10">
+                            <div className="flex-1">
+                                <h3 className={`font-bold text-lg ${isComplete ? 'text-slate-400 line-through decoration-slate-600' : 'text-slate-100'}`}>
+                                    {exercise.name}
+                                </h3>
+                            </div>
+                             <div className={`transition-transform duration-300 text-slate-500 ${isExpanded ? 'rotate-180 text-amber-500' : ''}`}>
+                                <Icon name="chevron-down" size={20} />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 relative z-10">
+                            <div className="flex gap-1">
+                                {[...Array(exercise.sets)].map((_, i) => (
+                                    <div key={i} className={`h-1.5 w-6 rounded-full transition-all duration-300 ${i < setsCompletedCount ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'bg-slate-700'}`} />
+                                ))}
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">
+                                {setsCompletedCount}/{exercise.sets} Sets
+                            </span>
+                        </div>
+                    </div>
+                    {isExpanded && (
+                        <div className="px-4 pb-4 pt-2 border-t border-slate-700/50 animate-slide-up bg-slate-900/40">
+                            <div className="text-xs text-slate-400 mb-4 flex items-start gap-2 bg-slate-900/60 p-2 rounded border border-slate-800">
+                                <Icon name="info" size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                                <div><p>{exercise.note}</p><p className="text-amber-500/80 mt-1 font-bold">Goal: {exercise.weightRec}</p></div>
+                            </div>
+                            <div className="flex gap-3 items-end">
+                                <div className="flex-1">
+                                    <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1 block">Lbs</label>
+                                    <input type="number" value={inputWeight} onChange={(e) => setInputWeight(e.target.value)} placeholder={lastLog ? lastLog.weight : "0"} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white font-mono text-lg outline-none placeholder-slate-700 focus:border-amber-500" onClick={(e) => e.stopPropagation()} />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1 block">Reps</label>
+                                    <input type="number" value={inputReps} onChange={(e) => setInputReps(e.target.value)} placeholder={exercise.reps.split('-')[0]} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white font-mono text-lg outline-none placeholder-slate-700 focus:border-amber-500" onClick={(e) => e.stopPropagation()} />
+                                </div>
+                                <button onClick={handleSave} disabled={!inputWeight || !inputReps} className="bg-gradient-to-br from-amber-400 to-amber-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-900 font-bold rounded-lg flex items-center justify-center w-14 h-[52px] shadow-lg active:scale-95 transition-all"><Icon name="check" size={24} strokeWidth={3} /></button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
 
-            const details = createElement("div", "stack");
-            details.style.cssText = "display:none;margin-top:10px;max-height:300px;overflow-y:auto";
+        // 4. DETAILED MANUAL ENTRY FORM
+        const ManualEntryModal = ({ isOpen, onClose, onSave }) => {
+            if (!isOpen) return null;
 
-            if (l.manualEntry) {
-              const manualNote = createElement("div", "sub", l.manualNotes || "No details recorded for this manual entry.");
-              details.appendChild(manualNote);
-            } else {
-              const groups = {};
-              (l.sets || []).forEach((t) => {
-                (groups[t.exerciseId] || (groups[t.exerciseId] = [])).push(t);
-              });
+            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+            const [routineId, setRoutineId] = useState('workout_a'); 
+            const [duration, setDuration] = useState(45);
+            const [entryData, setEntryData] = useState({});
 
-              Object.keys(groups).forEach((exId) => {
-                const sets = groups[exId].sort((a, b) => a.setIndex - b.setIndex);
-                const block = createElement("div", "card");
-                block.style.padding = "8px";
-                const name = document.createElement("div");
-                name.style.cssText = "font-weight:700;margin-bottom:4px";
-                name.textContent = exNames.get(exId) || exId;
-                const lines = document.createElement("div");
-                lines.style.cssText = "display:flex;flex-wrap:wrap;gap:8px";
+            useEffect(() => {
+                if (isOpen) {
+                    const routine = Object.values(ROUTINES).find(r => r.id === routineId);
+                    const initialData = {};
+                    if (routine) {
+                        routine.exercises.forEach(ex => {
+                            initialData[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: '', reps: '' }));
+                        });
+                    }
+                    setEntryData(initialData);
+                }
+            }, [isOpen, routineId]);
 
-                sets.forEach((t) => {
-                  const line = createElement("div", "sub");
-                  line.style.fontSize = "12px";
-                  const w = t.weightLb && t.weightLb > 0 ? `${t.weightLb} lb` : "BW";
-                  const repOrSec = t.seconds != null ? `${t.seconds}s${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}` : `${t.reps} reps${t.weightLb && t.weightLb > 0 ? " @ " + w : ""}`;
-                  line.textContent = `S${(t.setIndex || 0) + 1}: ${repOrSec}`;
-                  lines.appendChild(line);
-                });
-
-                block.appendChild(name);
-                block.appendChild(lines);
-                details.appendChild(block);
-              });
-            }
-
-            toggleBtn.onclick = () => {
-              const isHidden = details.style.display === "none";
-              details.style.display = isHidden ? "flex" : "none";
-              toggleBtn.textContent = isHidden ? "Hide" : "Details";
+            const handleSetChange = (exId, index, field, value) => {
+                const newSets = [...entryData[exId]];
+                newSets[index] = { ...newSets[index], [field]: value };
+                setEntryData({ ...entryData, [exId]: newSets });
             };
 
-            wrapper.appendChild(summary);
-            wrapper.appendChild(details);
-            list.appendChild(wrapper);
-          });
+            const addSet = (exId) => {
+                setEntryData({ ...entryData, [exId]: [...entryData[exId], { weight: '', reps: '' }] });
+            };
+
+            const removeSet = (exId, index) => {
+                const newSets = entryData[exId].filter((_, i) => i !== index);
+                setEntryData({ ...entryData, [exId]: newSets });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const routine = Object.values(ROUTINES).find(r => r.id === routineId);
+                const logs = [];
+                
+                if (routine) {
+                    routine.exercises.forEach(ex => {
+                        const sets = entryData[ex.id] || [];
+                        sets.forEach(set => {
+                            if (set.weight && set.reps) {
+                                logs.push({
+                                    exerciseId: ex.id,
+                                    exerciseName: ex.name,
+                                    weight: set.weight,
+                                    reps: set.reps,
+                                    date: new Date(date).toISOString() 
+                                });
+                            }
+                        });
+                    });
+                }
+
+                if (logs.length === 0) {
+                    alert("Please enter at least one completed set.");
+                    return;
+                }
+
+                onSave({ date, routineId, duration, logs });
+                onClose();
+            };
+
+            const activeRoutine = Object.values(ROUTINES).find(r => r.id === routineId);
+
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md animate-slide-up overflow-y-auto py-4">
+                    <div className="bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-full">
+                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/90 sticky top-0 z-10">
+                            <h3 className="text-lg font-bold text-white">Log Past Workout</h3>
+                            <button onClick={onClose} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white"><Icon name="x" size={20} /></button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date</label><input required type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-1 focus:border-amber-500 outline-none" /></div>
+                                <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Duration (min)</label><input required type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-1 focus:border-amber-500 outline-none" /></div>
+                                <div className="col-span-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Routine Template</label><select value={routineId} onChange={e => setRoutineId(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white mt-1 focus:border-amber-500 outline-none font-bold">{Object.values(ROUTINES).map(r => (<option key={r.id} value={r.id}>{r.title}</option>))}</select></div>
+                            </div>
+                            <hr className="border-slate-800" />
+                            <div className="space-y-6">
+                                {activeRoutine && activeRoutine.exercises.map(ex => (
+                                    <div key={ex.id} className="bg-slate-950/50 rounded-xl p-3 border border-slate-800/50">
+                                        <div className="flex justify-between items-center mb-2"><h4 className="font-bold text-slate-200 text-sm">{ex.name}</h4><span className="text-[10px] text-slate-500 font-mono">{ex.sets} Sets Goal</span></div>
+                                        <div className="space-y-2">
+                                            {entryData[ex.id] && entryData[ex.id].map((set, idx) => (
+                                                <div key={idx} className="flex items-center gap-2"><span className="text-xs text-slate-600 font-mono w-4">{idx + 1}</span><input type="number" placeholder="Lbs" value={set.weight} onChange={(e) => handleSetChange(ex.id, idx, 'weight', e.target.value)} className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-amber-500 outline-none" /><input type="number" placeholder="Reps" value={set.reps} onChange={(e) => handleSetChange(ex.id, idx, 'reps', e.target.value)} className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-amber-500 outline-none" /><button type="button" onClick={() => removeSet(ex.id, idx)} className="p-2 text-slate-600 hover:text-red-500"><Icon name="trash" size={14} /></button></div>
+                                            ))}
+                                            <button type="button" onClick={() => addSet(ex.id)} className="w-full py-1.5 text-xs font-bold text-amber-500/70 hover:text-amber-500 hover:bg-slate-900 rounded border border-dashed border-slate-700 mt-2 transition-colors">+ Add Set</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </form>
+                        <div className="p-4 border-t border-slate-800 bg-slate-900 sticky bottom-0 z-10">
+                            <button onClick={handleSubmit} className="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-xl hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">Save Workout Log</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 5. REUSABLE CONFIRMATION MODAL
+        const ConfirmModal = ({ isOpen, onClose, onConfirm, title="Confirm Action", message, confirmLabel="Confirm", confirmColor="bg-red-500" }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-slide-up">
+                    <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-6 shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+                        <p className="text-slate-400 mb-6">{message}</p>
+                        <div className="flex gap-3">
+                            <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors">Cancel</button>
+                            <button onClick={onConfirm} className={`flex-1 py-3 rounded-xl text-slate-900 font-bold transition-colors ${confirmColor}`}>{confirmLabel}</button>
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
-        const actions = createElement("div", "row");
-        const exp = createElement("button", "btn", "Export CSV");
-        exp.onclick = () => downloadRoutineCSV(id);
+        // 6. WORKOUT DETAIL MODAL (NEW)
+        const WorkoutDetailModal = ({ session, onClose }) => {
+            if (!session) return null;
 
-        card.appendChild(title);
-        if (sub.textContent) card.appendChild(sub);
-        card.appendChild(divider());
-        card.appendChild(list);
-        card.appendChild(divider());
-        card.appendChild(actions);
-        actions.appendChild(exp);
-        return card;
-      }
+            // Group logs by exercise
+            const groupedLogs = useMemo(() => {
+                if (!session.logs || session.logs.length === 0) return {};
+                const groups = {};
+                session.logs.forEach(log => {
+                    const key = log.exerciseName || 'Unknown Exercise'; 
+                    if (!groups[key]) {
+                        groups[key] = [];
+                    }
+                    groups[key].push(log);
+                });
+                return groups;
+            }, [session]);
 
-      function deleteSessionById(id) {
-        Store.mutate((st) => {
-          st.logs = st.logs.filter((x) => x.id !== id);
-        });
-        toast("Session deleted.");
-        render();
-      }
+            return (
+                <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md animate-slide-up p-4">
+                     <div className="bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-full overflow-hidden">
+                        {/* Header */}
+                        <div className="p-4 border-b border-slate-800 flex justify-between items-start bg-slate-900/90 sticky top-0 z-10">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">{session.routineName}</h3>
+                                <p className="text-sm text-slate-400">{new Date(session.endTime).toLocaleDateString()} • {formatDuration(session.duration)}</p>
+                            </div>
+                            <button onClick={onClose} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white">
+                                <Icon name="x" size={20} />
+                            </button>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {Object.keys(groupedLogs).length === 0 ? (
+                                 <div className="text-center text-slate-500 py-8">No detailed logs available for this session.</div>
+                            ) : (
+                                Object.entries(groupedLogs).map(([name, sets], i) => (
+                                    <div key={i} className="bg-slate-950/50 rounded-xl p-4 border border-slate-800/50">
+                                        <h4 className="font-bold text-slate-200 mb-3">{name}</h4>
+                                        <div className="space-y-2">
+                                            {sets.map((set, idx) => (
+                                                <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-800/50 last:border-0 pb-2 last:pb-0">
+                                                    <span className="text-slate-500 font-mono w-8">#{idx + 1}</span>
+                                                    <div className="flex gap-6">
+                                                        <span className="text-slate-300"><span className="text-slate-500 text-xs uppercase mr-1">lbs</span>{set.weight}</span>
+                                                        <span className="text-slate-300"><span className="text-slate-500 text-xs uppercase mr-1">reps</span>{set.reps}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                     </div>
+                </div>
+            );
+        };
 
-      function downloadRoutineCSV(id) {
-        const s = Store.get();
-        const headers = ["sessionId", "date", "workoutId", "totalSec", "exerciseId", "setIndex", "weightLb", "reps", "seconds", "rpe", "formScore"];
-        const rows = [headers.join(",")];
+        // 7. STATS TAB (UPDATED)
+        const StatsTab = ({ sessions, onDelete, onAddManual }) => {
+            const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
+            const [deleteId, setDeleteId] = useState(null);
+            const [selectedSession, setSelectedSession] = useState(null); // For viewing details
 
-        s.logs.filter((l) => l.workoutId === id).forEach((l) => {
-          if (!l.sets?.length) {
-            rows.push([l.id, l.date, l.workoutId, l.totalSec || 0, "", "", "", "", "", "", ""].join(","));
-          } else {
-            l.sets.forEach((t) => {
-              rows.push([l.id, l.date, l.workoutId, l.totalSec || 0, t.exerciseId, t.setIndex, t.weightLb || "", t.reps || "", t.seconds || "", t.rpe || "", t.formScore || ""].join(","));
-            });
-          }
-        });
+            const totalPounds = sessions.reduce((acc, session) => {
+                if (session.manualVolume) return acc + parseInt(session.manualVolume);
+                if (!session.logs) return acc;
+                return acc + session.logs.reduce((sAcc, log) => sAcc + (parseInt(log.weight || 0) * parseInt(log.reps || 0)), 0);
+            }, 0);
 
-        const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `fitforge-${(Tracks[id]?.title || id).replace(/\s+/g, "_")}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+            const requestDelete = (e, id) => {
+                e.stopPropagation(); 
+                setDeleteId(id);
+            };
 
-      function viewLearn() {
-        const wrap = createElement("div", "stack");
+            const confirmDelete = () => {
+                if (deleteId) {
+                    onDelete(deleteId);
+                    setDeleteId(null);
+                }
+            };
 
-        const con = createElement("div", "card");
-        con.innerHTML = `<div class="h">The Lumbar Constitution</div><div class="sub">These guard your back on swings and rows.</div><div class="hr"></div><div class="h" style="font-weight:700">KB Swings</div><div class="sub">• Hinge at hips; butt to wall<br/>• Arms = ropes; bell = pendulum<br/>• Brace before hike; ribs down<br/>• Top = plank; bell ≤ chest<br/>• No rounding at bottom</div><div class="hr"></div><div class="h" style="font-weight:700">Bent-Over Rows</div><div class="sub">• Hinge ~45°; feel hamstrings<br/>• Back flat as a table<br/>• Inhale, brace, pull; exhale top<br/>• Elbow drives back; squeeze blade<br/>• No twisting; drop weight if needed</div>`;
-        wrap.appendChild(con);
+            return (
+                <div className="space-y-6 animate-slide-up pb-24">
+                    <ManualEntryModal isOpen={isEntryModalOpen} onClose={() => setIsEntryModalOpen(false)} onSave={onAddManual} />
+                    
+                    <ConfirmModal 
+                        isOpen={!!deleteId} 
+                        onClose={() => setDeleteId(null)} 
+                        onConfirm={confirmDelete}
+                        title="Delete Log"
+                        message="Are you sure you want to delete this entry? This cannot be undone." 
+                        confirmLabel="Delete"
+                        confirmColor="bg-red-500 text-white"
+                    />
 
-        const prog = createElement("div", "card");
-        prog.innerHTML = `<div class="h">Progression: Add Before You Load</div><div class="sub">• Weeks 1–2: Nail form at 35 lb KB / 25 lb DB (aim 12 reps)<br/>• Weeks 3–4: Add a set or 4s eccentric<br/>• Week 5+: +5 lb only if reps are clean (drop to 8, rebuild)</div>`;
-        wrap.appendChild(prog);
+                    <WorkoutDetailModal 
+                        session={selectedSession} 
+                        onClose={() => setSelectedSession(null)} 
+                    />
 
-        return wrap;
-      }
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="glass-card p-4 rounded-2xl text-center"><p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Workouts</p><p className="text-3xl font-black text-white">{sessions.length}</p></div>
+                        <div className="glass-card p-4 rounded-2xl text-center"><p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Lbs</p><p className="text-3xl font-black text-amber-500">{(totalPounds / 1000).toFixed(1)}k</p></div>
+                    </div>
 
-      // Event listeners
-      window.addEventListener("hashchange", render);
+                    <button onClick={() => setIsEntryModalOpen(true)} className="w-full py-3 border border-dashed border-slate-600 rounded-xl text-slate-400 text-sm font-bold hover:border-amber-500 hover:text-amber-500 transition-all flex items-center justify-center gap-2"><Icon name="plus-circle" size={16} /> Log Past Workout</button>
 
-      window.addEventListener("load", () => {
-        // Initialize theme
-        const s = Store.get();
-        if (!s.profile.theme) {
-          Store.mutate((st) => {
-            st.profile.theme = "auto";
-          });
-        }
-        applyTheme(s.profile.theme || "auto");
+                    <div>
+                        <h3 className="text-slate-300 font-bold text-sm uppercase tracking-wider mb-3 ml-1">History</h3>
+                        {sessions.length === 0 ? (
+                            <div className="text-center py-10 text-slate-600 italic bg-slate-900/30 rounded-xl border border-dashed border-slate-800">No workouts completed yet.</div>
+                        ) : (
+                            <div className="space-y-3">
+                                {[...sessions].reverse().map((session) => {
+                                    const setsCount = session.logs ? session.logs.length : (session.manualSets || 0);
+                                    const uniqueExercises = session.logs ? [...new Set(session.logs.map(l => l.exerciseName))] : [];
+                                    return (
+                                        <div 
+                                            key={session.id} 
+                                            onClick={() => setSelectedSession(session)}
+                                            className="glass-card p-4 rounded-xl border-l-4 border-l-amber-500/50 relative group cursor-pointer hover:border-slate-500 transition-all active:scale-[0.98]"
+                                        >
+                                            <button onClick={(e) => requestDelete(e, session.id)} className="absolute top-4 right-4 z-30 text-slate-600 hover:text-red-500 p-2 rounded-full hover:bg-slate-800 transition-colors"><Icon name="trash-2" size={16} /></button>
+                                            <div className="flex justify-between items-start mb-3 pr-8">
+                                                <div><h4 className="text-white font-bold">{session.routineName || 'Workout'}</h4><p className="text-xs text-slate-500">{new Date(session.endTime).toLocaleDateString()} • {session.manual ? 'Manual Entry' : new Date(session.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p></div>
+                                                <div className="text-right"><span className="block font-mono text-amber-400 text-sm font-bold">{formatDuration(session.duration)}</span><span className="text-[10px] text-slate-500 uppercase font-bold">{setsCount} Sets</span></div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {uniqueExercises.slice(0, 3).map((name, i) => (<span key={i} className="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700/50 truncate max-w-[100px]">{name}</span>))}
+                                                {uniqueExercises.length > 3 && (<span className="text-[9px] text-slate-500 px-1 py-0.5">+more</span>)}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
 
-        render();
+        // --- MAIN APP ---
 
-        // Optimize touch handling
-        let lastTouchEnd = 0;
-        document.addEventListener("touchend", (e) => {
-          const now = Date.now();
-          if (now - lastTouchEnd <= 300) e.preventDefault();
-          lastTouchEnd = now;
-        }, { passive: false });
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('workout_a');
+            const [sessions, setSessions] = useState([]);
+            const [isWorkoutActive, setIsWorkoutActive] = useState(false);
+            const [sessionStartTime, setSessionStartTime] = useState(null);
+            const [currentSessionLogs, setCurrentSessionLogs] = useState([]);
+            const [showRestTimer, setShowRestTimer] = useState(false);
+            const [restTimerTrigger, setRestTimerTrigger] = useState(null);
 
-        document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
-        document.addEventListener("dblclick", (e) => e.preventDefault(), { passive: false });
+            // Confirmation States
+            const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+            const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
-        window.addEventListener("offline", () => toast("Offline: PWA cache active."));
-        window.addEventListener("online", () => toast("Online: syncing..."));
-      });
+            useEffect(() => {
+                const savedSessions = localStorage.getItem('iron_bell_sessions');
+                if (savedSessions) setSessions(JSON.parse(savedSessions));
+                const activeSession = localStorage.getItem('iron_bell_active_session');
+                if (activeSession) {
+                    const parsed = JSON.parse(activeSession);
+                    if (Date.now() - parsed.startTime > 14400000) localStorage.removeItem('iron_bell_active_session');
+                    else { setIsWorkoutActive(true); setSessionStartTime(parsed.startTime); setCurrentSessionLogs(parsed.logs); }
+                }
+            }, []);
+
+            useEffect(() => {
+                if (isWorkoutActive) localStorage.setItem('iron_bell_active_session', JSON.stringify({ startTime: sessionStartTime, logs: currentSessionLogs }));
+                else localStorage.removeItem('iron_bell_active_session');
+            }, [isWorkoutActive, currentSessionLogs, sessionStartTime]);
+
+            const startWorkout = () => { const now = Date.now(); setIsWorkoutActive(true); setSessionStartTime(now); setCurrentSessionLogs([]); };
+
+            // REPLACED: Logic to trigger modals instead of window.confirm
+            const handleFinishClick = () => {
+                if (currentSessionLogs.length === 0) {
+                    setShowDiscardConfirm(true);
+                } else {
+                    setShowFinishConfirm(true);
+                }
+            };
+
+            const performFinish = () => {
+                const endTime = Date.now();
+                const duration = endTime - sessionStartTime;
+                const routineName = ROUTINES[activeTab.toUpperCase()]?.title || 'Custom Workout';
+                const newSession = { id: `sess_${endTime}`, startTime: sessionStartTime, endTime, duration, routineName, logs: currentSessionLogs, manual: false };
+                saveSession(newSession);
+                
+                // Reset states
+                setIsWorkoutActive(false); 
+                setSessionStartTime(null); 
+                setCurrentSessionLogs([]); 
+                setShowFinishConfirm(false);
+                setActiveTab('stats'); 
+            };
+
+            const performDiscard = () => {
+                setIsWorkoutActive(false); 
+                setSessionStartTime(null); 
+                setCurrentSessionLogs([]); 
+                setShowDiscardConfirm(false);
+            };
+
+            const logExercise = (exerciseId, data) => {
+                const newLog = { exerciseId, ...data, date: new Date().toISOString() };
+                setCurrentSessionLogs(prev => [...prev, newLog]); setRestTimerTrigger(Date.now()); setShowRestTimer(true);
+            };
+
+            const addManualSession = (data) => {
+                const endTime = new Date(data.date).getTime() + 43200000;
+                const routineTitle = Object.values(ROUTINES).find(r => r.id === data.routineId)?.title || 'Manual Workout';
+                const newSession = { id: `manual_${Date.now()}`, startTime: endTime - (data.duration * 60000), endTime: endTime, duration: data.duration * 60000, routineName: routineTitle, logs: data.logs, manual: true };
+                saveSession(newSession);
+            };
+
+            const deleteSession = (id) => {
+                const updatedSessions = sessions.filter(s => s.id !== id);
+                setSessions(updatedSessions);
+                localStorage.setItem('iron_bell_sessions', JSON.stringify(updatedSessions));
+            };
+
+            const saveSession = (session) => {
+                const updatedSessions = [...sessions, session];
+                updatedSessions.sort((a, b) => a.endTime - b.endTime);
+                setSessions(updatedSessions);
+                localStorage.setItem('iron_bell_sessions', JSON.stringify(updatedSessions));
+            };
+
+            const currentRoutine = Object.values(ROUTINES).find(r => r.id === activeTab) || ROUTINES.WORKOUT_A;
+
+            return (
+                <div className="min-h-screen flex flex-col bg-[#0f172a] text-slate-200 pb-0 relative overflow-hidden">
+                    
+                    {/* Confirmation Modals */}
+                    <ConfirmModal
+                        isOpen={showFinishConfirm}
+                        onClose={() => setShowFinishConfirm(false)}
+                        onConfirm={performFinish}
+                        title="Finish Workout"
+                        message="Are you ready to finish this workout and save your stats?"
+                        confirmLabel="Finish & Save"
+                        confirmColor="bg-amber-500 text-slate-900"
+                    />
+
+                    <ConfirmModal
+                        isOpen={showDiscardConfirm}
+                        onClose={() => setShowDiscardConfirm(false)}
+                        onConfirm={performDiscard}
+                        title="Discard Workout"
+                        message="No sets were logged. Do you want to discard this empty session?"
+                        confirmLabel="Discard"
+                        confirmColor="bg-red-500 text-white"
+                    />
+
+                    <div className="pt-12 pb-4 px-6 sticky top-0 z-30 glass-panel shadow-2xl">
+                        <div className="flex justify-between items-start">
+                            <div><h1 className="text-2xl font-black tracking-tighter text-white leading-none">IRON <span className="text-amber-500">&</span> BELL</h1><p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-1">Scientific Strength Protocol</p></div>
+                            <div className="flex flex-col items-end gap-2">{isWorkoutActive ? (<SessionTimer startTime={sessionStartTime} />) : (<div className="text-[10px] font-bold text-slate-500 uppercase py-1">Not Active</div>)}</div>
+                        </div>
+                        {activeTab !== 'stats' && (
+                            <div className="mt-4">
+                                {!isWorkoutActive ? (
+                                    <button onClick={startWorkout} className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black tracking-wide uppercase shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"><Icon name="play" size={18} fill="currentColor" /> Start Workout</button>
+                                ) : (
+                                    <button onClick={handleFinishClick} className="w-full py-3 rounded-xl bg-slate-800 border border-slate-600 text-white font-bold tracking-wide uppercase hover:bg-slate-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"><Icon name="flag" size={18} /> Finish Workout</button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex-1 px-4 pt-6 pb-24 overflow-y-auto no-scrollbar">
+                        {activeTab === 'stats' ? (
+                            <StatsTab sessions={sessions} onDelete={deleteSession} onAddManual={addManualSession} />
+                        ) : (
+                            <div className="animate-slide-up">
+                                <div className="mb-6"><h2 className="text-2xl font-bold text-white">{currentRoutine.title}</h2><p className="text-slate-400 text-sm">{currentRoutine.subtitle}</p></div>
+                                <div className="space-y-2 pb-8">{currentRoutine.exercises.map((ex) => (<ExerciseCard key={ex.id} exercise={ex} logs={currentSessionLogs} onLog={logExercise} isWorkoutActive={isWorkoutActive} />))}</div>
+                            </div>
+                        )}
+                    </div>
+                    <RestTimer isOpen={showRestTimer} onClose={() => setShowRestTimer(false)} autoStartTrigger={restTimerTrigger} />
+                    {!isWorkoutActive && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-[#0f172a]/95 backdrop-blur-lg border-t border-white/10 pb-safe pt-2 px-2 z-40">
+                            <div className="flex justify-around items-center h-16">
+                                <button onClick={() => setActiveTab('warmup')} className={`flex flex-col items-center justify-center w-16 h-full ${activeTab === 'warmup' ? 'active-tab' : 'text-slate-500'}`}><Icon name="sun" size={20} /><span className="text-[9px] font-bold uppercase mt-1">Warmup</span></button>
+                                <button onClick={() => setActiveTab('workout_a')} className={`flex flex-col items-center justify-center w-16 h-full ${activeTab === 'workout_a' ? 'active-tab' : 'text-slate-500'}`}><Icon name="dumbbell" size={20} /><span className="text-[9px] font-bold uppercase mt-1">A</span></button>
+                                <button onClick={() => setActiveTab('workout_b')} className={`flex flex-col items-center justify-center w-16 h-full ${activeTab === 'workout_b' ? 'active-tab' : 'text-slate-500'}`}><Icon name="biceps-flexed" size={20} /><span className="text-[9px] font-bold uppercase mt-1">B</span></button>
+                                <button onClick={() => setActiveTab('stats')} className={`flex flex-col items-center justify-center w-16 h-full ${activeTab === 'stats' ? 'active-tab' : 'text-slate-500'}`}><Icon name="bar-chart-2" size={20} /><span className="text-[9px] font-bold uppercase mt-1">Stats</span></button>
+                            </div>
+                        </div>
+                    )}
+                    {isWorkoutActive && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-amber-500 text-slate-900 p-3 text-center font-bold uppercase text-xs tracking-widest z-40 flex justify-center items-center gap-2"><span className="w-2 h-2 bg-slate-900 rounded-full animate-pulse"></span>Workout in Progress</div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
-  </body>
+</body>
 </html>
