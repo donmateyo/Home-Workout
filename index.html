@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Iron & Bell Tracker</title>
     
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIklyb24gJiBCZWxsIiwKICAic2hvcnRfbmFtZSI6ICJJcm9uIEJlWxsrIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxYTIwMmMiLAogICJ0aGVtZV9jb2xvciI6ICIjMWEyMDJjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS9mbHVlbmN5Lzk2L2tldHRsZWJlbGwucG5nIiwKICAgICAgInNpemVzIjogIjk2eDk2IiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <!-- Web Manifest with Custom Icon -->
+    <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"Iron %26 Bell","short_name":"Iron Bell","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://i.postimg.cc/4dMyqKbg/IMG-0587.jpg","sizes":"192x192","type":"image/jpeg"},{"src":"https://i.postimg.cc/4dMyqKbg/IMG-0587.jpg","sizes":"512x512","type":"image/jpeg"}]}'>
     
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/96/kettlebell.png">
+    <!-- iOS Home Screen Icon -->
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/4dMyqKbg/IMG-0587.jpg">
+    
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
 
@@ -422,7 +425,7 @@
             );
         }
 
-        // 6. WORKOUT DETAIL MODAL (NEW)
+        // 6. WORKOUT DETAIL MODAL
         const WorkoutDetailModal = ({ session, onClose }) => {
             if (!session) return null;
 
@@ -482,7 +485,7 @@
             );
         };
 
-        // 7. STATS TAB (UPDATED)
+        // 7. STATS TAB
         const StatsTab = ({ sessions, onDelete, onAddManual }) => {
             const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
             const [deleteId, setDeleteId] = useState(null);
