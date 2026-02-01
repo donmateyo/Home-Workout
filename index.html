@@ -428,6 +428,12 @@
             margin-top: 10px;
         }
 
+        .routine-note {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
         .routine-options {
             margin-top: 10px;
             border-radius: 12px;
@@ -783,6 +789,14 @@
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 2px;
+        }
+
+        .exercise-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
 
         .exercise-badge {
@@ -1217,6 +1231,37 @@
             opacity: 0.5;
         }
 
+        .toggle-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .support-pill {
+            display: none;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 6px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            background: var(--surface-3);
+            white-space: nowrap;
+        }
+
+        .support-pill.show {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .support-pill.unsupported {
+            border-color: rgba(148, 163, 184, 0.35);
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-muted);
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -1451,6 +1496,18 @@
                     </div>
                 </div>
 
+                <h2 class="section-title">Coach Insights</h2>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Coach Suggestions</div>
+                            <div class="panel-sub">Based on your recent sessions</div>
+                        </div>
+                        <span class="panel-badge">Smart</span>
+                    </div>
+                    <div class="coach-list" id="coach-suggestions"></div>
+                </div>
+
                 <h2 class="section-title">Quick Start</h2>
                 <div class="workout-grid">
                     <button type="button" class="workout-card accent-amber" onclick="startPresetWorkout('fullBody')">
@@ -1561,6 +1618,17 @@
                             <span class="panel-badge">Preview</span>
                         </div>
                         <div id="routine-list" class="routine-list"></div>
+                    </div>
+
+                    <div class="panel" id="builder-suggestions-panel">
+                        <div class="panel-header">
+                            <div>
+                                <div class="panel-title">Session Coach</div>
+                                <div class="panel-sub">Overload guidance for your selected exercises</div>
+                            </div>
+                            <span class="panel-badge">Coach</span>
+                        </div>
+                        <div class="coach-list" id="builder-suggestions"></div>
                     </div>
 
                     <div class="panel">
@@ -1724,7 +1792,10 @@
                             <div class="toggle-title">Sound Effects</div>
                             <div class="toggle-sub">Beep when you complete a set</div>
                         </div>
-                        <input type="checkbox" id="setting-sound" onchange="saveSettings()">
+                        <div class="toggle-controls">
+                            <span class="support-pill" id="sound-support-pill" aria-live="polite"></span>
+                            <input type="checkbox" id="setting-sound" onchange="saveSettings()">
+                        </div>
                     </div>
 
                     <div class="toggle">
@@ -1732,7 +1803,10 @@
                             <div class="toggle-title">Vibration</div>
                             <div class="toggle-sub">Haptic feedback on actions</div>
                         </div>
-                        <input type="checkbox" id="setting-vibrate" onchange="saveSettings()">
+                        <div class="toggle-controls">
+                            <span class="support-pill" id="vibrate-support-pill" aria-live="polite"></span>
+                            <input type="checkbox" id="setting-vibrate" onchange="saveSettings()">
+                        </div>
                     </div>
                 </div>
 
@@ -1879,7 +1953,7 @@
         'use strict';
 
         const STORAGE_KEY = 'bodyforge_state';
-        const APP_VERSION = 5;
+        const APP_VERSION = 6;
 
         // ===================
         // EXERCISE DATABASE
@@ -2980,7 +3054,10 @@
                             <div class="exercise-name">${ex.name}</div>
                             <div class="exercise-target">${ex.muscle}${secondaryText}</div>
                         </div>
-                        <span class="exercise-badge badge-${ex.level}" aria-label="${ex.level} level">${ex.level}</span>
+                        <div class="exercise-badges">
+                            <span class="exercise-badge badge-${ex.level}" aria-label="${ex.level} level">${ex.level}</span>
+                            ${ex.custom ? `<span class="exercise-badge badge-custom" aria-label="custom exercise">custom</span>` : ''}
+                        </div>
                     </button>
                 `;
             }).join('');
@@ -3493,6 +3570,11 @@
             listEl.innerHTML = ids.map((id, idx) => {
                 const ex = getExercise(id);
                 const suggestion = buildSuggestion(id);
+                const nextId = suggestion && suggestion.type === 'progression' ? suggestion.nextId : null;
+                const upgradeExists = !!(nextId && getExercise(nextId));
+                const alreadyInRoutine = upgradeExists && state.selectedExercises.includes(nextId);
+                const canUpgrade = upgradeExists && !alreadyInRoutine;
+
                 const secondary = Array.isArray(ex.secondary) && ex.secondary.length ? ' • ' + ex.secondary.join(', ') : '';
                 const suggestionHTML = suggestion ? renderSuggestionHTML(suggestion, true) : `
                     <div class="coach-item compact">
@@ -3504,8 +3586,7 @@
                     </div>
                 `;
 
-                const canUpgrade = suggestion && suggestion.type === 'progression' && suggestion.nextId && getExercise(suggestion.nextId);
-                const recommendedId = canUpgrade ? suggestion.nextId : null;
+                const recommendedId = upgradeExists ? nextId : null;
 
                 let progressionList = Array.isArray(ex.progression) ? ex.progression.filter(pid => getExercise(pid)) : [];
                 if (progressionList.length && !progressionList.includes(id)) {
@@ -3563,6 +3644,7 @@
                             ${canUpgrade ? `<button type="button" class="btn btn-primary btn-small" onclick="applyProgressionUpgrade('${id}')">Upgrade → ${getExercise(suggestion.nextId).name}</button>` : ''}
                             <button type="button" class="btn btn-ghost btn-small" onclick="removeFromRoutine('${id}')">Remove</button>
                         </div>
+                        ${alreadyInRoutine ? `<div class="routine-note">Next progression already in your routine.</div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -3587,7 +3669,7 @@
 
             const prompts = state.selectedExercises
                 .map(buildSuggestion)
-                .filter(p => p && p.type === 'progression' && p.nextId && getExercise(p.nextId) && !dismissedPrompts.has(p.id));
+                .filter(p => p && p.type === 'progression' && p.nextId && getExercise(p.nextId) && !dismissedPrompts.has(p.id) && !state.selectedExercises.includes(p.nextId));
 
             if (prompts.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧱</div><p>No progression upgrades ready yet.</p></div>';
@@ -3629,6 +3711,11 @@
             const suggestion = buildSuggestion(oldId);
             if (!suggestion || suggestion.type !== 'progression' || !suggestion.nextId || !getExercise(suggestion.nextId)) return;
 
+            if (state.selectedExercises.includes(suggestion.nextId)) {
+                alert('That progression is already in your routine.');
+                return;
+            }
+
             const idx = state.selectedExercises.indexOf(oldId);
             if (idx === -1) return;
 
@@ -3639,13 +3726,21 @@
         }
 
         function applyAllProgressionUpgrades() {
+            const current = [...state.selectedExercises];
+            const set = new Set(current);
             let changed = false;
-            const updated = state.selectedExercises.map(id => {
+
+            const updated = current.map(id => {
                 const suggestion = buildSuggestion(id);
                 if (suggestion && suggestion.type === 'progression' && suggestion.nextId && getExercise(suggestion.nextId)) {
-                    changed = true;
-                    dismissedPrompts.delete(id);
-                    return suggestion.nextId;
+                    const nextId = suggestion.nextId;
+                    if (!set.has(nextId)) {
+                        set.delete(id);
+                        set.add(nextId);
+                        changed = true;
+                        dismissedPrompts.delete(id);
+                        return nextId;
+                    }
                 }
                 return id;
             });
@@ -3881,7 +3976,6 @@
             hideRestOverlay();
 
             state.workout = { ...defaultWorkout };
-            state.selectedExercises = [];
             dismissedPrompts.clear();
             saveState();
             
@@ -4401,6 +4495,21 @@
         // ===================
         // SETTINGS
         // ===================
+        function updateSupportPill(id, supported, message) {
+            const pill = document.getElementById(id);
+            if (!pill) return;
+
+            if (supported) {
+                pill.textContent = '';
+                pill.className = 'support-pill';
+                pill.removeAttribute('title');
+            } else {
+                pill.textContent = 'Not supported';
+                pill.className = 'support-pill show unsupported';
+                if (message) pill.title = message;
+            }
+        }
+
         function loadSettingsUI() {
             document.getElementById('setting-sets').value = String(state.settings.sets);
             document.getElementById('setting-rest').value = String(state.settings.rest);
@@ -4409,29 +4518,17 @@
             const soundToggle = document.getElementById('setting-sound');
             const vibrateToggle = document.getElementById('setting-vibrate');
 
-            let changed = false;
+            if (soundToggle) soundToggle.disabled = false;
+            if (vibrateToggle) vibrateToggle.disabled = false;
+
+            if (soundToggle) soundToggle.checked = state.settings.sound;
+            if (vibrateToggle) vibrateToggle.checked = state.settings.vibrate;
 
             const soundSupported = !!(window.AudioContext || window.webkitAudioContext);
-            if (!soundSupported) {
-                soundToggle.disabled = true;
-                if (state.settings.sound) {
-                    state.settings.sound = false;
-                    changed = true;
-                }
-            }
-            soundToggle.checked = state.settings.sound;
-
             const vibrateSupported = !!navigator.vibrate;
-            if (!vibrateSupported) {
-                vibrateToggle.disabled = true;
-                if (state.settings.vibrate) {
-                    state.settings.vibrate = false;
-                    changed = true;
-                }
-            }
-            vibrateToggle.checked = state.settings.vibrate;
 
-            if (changed) saveState();
+            updateSupportPill('sound-support-pill', soundSupported, 'Sound effects are not supported on this device.');
+            updateSupportPill('vibrate-support-pill', vibrateSupported, 'Vibration is not supported on this device.');
         }
 
         function saveSettings() {
