@@ -1472,7 +1472,7 @@
                     <div class="hero-title">Train smart. Progress faster.</div>
                     <div class="hero-sub">Adaptive overload suggestions built from your last sessions.</div>
                     <div class="hero-actions">
-                        <button type="button" class="btn btn-primary" onclick="showSection('workout')">Build Workout</button>
+                        <button type="button" class="btn btn-primary" onclick="openBuilderMode()">Build Workout</button>
                         <button type="button" class="btn btn-ghost" onclick="startPresetWorkout('fullBody')">Load Full Body</button>
                     </div>
                 </div>
@@ -1618,6 +1618,11 @@
                             <span class="panel-badge">Preview</span>
                         </div>
                         <div id="routine-list" class="routine-list"></div>
+                        <div id="routine-start" style="margin-top: 12px;">
+                            <button type="button" class="btn btn-primary btn-block" onclick="startCustomWorkout()">
+                                🚀 Start Workout
+                            </button>
+                        </div>
                     </div>
 
                     <div class="panel" id="builder-suggestions-panel">
@@ -1631,7 +1636,7 @@
                         <div class="coach-list" id="builder-suggestions"></div>
                     </div>
 
-                    <div class="panel">
+                    <div class="panel" id="builder-panel">
                         <div class="panel-header">
                             <div>
                                 <div class="panel-title">Build Your Session</div>
@@ -2420,7 +2425,8 @@
             progress: { ...defaultProgress },
             workout: { ...defaultWorkout },
             selectedExercises: [],
-            customExercises: []
+            customExercises: [],
+            routineMode: 'custom'
         };
 
         let restInterval = null;
@@ -2466,6 +2472,15 @@
 
         function safeStorageRemove(key) {
             try { localStorage.removeItem(key); } catch (e) {}
+        }
+
+        function safeConfirm(message) {
+            try {
+                if (typeof window.confirm === 'function') {
+                    return window.confirm(message);
+                }
+            } catch (e) {}
+            return true;
         }
 
         function toNumber(value, fallback = 0) {
@@ -2743,6 +2758,7 @@
             if (parsed.progress) state.progress = { ...state.progress, ...parsed.progress };
             if (Array.isArray(parsed.selectedExercises)) state.selectedExercises = parsed.selectedExercises;
             if (Array.isArray(parsed.customExercises)) state.customExercises = parsed.customExercises;
+            if (typeof parsed.routineMode === 'string') state.routineMode = parsed.routineMode;
         }
 
         function saveState() {
@@ -2751,7 +2767,8 @@
                 settings: state.settings,
                 progress: state.progress,
                 selectedExercises: state.selectedExercises,
-                customExercises: state.customExercises
+                customExercises: state.customExercises,
+                routineMode: state.routineMode
             }));
         }
 
@@ -2869,6 +2886,26 @@
             if (!arraysEqual(selected, state.selectedExercises)) {
                 state.selectedExercises = selected;
                 changed = true;
+            }
+
+            // Routine mode normalization
+            const validModes = ['custom', ...Object.keys(presetWorkouts)];
+            if (typeof state.routineMode !== 'string' || !validModes.includes(state.routineMode)) {
+                state.routineMode = findMatchingPreset(selected);
+                changed = true;
+            }
+
+            if (selected.length === 0 && state.routineMode !== 'custom') {
+                state.routineMode = 'custom';
+                changed = true;
+            }
+
+            if (state.routineMode !== 'custom') {
+                const preset = presetWorkouts[state.routineMode];
+                if (!preset || !isSameSet(selected, preset)) {
+                    state.routineMode = 'custom';
+                    changed = true;
+                }
             }
 
             if (checkStreak()) changed = true;
@@ -3019,6 +3056,14 @@
                 renderProgressions();
                 renderHistory();
             }
+        }
+
+        function openBuilderMode() {
+            if (state.routineMode !== 'custom') {
+                state.routineMode = 'custom';
+                saveState();
+            }
+            showSection('workout');
         }
 
         // ===================
@@ -3232,10 +3277,20 @@
         }
 
         function addExerciseToWorkout(id) {
+            let changed = false;
+
             if (!state.selectedExercises.includes(id)) {
                 state.selectedExercises.push(id);
-                saveState();
+                changed = true;
             }
+
+            if (state.routineMode !== 'custom') {
+                state.routineMode = 'custom';
+                changed = true;
+            }
+
+            if (changed) saveState();
+
             closeModal();
             showSection('workout');
         }
@@ -3416,7 +3471,7 @@
             renderRoutineOverview();
             renderProgressionPrompts();
             renderBuilderSuggestions();
-            updateRoutineSelectorUI();
+            refreshRoutineUI();
         }
 
         function toggleExercise(id) {
@@ -3470,21 +3525,78 @@
             return 'custom';
         }
 
+        function isValidRoutineMode(mode) {
+            return mode === 'custom' || Object.prototype.hasOwnProperty.call(presetWorkouts, mode);
+        }
+
+        function syncRoutineModeWithSelection() {
+            let changed = false;
+
+            if (!isValidRoutineMode(state.routineMode)) {
+                state.routineMode = 'custom';
+                changed = true;
+            }
+
+            if (state.selectedExercises.length === 0 && state.routineMode !== 'custom') {
+                state.routineMode = 'custom';
+                changed = true;
+            }
+
+            if (state.routineMode !== 'custom') {
+                const preset = presetWorkouts[state.routineMode];
+                if (!preset || !isSameSet(state.selectedExercises, preset)) {
+                    state.routineMode = 'custom';
+                    changed = true;
+                }
+            }
+
+            if (changed) saveState();
+            return changed;
+        }
+
         function updateRoutineSelectorUI() {
             const select = document.getElementById('routine-select');
             if (!select) return;
-            const match = findMatchingPreset(state.selectedExercises);
-            select.value = match || 'custom';
+
+            const mode = isValidRoutineMode(state.routineMode) ? state.routineMode : 'custom';
+            select.value = mode;
+        }
+
+        function updateRoutinePanels() {
+            const builderPanel = document.getElementById('builder-panel');
+            const routinePanel = document.getElementById('routine-panel');
+            const showBuilder = state.routineMode === 'custom';
+
+            if (builderPanel) builderPanel.style.display = showBuilder ? 'block' : 'none';
+            if (routinePanel) routinePanel.style.display = showBuilder ? 'none' : 'block';
+        }
+
+        function refreshRoutineUI() {
+            syncRoutineModeWithSelection();
+            updateRoutineSelectorUI();
+            updateRoutinePanels();
         }
 
         function handleRoutineSelectChange(value) {
-            if (value === 'custom') return;
+            if (value === 'custom') {
+                state.routineMode = 'custom';
+                saveState();
+                renderExerciseSelector();
+                return;
+            }
 
             const preset = presetWorkouts[value];
-            if (!preset) return;
+            if (!preset) {
+                updateRoutineSelectorUI();
+                return;
+            }
 
-            if (state.selectedExercises.length > 0 && !isSameSet(state.selectedExercises, preset)) {
-                const ok = confirm('Replace your current routine with this preset?');
+            const needsConfirm = state.routineMode === 'custom'
+                && state.selectedExercises.length > 0
+                && !isSameSet(state.selectedExercises, preset);
+
+            if (needsConfirm) {
+                const ok = safeConfirm('Replace your current routine with this preset?');
                 if (!ok) {
                     updateRoutineSelectorUI();
                     return;
@@ -3508,6 +3620,7 @@
             }
 
             routineOpenAllNextRender = true;
+            state.routineMode = preset;
             state.selectedExercises = [...list];
             dismissedPrompts.clear();
             saveState();
@@ -3516,7 +3629,6 @@
             renderRoutineOverview();
             renderProgressionPrompts();
             renderBuilderSuggestions();
-            updateRoutineSelectorUI();
 
             if (options.showSection) showSection('workout');
         }
@@ -3526,10 +3638,10 @@
             if (!confirm('Clear the current routine?')) return;
 
             state.selectedExercises = [];
+            state.routineMode = 'custom';
             dismissedPrompts.clear();
             saveState();
             renderExerciseSelector();
-            updateRoutineSelectorUI();
         }
 
         function expandAllRoutineOptions() {
@@ -3560,7 +3672,7 @@
 
             if (ids.length === 0) {
                 listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧭</div><p>Select exercises to build your routine.</p></div>';
-                updateRoutineSelectorUI();
+                refreshRoutineUI();
                 return;
             }
 
@@ -3650,7 +3762,7 @@
             }).join('');
 
             routineOpenAllNextRender = false;
-            updateRoutineSelectorUI();
+            refreshRoutineUI();
         }
 
         function renderProgressionPrompts() {
