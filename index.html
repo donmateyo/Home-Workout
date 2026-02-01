@@ -796,6 +796,7 @@
         .badge-beginner { background: rgba(34, 197, 94, 0.18); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
         .badge-intermediate { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
         .badge-advanced { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-custom { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
 
         /* Workout Active */
         .workout-active {
@@ -1059,13 +1060,70 @@
         }
 
         .form-select,
-        .form-input {
+        .form-input,
+        .form-textarea {
             width: 100%;
             padding: 12px;
             border-radius: 12px;
             background: var(--surface-2);
             border: 1px solid var(--border);
             color: var(--text);
+        }
+
+        .form-textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.8rem;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .icon-btn {
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        .icon-btn.selected {
+            border-color: rgba(255, 138, 0, 0.7);
+            box-shadow: inset 0 0 0 1px rgba(255, 138, 0, 0.4);
+            background: var(--surface-3);
         }
 
         .history-edit-row {
@@ -1342,12 +1400,15 @@
             <div class="brand">
                 <div class="brand-icon" aria-hidden="true">
                     <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 40h36l-3 10H17l-3-10z" fill="#0b0f1a"/>
-                        <rect x="18" y="30" width="28" height="8" rx="3" fill="#0b0f1a"/>
-                        <rect x="24" y="24" width="16" height="6" rx="3" fill="#0b0f1a"/>
-                        <rect x="38" y="10" width="6" height="18" rx="3" transform="rotate(35 38 10)" fill="#0b0f1a"/>
-                        <rect x="44" y="12" width="12" height="6" rx="2" transform="rotate(35 44 12)" fill="#0b0f1a"/>
-                        <path d="M18 52h28" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+                        <g fill="#0b0f1a">
+                            <circle cx="32" cy="32" r="18" opacity="0.18"></circle>
+                            <rect x="18" y="30" width="28" height="4" rx="2"/>
+                            <rect x="12" y="24" width="6" height="16" rx="3"/>
+                            <rect x="46" y="24" width="6" height="16" rx="3"/>
+                            <rect x="21" y="26" width="4" height="12" rx="2" opacity="0.9"/>
+                            <rect x="39" y="26" width="4" height="12" rx="2" opacity="0.9"/>
+                            <path d="M32 16l-6 12h6l-4 12 10-16h-6l4-8z"/>
+                        </g>
                     </svg>
                 </div>
                 <div class="brand-text">
@@ -1437,6 +1498,18 @@
             <!-- Exercises Section -->
             <section id="exercises-section" class="section">
                 <h2 class="section-title">Exercise Library</h2>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Add Exercise</div>
+                            <div class="panel-sub">Create a custom movement with proper muscles & difficulty</div>
+                        </div>
+                        <span class="panel-badge">Custom</span>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" onclick="openAddExerciseModal()">➕ Add Exercise</button>
+                </div>
+
                 <div class="filter-tabs" id="muscle-filters" role="group" aria-label="Muscle group filters"></div>
                 <div id="exercise-list"></div>
             </section>
@@ -1713,6 +1786,72 @@
         </div>
     </div>
 
+    <!-- Add Exercise Modal -->
+    <div class="modal-overlay" id="add-exercise-modal" role="dialog" aria-modal="true" aria-labelledby="add-exercise-title" aria-describedby="add-exercise-body" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="add-exercise-title">Add Exercise</h3>
+                <button type="button" class="modal-close" onclick="closeAddExerciseModal()" aria-label="Close">&times;</button>
+            </div>
+            <div id="add-exercise-body">
+                <div class="form-group">
+                    <label class="form-label">Exercise Name</label>
+                    <input type="text" class="form-input" id="add-exercise-name" placeholder="e.g., Slow Tempo Push-ups">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Primary Muscle</label>
+                    <select class="form-select" id="add-exercise-muscle"></select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Secondary Muscles</label>
+                    <div class="checkbox-grid" id="add-exercise-secondary"></div>
+                    <div class="form-hint">Optional — choose any that also work.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Difficulty Level</label>
+                    <select class="form-select" id="add-exercise-level">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Icon</label>
+                    <div class="icon-grid" id="add-exercise-icon-grid"></div>
+                    <input type="hidden" id="add-exercise-icon" value="💪">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Target Reps (by Level)</label>
+                    <div class="form-row">
+                        <input type="number" min="1" max="200" class="form-input" id="add-exercise-reps-beginner" placeholder="Beginner">
+                        <input type="number" min="1" max="200" class="form-input" id="add-exercise-reps-intermediate" placeholder="Intermediate">
+                        <input type="number" min="1" max="200" class="form-input" id="add-exercise-reps-advanced" placeholder="Advanced">
+                    </div>
+                    <div class="form-hint">These match how built‑in exercises scale.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="add-exercise-description" placeholder="Short description of the movement"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tips (one per line)</label>
+                    <textarea class="form-textarea" id="add-exercise-tips" placeholder="Keep core tight&#10;Control the negative"></textarea>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top: 12px;">
+                <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeAddExerciseModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" style="flex:1;" onclick="addCustomExercise()">Add Exercise</button>
+            </div>
+        </div>
+    </div>
+
     <!-- History Edit Modal -->
     <div class="modal-overlay" id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-modal-title" aria-describedby="history-modal-body" aria-hidden="true">
         <div class="modal">
@@ -1740,7 +1879,7 @@
         'use strict';
 
         const STORAGE_KEY = 'bodyforge_state';
-        const APP_VERSION = 4;
+        const APP_VERSION = 5;
 
         // ===================
         // EXERCISE DATABASE
@@ -2162,7 +2301,8 @@
             core: ['plank', 'deadBug', 'bicycleCrunches', 'legRaises', 'mountainClimbers', 'hollowBody']
         };
 
-        const nameToId = Object.fromEntries(Object.values(exerciseDB).map(e => [e.name, e.id]));
+        let allExercises = { ...exerciseDB };
+        let nameToId = Object.fromEntries(Object.values(allExercises).map(e => [e.name, e.id]));
 
         // ===================
         // DEFAULT STATE
@@ -2205,7 +2345,8 @@
             settings: { ...defaultSettings },
             progress: { ...defaultProgress },
             workout: { ...defaultWorkout },
-            selectedExercises: []
+            selectedExercises: [],
+            customExercises: []
         };
 
         let restInterval = null;
@@ -2232,6 +2373,8 @@
             start: '🚀'
         };
 
+        const addExerciseIcons = ['💪','🏋️','🏃','🦵','🧘','🤸','🥊','🧗','🚴','🏊','⚡','🔥','🎯','🏆','🛡️','🔩','🦾','📈','✅','➕','🏋️‍♂️','🏋️‍♀️','🏃‍♂️','🏃‍♀️'];
+
         // ===================
         // HELPERS
         // ===================
@@ -2254,6 +2397,12 @@
         function toNumber(value, fallback = 0) {
             const n = Number(value);
             return Number.isFinite(n) ? n : fallback;
+        }
+
+        function clampNumber(value, min, max, fallback) {
+            const n = toNumber(value, fallback);
+            if (!Number.isFinite(n)) return fallback;
+            return Math.min(max, Math.max(min, n));
         }
 
         function uniqueArray(arr) {
@@ -2328,6 +2477,75 @@
             return arr;
         }
 
+        function sanitizeText(str, maxLen = 120) {
+            return String(str || '')
+                .replace(/[<>]/g, '')
+                .trim()
+                .slice(0, maxLen);
+        }
+
+        function rebuildExerciseIndex() {
+            allExercises = { ...exerciseDB };
+            if (Array.isArray(state.customExercises)) {
+                state.customExercises.forEach(ex => {
+                    if (ex && ex.id) allExercises[ex.id] = ex;
+                });
+            }
+            nameToId = Object.fromEntries(Object.values(allExercises).map(e => [e.name, e.id]));
+        }
+
+        function getExercise(id) {
+            return allExercises[id];
+        }
+
+        function getAllExercises() {
+            return Object.values(allExercises);
+        }
+
+        function normalizeCustomExercise(ex) {
+            if (!ex || typeof ex !== 'object') return null;
+
+            const id = sanitizeText(ex.id, 80);
+            const name = sanitizeText(ex.name, 60);
+            const muscle = sanitizeText(ex.muscle, 24);
+            const level = sanitizeText(ex.level, 24);
+            const icon = sanitizeText(ex.icon, 8) || '💪';
+            const description = sanitizeText(ex.description, 200);
+            const tips = Array.isArray(ex.tips)
+                ? ex.tips.map(t => sanitizeText(t, 80)).filter(Boolean).slice(0, 6)
+                : [];
+
+            const allowedLevels = ['beginner', 'intermediate', 'advanced'];
+            const allowedMuscles = muscleGroups.filter(m => m !== 'all');
+
+            if (!id || !name) return null;
+            if (!allowedMuscles.includes(muscle)) return null;
+            if (!allowedLevels.includes(level)) return null;
+
+            const secondary = Array.isArray(ex.secondary)
+                ? ex.secondary.map(s => sanitizeText(s, 24)).filter(s => allowedMuscles.includes(s) && s !== muscle)
+                : [];
+
+            const targetReps = ex.targetReps || {};
+            const repBeginner = clampNumber(targetReps.beginner, 1, 200, 10);
+            const repIntermediate = clampNumber(targetReps.intermediate, 1, 200, 15);
+            const repAdvanced = clampNumber(targetReps.advanced, 1, 200, 20);
+
+            return {
+                id,
+                name,
+                muscle,
+                level,
+                icon,
+                description,
+                tips,
+                secondary: uniqueArray(secondary),
+                targetReps: { beginner: repBeginner, intermediate: repIntermediate, advanced: repAdvanced },
+                progression: [],
+                custom: true
+            };
+        }
+
         function ensureCurrentWeek() {
             const currentWeek = getWeekStartKey();
             if (state.progress.weekStart !== currentWeek) {
@@ -2386,12 +2604,12 @@
             for (const ex of entry.exercises) {
                 if (!ex) continue;
                 const id = ex.id || nameToId[ex.name];
-                if (!id || !exerciseDB[id]) continue;
+                if (!id || !getExercise(id)) continue;
                 const sets = Array.isArray(ex.sets)
                     ? ex.sets.map(n => Math.max(0, Math.floor(toNumber(n, 0))))
                     : [];
                 if (sets.length === 0) continue;
-                exercises.push({ id, name: exerciseDB[id].name, sets });
+                exercises.push({ id, name: getExercise(id).name, sets });
             }
 
             if (exercises.length === 0) return null;
@@ -2450,6 +2668,7 @@
             if (parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
             if (parsed.progress) state.progress = { ...state.progress, ...parsed.progress };
             if (Array.isArray(parsed.selectedExercises)) state.selectedExercises = parsed.selectedExercises;
+            if (Array.isArray(parsed.customExercises)) state.customExercises = parsed.customExercises;
         }
 
         function saveState() {
@@ -2457,7 +2676,8 @@
                 version: APP_VERSION,
                 settings: state.settings,
                 progress: state.progress,
-                selectedExercises: state.selectedExercises
+                selectedExercises: state.selectedExercises,
+                customExercises: state.customExercises
             }));
         }
 
@@ -2483,6 +2703,24 @@
 
             const vibrate = Boolean(state.settings.vibrate);
             if (vibrate !== state.settings.vibrate) { state.settings.vibrate = vibrate; changed = true; }
+
+            // Custom exercises normalization
+            if (!Array.isArray(state.customExercises)) {
+                state.customExercises = [];
+                changed = true;
+            } else {
+                const normalized = [];
+                for (const ex of state.customExercises) {
+                    const n = normalizeCustomExercise(ex);
+                    if (n) normalized.push(n);
+                }
+                if (JSON.stringify(normalized) !== JSON.stringify(state.customExercises)) {
+                    state.customExercises = normalized;
+                    changed = true;
+                }
+            }
+
+            rebuildExerciseIndex();
 
             // Progress validation
             state.progress.totalWorkouts = Math.max(0, Math.floor(toNumber(state.progress.totalWorkouts, 0)));
@@ -2552,7 +2790,7 @@
 
             // Selected exercises
             const selected = uniqueArray(Array.isArray(state.selectedExercises) ? state.selectedExercises : [])
-                .filter(id => exerciseDB[id]);
+                .filter(id => getExercise(id));
 
             if (!arraysEqual(selected, state.selectedExercises)) {
                 state.selectedExercises = selected;
@@ -2572,6 +2810,13 @@
                 });
             }
 
+            const addOverlay = document.getElementById('add-exercise-modal');
+            if (addOverlay) {
+                addOverlay.addEventListener('click', (e) => {
+                    if (e.target === addOverlay) closeAddExerciseModal();
+                });
+            }
+
             const historyOverlay = document.getElementById('history-modal');
             if (historyOverlay) {
                 historyOverlay.addEventListener('click', (e) => {
@@ -2584,6 +2829,9 @@
                     if (isHistoryModalOpen()) {
                         e.preventDefault();
                         closeHistoryModal();
+                    } else if (isAddExerciseModalOpen()) {
+                        e.preventDefault();
+                        closeAddExerciseModal();
                     } else if (isExerciseModalOpen()) {
                         e.preventDefault();
                         closeModal();
@@ -2631,13 +2879,18 @@
             return overlay && overlay.classList.contains('active');
         }
 
+        function isAddExerciseModalOpen() {
+            const overlay = document.getElementById('add-exercise-modal');
+            return overlay && overlay.classList.contains('active');
+        }
+
         function isHistoryModalOpen() {
             const overlay = document.getElementById('history-modal');
             return overlay && overlay.classList.contains('active');
         }
 
         function isAnyModalOpen() {
-            return isExerciseModalOpen() || isHistoryModalOpen();
+            return isExerciseModalOpen() || isAddExerciseModalOpen() || isHistoryModalOpen();
         }
 
         function isRestOpen() {
@@ -2708,7 +2961,7 @@
 
         function renderExerciseList(filter = 'all') {
             const container = document.getElementById('exercise-list');
-            const filtered = Object.values(exerciseDB).filter(e => 
+            const filtered = getAllExercises().filter(e => 
                 filter === 'all' || e.muscle === filter || (Array.isArray(e.secondary) && e.secondary.includes(filter))
             );
 
@@ -2746,7 +2999,7 @@
         }
 
         function showExerciseModal(id) {
-            const ex = exerciseDB[id];
+            const ex = getExercise(id);
             if (!ex) return;
 
             document.getElementById('modal-ex-name').textContent = ex.name;
@@ -2757,14 +3010,17 @@
 
             content.innerHTML = `
                 <div style="text-align: center; font-size: 3.5rem; margin-bottom: 12px;">${ex.icon}</div>
-                <span class="exercise-badge badge-${ex.level}" style="margin-bottom: 12px; display: inline-block;">${ex.level}</span>
+                <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                    <span class="exercise-badge badge-${ex.level}" style="display: inline-block;">${ex.level}</span>
+                    ${ex.custom ? `<span class="exercise-badge badge-custom" style="display: inline-block;">custom</span>` : ''}
+                </div>
                 
-                <p style="color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">${ex.description}</p>
+                <p style="color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">${ex.description || 'Custom exercise'}</p>
                 
                 <div class="panel" style="margin-bottom: 16px;">
                     <div class="panel-title">💡 Tips</div>
                     <ul style="color: var(--text-muted); padding-left: 20px; font-size: 0.85rem; margin-top: 8px;">
-                        ${ex.tips.map(t => `<li style="margin-bottom: 6px;">${t}</li>`).join('')}
+                        ${(ex.tips && ex.tips.length ? ex.tips : ['Focus on form', 'Control the tempo', 'Breathe steadily']).map(t => `<li style="margin-bottom: 6px;">${t}</li>`).join('')}
                     </ul>
                 </div>
                 
@@ -2798,7 +3054,7 @@
                         <div class="panel-title">📈 Progression Path</div>
                         <div class="progression-list">
                             ${ex.progression.map((pId, i) => {
-                                const pEx = exerciseDB[pId];
+                                const pEx = getExercise(pId);
                                 if (!pEx) return '';
                                 const pRec = state.progress.records[pId];
                                 const isCurrent = pId === id;
@@ -2849,6 +3105,30 @@
             }
         }
 
+        function openAddExerciseModal() {
+            prepareAddExerciseForm();
+            const overlay = document.getElementById('add-exercise-modal');
+            lastFocusedElement = document.activeElement;
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            updateBodyScrollLock();
+
+            const nameInput = document.getElementById('add-exercise-name');
+            if (nameInput) nameInput.focus();
+        }
+
+        function closeAddExerciseModal() {
+            const overlay = document.getElementById('add-exercise-modal');
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            updateBodyScrollLock();
+
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
+        }
+
         function openHistoryModal() {
             const overlay = document.getElementById('history-modal');
             lastFocusedElement = document.activeElement;
@@ -2883,12 +3163,165 @@
             showSection('workout');
         }
 
+        function prepareAddExerciseForm() {
+            const name = document.getElementById('add-exercise-name');
+            const muscleSelect = document.getElementById('add-exercise-muscle');
+            const secondaryWrap = document.getElementById('add-exercise-secondary');
+            const level = document.getElementById('add-exercise-level');
+            const iconInput = document.getElementById('add-exercise-icon');
+            const desc = document.getElementById('add-exercise-description');
+            const tips = document.getElementById('add-exercise-tips');
+
+            if (name) name.value = '';
+            if (desc) desc.value = '';
+            if (tips) tips.value = '';
+
+            const muscleOptions = muscleGroups.filter(m => m !== 'all');
+            if (muscleSelect) {
+                muscleSelect.innerHTML = muscleOptions.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('');
+            }
+
+            if (secondaryWrap) {
+                secondaryWrap.innerHTML = muscleOptions.map(m => `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${m}">
+                        ${m.charAt(0).toUpperCase() + m.slice(1)}
+                    </label>
+                `).join('');
+            }
+
+            const repsBeginner = document.getElementById('add-exercise-reps-beginner');
+            const repsIntermediate = document.getElementById('add-exercise-reps-intermediate');
+            const repsAdvanced = document.getElementById('add-exercise-reps-advanced');
+            if (repsBeginner) repsBeginner.value = 10;
+            if (repsIntermediate) repsIntermediate.value = 15;
+            if (repsAdvanced) repsAdvanced.value = 20;
+
+            if (level) level.value = 'intermediate';
+
+            renderAddExerciseIconGrid();
+            if (iconInput) iconInput.value = '💪';
+        }
+
+        function renderAddExerciseIconGrid() {
+            const grid = document.getElementById('add-exercise-icon-grid');
+            if (!grid) return;
+
+            const current = document.getElementById('add-exercise-icon')?.value || '💪';
+
+            grid.innerHTML = addExerciseIcons.map(icon => `
+                <button type="button" class="icon-btn ${icon === current ? 'selected' : ''}" onclick="selectAddExerciseIcon('${icon}')">
+                    ${icon}
+                </button>
+            `).join('');
+        }
+
+        function selectAddExerciseIcon(icon) {
+            const input = document.getElementById('add-exercise-icon');
+            if (input) input.value = icon;
+            renderAddExerciseIconGrid();
+        }
+
+        function buildExerciseIdFromName(name) {
+            const base = sanitizeText(name, 60)
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '') || 'custom-ex';
+            let id = base;
+            let i = 1;
+            while (getExercise(id)) {
+                i += 1;
+                id = `${base}-${i}`;
+            }
+            return id;
+        }
+
+        function addCustomExercise() {
+            const name = sanitizeText(document.getElementById('add-exercise-name')?.value, 60);
+            const muscle = document.getElementById('add-exercise-muscle')?.value;
+            const level = document.getElementById('add-exercise-level')?.value;
+            const icon = sanitizeText(document.getElementById('add-exercise-icon')?.value, 8) || '💪';
+
+            const repsBeginner = clampNumber(document.getElementById('add-exercise-reps-beginner')?.value, 1, 200, 10);
+            const repsIntermediate = clampNumber(document.getElementById('add-exercise-reps-intermediate')?.value, 1, 200, 15);
+            const repsAdvanced = clampNumber(document.getElementById('add-exercise-reps-advanced')?.value, 1, 200, 20);
+
+            const description = sanitizeText(document.getElementById('add-exercise-description')?.value, 200);
+            const tipsRaw = document.getElementById('add-exercise-tips')?.value || '';
+            const tips = tipsRaw.split('\n').map(t => sanitizeText(t, 80)).filter(Boolean).slice(0, 6);
+
+            if (!name || name.length < 2) {
+                alert('Please enter a valid exercise name.');
+                return;
+            }
+
+            if (nameToId[name]) {
+                alert('An exercise with that name already exists.');
+                return;
+            }
+
+            const allowedMuscles = muscleGroups.filter(m => m !== 'all');
+            const allowedLevels = ['beginner', 'intermediate', 'advanced'];
+
+            if (!allowedMuscles.includes(muscle)) {
+                alert('Please select a valid primary muscle.');
+                return;
+            }
+
+            if (!allowedLevels.includes(level)) {
+                alert('Please select a valid difficulty level.');
+                return;
+            }
+
+            const secondaryWrap = document.getElementById('add-exercise-secondary');
+            let secondary = [];
+            if (secondaryWrap) {
+                const checks = secondaryWrap.querySelectorAll('input[type="checkbox"]');
+                secondary = Array.from(checks)
+                    .filter(c => c.checked)
+                    .map(c => c.value)
+                    .filter(v => allowedMuscles.includes(v) && v !== muscle);
+            }
+
+            const newExercise = normalizeCustomExercise({
+                id: buildExerciseIdFromName(name),
+                name,
+                muscle,
+                level,
+                icon,
+                description: description || 'Custom exercise',
+                tips,
+                secondary,
+                targetReps: {
+                    beginner: repsBeginner,
+                    intermediate: repsIntermediate,
+                    advanced: repsAdvanced
+                }
+            });
+
+            if (!newExercise) {
+                alert('Unable to create this exercise. Please review the fields.');
+                return;
+            }
+
+            state.customExercises.push(newExercise);
+            rebuildExerciseIndex();
+            saveState();
+
+            closeAddExerciseModal();
+            renderExerciseList();
+            renderExerciseSelector();
+            renderRoutineOverview();
+            renderProgressionPrompts();
+            renderBuilderSuggestions();
+        }
+
         // ===================
         // EXERCISE SELECTOR
         // ===================
         function renderExerciseSelector() {
             const container = document.getElementById('exercise-selector');
-            container.innerHTML = Object.values(exerciseDB).map(ex => {
+            container.innerHTML = getAllExercises().map(ex => {
                 const isSelected = state.selectedExercises.includes(ex.id);
                 return `
                     <button type="button" class="exercise-item ${isSelected ? 'selected' : ''}" onclick="toggleExercise('${ex.id}')" aria-pressed="${isSelected}">
@@ -2933,7 +3366,7 @@
 
         function swapExercise(oldId, newId) {
             if (oldId === newId) return;
-            if (!exerciseDB[newId]) return;
+            if (!getExercise(newId)) return;
 
             if (state.selectedExercises.includes(newId)) {
                 alert('That exercise is already in your routine. Remove it first or choose another option.');
@@ -3040,7 +3473,7 @@
             const summaryEl = document.getElementById('routine-summary');
             if (!listEl || !summaryEl) return;
 
-            const ids = state.selectedExercises.filter(id => exerciseDB[id]);
+            const ids = state.selectedExercises.filter(id => getExercise(id));
             const totalSets = ids.length * (Number(state.settings.sets) || defaultSettings.sets);
             const rest = Number(state.settings.rest) || defaultSettings.rest;
 
@@ -3058,7 +3491,7 @@
             const level = state.settings.level;
 
             listEl.innerHTML = ids.map((id, idx) => {
-                const ex = exerciseDB[id];
+                const ex = getExercise(id);
                 const suggestion = buildSuggestion(id);
                 const secondary = Array.isArray(ex.secondary) && ex.secondary.length ? ' • ' + ex.secondary.join(', ') : '';
                 const suggestionHTML = suggestion ? renderSuggestionHTML(suggestion, true) : `
@@ -3071,17 +3504,17 @@
                     </div>
                 `;
 
-                const canUpgrade = suggestion && suggestion.type === 'progression' && suggestion.nextId && exerciseDB[suggestion.nextId];
+                const canUpgrade = suggestion && suggestion.type === 'progression' && suggestion.nextId && getExercise(suggestion.nextId);
                 const recommendedId = canUpgrade ? suggestion.nextId : null;
 
-                let progressionList = Array.isArray(ex.progression) ? ex.progression.filter(pid => exerciseDB[pid]) : [];
+                let progressionList = Array.isArray(ex.progression) ? ex.progression.filter(pid => getExercise(pid)) : [];
                 if (progressionList.length && !progressionList.includes(id)) {
                     progressionList.unshift(id);
                 }
 
                 const optionsHTML = progressionList.length
                     ? progressionList.map(optId => {
-                        const opt = exerciseDB[optId];
+                        const opt = getExercise(optId);
                         const isCurrent = optId === id;
                         const isRecommended = optId === recommendedId;
                         const target = opt.targetReps[level] || opt.targetReps.intermediate;
@@ -3127,7 +3560,7 @@
                             </div>
                         </details>
                         <div class="routine-actions">
-                            ${canUpgrade ? `<button type="button" class="btn btn-primary btn-small" onclick="applyProgressionUpgrade('${id}')">Upgrade → ${exerciseDB[suggestion.nextId].name}</button>` : ''}
+                            ${canUpgrade ? `<button type="button" class="btn btn-primary btn-small" onclick="applyProgressionUpgrade('${id}')">Upgrade → ${getExercise(suggestion.nextId).name}</button>` : ''}
                             <button type="button" class="btn btn-ghost btn-small" onclick="removeFromRoutine('${id}')">Remove</button>
                         </div>
                     </div>
@@ -3154,7 +3587,7 @@
 
             const prompts = state.selectedExercises
                 .map(buildSuggestion)
-                .filter(p => p && p.type === 'progression' && p.nextId && exerciseDB[p.nextId] && !dismissedPrompts.has(p.id));
+                .filter(p => p && p.type === 'progression' && p.nextId && getExercise(p.nextId) && !dismissedPrompts.has(p.id));
 
             if (prompts.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧱</div><p>No progression upgrades ready yet.</p></div>';
@@ -3175,7 +3608,7 @@
                             <div class="prompt-text">${p.text}</div>
                             <div class="prompt-actions">
                                 <button type="button" class="btn btn-primary btn-small" onclick="applyProgressionUpgrade('${p.id}')">
-                                    Upgrade → ${exerciseDB[p.nextId].name}
+                                    Upgrade → ${getExercise(p.nextId).name}
                                 </button>
                                 <button type="button" class="btn btn-ghost btn-small" onclick="dismissProgressionPrompt('${p.id}')">
                                     Keep for now
@@ -3194,7 +3627,7 @@
 
         function applyProgressionUpgrade(oldId) {
             const suggestion = buildSuggestion(oldId);
-            if (!suggestion || suggestion.type !== 'progression' || !suggestion.nextId || !exerciseDB[suggestion.nextId]) return;
+            if (!suggestion || suggestion.type !== 'progression' || !suggestion.nextId || !getExercise(suggestion.nextId)) return;
 
             const idx = state.selectedExercises.indexOf(oldId);
             if (idx === -1) return;
@@ -3209,7 +3642,7 @@
             let changed = false;
             const updated = state.selectedExercises.map(id => {
                 const suggestion = buildSuggestion(id);
-                if (suggestion && suggestion.type === 'progression' && suggestion.nextId && exerciseDB[suggestion.nextId]) {
+                if (suggestion && suggestion.type === 'progression' && suggestion.nextId && getExercise(suggestion.nextId)) {
                     changed = true;
                     dismissedPrompts.delete(id);
                     return suggestion.nextId;
@@ -3240,7 +3673,7 @@
                 endWorkoutSession();
             }
 
-            const selected = uniqueArray(state.selectedExercises).filter(id => exerciseDB[id]);
+            const selected = uniqueArray(state.selectedExercises).filter(id => getExercise(id));
             if (selected.length === 0) {
                 alert('Select at least one exercise!');
                 return;
@@ -3284,7 +3717,7 @@
                 return;
             }
 
-            const ex = exerciseDB[current.id];
+            const ex = getExercise(current.id);
             const level = state.settings.level;
             
             document.getElementById('current-ex-icon').textContent = ex.icon;
@@ -3414,7 +3847,7 @@
                 duration,
                 exercises: w.exercises.map(e => ({
                     id: e.id,
-                    name: exerciseDB[e.id].name,
+                    name: getExercise(e.id).name,
                     sets: e.sets
                 })),
                 totalReps
@@ -3474,9 +3907,9 @@
             let nextName = 'Finished!';
             
             if (w.currentSet <= w.exercises[w.currentIndex].targetSets) {
-                nextName = exerciseDB[w.exercises[w.currentIndex].id].name + ' - Set ' + w.currentSet;
+                nextName = getExercise(w.exercises[w.currentIndex].id).name + ' - Set ' + w.currentSet;
             } else if (w.currentIndex < w.exercises.length - 1) {
-                nextName = exerciseDB[w.exercises[w.currentIndex + 1].id].name;
+                nextName = getExercise(w.exercises[w.currentIndex + 1].id).name;
             }
             
             document.getElementById('rest-time').textContent = time;
@@ -3577,7 +4010,7 @@
             
             container.innerHTML = records.map(([id, data]) => `
                 <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span>${exerciseDB[id]?.name || id}</span>
+                    <span>${getExercise(id)?.name || id}</span>
                     <span style="font-weight: 700; color: var(--accent-2);">${data.maxReps} reps</span>
                 </div>
             `).join('');
@@ -3597,7 +4030,7 @@
                 let currentLevel = 0;
                 prog.path.forEach((exId, i) => {
                     const rec = state.progress.records[exId];
-                    const ex = exerciseDB[exId];
+                    const ex = getExercise(exId);
                     if (rec && ex && rec.maxReps >= ex.targetReps.intermediate) {
                         currentLevel = i + 1;
                     }
@@ -3614,7 +4047,7 @@
                         </div>
                         <div class="progression-list">
                             ${prog.path.map((exId, i) => {
-                                const ex = exerciseDB[exId];
+                                const ex = getExercise(exId);
                                 if (!ex) return '';
                                 const rec = state.progress.records[exId];
                                 const isCompleted = i < currentLevel;
@@ -3692,7 +4125,7 @@
                 duration: String(Math.max(1, Math.floor(toNumber(entry.duration, 1)))),
                 exercises: entry.exercises.map(e => {
                     const id = e.id || nameToId[e.name];
-                    if (!id || !exerciseDB[id]) return null;
+                    if (!id || !getExercise(id)) return null;
                     const sets = Array.isArray(e.sets) ? e.sets.map(n => Math.max(0, Math.floor(toNumber(n, 0)))) : [];
                     return { id, setsText: sets.join(',') };
                 }).filter(Boolean)
@@ -3707,7 +4140,7 @@
             if (!body || !historyEditDraft) return;
 
             const used = new Set(historyEditDraft.exercises.map(e => e.id));
-            const optionsHTML = Object.values(exerciseDB).map(ex => `
+            const optionsHTML = getAllExercises().map(ex => `
                 <option value="${ex.id}" ${used.has(ex.id) ? 'disabled' : ''}>${ex.name}</option>
             `).join('');
 
@@ -3716,7 +4149,7 @@
                     <div class="history-edit-row" data-ex-id="${ex.id}">
                         <div class="history-edit-row-head">
                             <div>
-                                <div class="history-edit-name">${exerciseDB[ex.id].name}</div>
+                                <div class="history-edit-name">${getExercise(ex.id).name}</div>
                                 <div class="history-edit-meta">Sets (comma-separated reps)</div>
                             </div>
                             <button type="button" class="btn btn-ghost btn-small" onclick="removeHistoryExercise(${idx})">Remove</button>
@@ -3782,7 +4215,7 @@
             const id = select.value;
             const sets = parseSetsInput(setsInput.value);
 
-            if (!id || !exerciseDB[id]) {
+            if (!id || !getExercise(id)) {
                 alert('Select a valid exercise.');
                 return;
             }
@@ -3827,13 +4260,13 @@
 
             const exercises = [];
             for (const ex of historyEditDraft.exercises) {
-                if (!exerciseDB[ex.id]) continue;
+                if (!getExercise(ex.id)) continue;
                 const sets = parseSetsInput(ex.setsText || '');
                 if (sets.length === 0) {
-                    alert(`Enter sets for ${exerciseDB[ex.id].name}.`);
+                    alert(`Enter sets for ${getExercise(ex.id).name}.`);
                     return;
                 }
-                exercises.push({ id: ex.id, name: exerciseDB[ex.id].name, sets });
+                exercises.push({ id: ex.id, name: getExercise(ex.id).name, sets });
             }
 
             if (exercises.length === 0) {
@@ -4070,7 +4503,7 @@
         }
 
         function buildSuggestion(exId) {
-            const ex = exerciseDB[exId];
+            const ex = getExercise(exId);
             if (!ex) return null;
 
             const level = state.settings.level;
@@ -4107,7 +4540,7 @@
             const nextId = idx >= 0 ? progression[idx + 1] : null;
 
             if (nextId && successStreak >= 2) {
-                const nextEx = exerciseDB[nextId];
+                const nextEx = getExercise(nextId);
                 const nextTarget = nextEx.targetReps[level];
                 return {
                     id: exId,
@@ -4219,7 +4652,7 @@
 
             let ids = getRecentExerciseIds(8);
             if (ids.length === 0) {
-                ids = ['pushups', 'squats', 'plank', 'gluteBridge', 'lunges', 'supermanHold'].filter(id => exerciseDB[id]);
+                ids = ['pushups', 'squats', 'plank', 'gluteBridge', 'lunges', 'supermanHold'].filter(id => getExercise(id));
             }
 
             const suggestions = ids.map(buildSuggestion).filter(Boolean);
@@ -4306,14 +4739,15 @@
   </defs>
   <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
   <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#r)"/>
-  <g fill="#0b0f1a">
-    <path d="M14 40h36l-3 10H17l-3-10z"/>
-    <rect x="18" y="30" width="28" height="8" rx="3"/>
-    <rect x="24" y="24" width="16" height="6" rx="3"/>
-    <rect x="38" y="10" width="6" height="18" rx="3" transform="rotate(35 38 10)"/>
-    <rect x="44" y="12" width="12" height="6" rx="2" transform="rotate(35 44 12)"/>
+  <circle cx="32" cy="32" r="18" fill="#0b0f1a" opacity="0.92"/>
+  <g fill="#f8fafc">
+    <rect x="18" y="30" width="28" height="4" rx="2"/>
+    <rect x="12" y="24" width="6" height="16" rx="3"/>
+    <rect x="46" y="24" width="6" height="16" rx="3"/>
+    <rect x="21" y="26" width="4" height="12" rx="2" opacity="0.9"/>
+    <rect x="39" y="26" width="4" height="12" rx="2" opacity="0.9"/>
   </g>
-  <path d="M18 52h28" stroke="#ffffff" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 16l-6 12h6l-4 12 10-16h-6l4-8z" fill="#ff8a00"/>
   <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.12"/>
 </svg>`;
         }
