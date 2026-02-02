@@ -111,6 +111,8 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            flex-wrap: wrap;
+            row-gap: 10px;
             background: rgba(11, 15, 26, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
@@ -120,6 +122,26 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-left: auto;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        @media (max-width: 520px) {
+            .header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
         }
 
         .brand-icon {
@@ -157,12 +179,18 @@
             font-size: 0.72rem;
             color: var(--text-muted);
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 100%;
         }
 
         .workout-timer-pill {
             display: inline-flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: center;
+            justify-content: center;
             gap: 2px;
             padding: 8px 10px;
             border-radius: 12px;
@@ -170,7 +198,7 @@
             background: rgba(56, 189, 248, 0.12);
             color: #c7f1ff;
             min-width: 86px;
-            text-align: right;
+            text-align: center;
         }
 
         .workout-timer-label {
@@ -178,12 +206,17 @@
             letter-spacing: 0.14em;
             text-transform: uppercase;
             opacity: 0.85;
+            width: 100%;
+            text-align: center;
         }
 
         .workout-timer-value {
             font-size: 0.9rem;
             font-weight: 800;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            width: 100%;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
         }
 
         main {
@@ -1208,7 +1241,7 @@
                     <div class="brand-sub">Progressive strength & hypertrophy</div>
                 </div>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div class="header-right">
                 <div class="workout-timer-pill" id="workout-timer-pill">
                     <div class="workout-timer-label">Routine</div>
                     <div class="workout-timer-value" id="workout-timer-value">00:00</div>
