@@ -7,57 +7,65 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#242836;--surface3:#2e3345;
-  --border:#353a4f;--text:#e4e6f0;--text2:#9ca0b4;--text3:#6b7089;
-  --accent:#6c8cff;--accent2:#4a6adf;--accent-glow:rgba(108,140,255,.15);
-  --green:#4ade80;--green-bg:rgba(74,222,128,.12);
-  --yellow:#facc15;--yellow-bg:rgba(250,204,21,.1);
-  --red:#f87171;--red-bg:rgba(248,113,113,.1);
-  --radius:12px;--radius-sm:8px;
+  --bg:#101114;--surface:#18191f;--surface2:#1f2128;--surface3:#282a33;
+  --border:#2a2d38;--border2:#33363f;
+  --text:#d8d9e0;--text2:#8b8d9a;--text3:#5c5e6b;
+  --accent:#c9a84c;--accent2:#b0903e;--accent-glow:rgba(201,168,76,.12);
+  --accent-border:rgba(201,168,76,.25);
+  --green:#5cb98a;--green-bg:rgba(92,185,138,.1);--green-border:rgba(92,185,138,.2);
+  --yellow:#d4a94e;--yellow-bg:rgba(212,169,78,.08);--yellow-border:rgba(212,169,78,.18);
+  --red:#cf6565;--red-bg:rgba(207,101,101,.08);--red-border:rgba(207,101,101,.18);
+  --radius:10px;--radius-sm:7px;
 }
 html{font-size:16px;-webkit-tap-highlight-color:transparent}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   background:var(--bg);color:var(--text);min-height:100dvh;
   padding-bottom:env(safe-area-inset-bottom,0);
   overflow-x:hidden;
 }
-button{
-  font-family:inherit;cursor:pointer;border:none;
-  -webkit-appearance:none;appearance:none;
-}
-input,select,textarea{
-  font-family:inherit;font-size:1rem;
-  -webkit-appearance:none;appearance:none;
-}
+button{font-family:inherit;cursor:pointer;border:none;-webkit-appearance:none;appearance:none}
+input,select,textarea{font-family:inherit;font-size:1rem;-webkit-appearance:none;appearance:none}
+
+/* ICONS */
+.icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex-shrink:0}
+.icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* HEADER */
 .header{
   position:sticky;top:0;z-index:100;
-  background:rgba(15,17,23,.92);backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--border);padding:12px 16px;
+  background:rgba(16,17,20,.94);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);padding:14px 20px;
 }
-.header h1{font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
-.header-sub{font-size:.75rem;color:var(--text2);margin-top:2px}
+.header-row{display:flex;align-items:center;gap:10px}
+.header-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent-glow);border:1px solid var(--accent-border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+}
+.header-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.header h1{font-size:1.05rem;font-weight:700;letter-spacing:-.03em;color:var(--text)}
+.header-sub{font-size:.72rem;color:var(--text3);margin-top:1px;letter-spacing:.01em}
 
 /* NAV TABS */
 .nav{
-  display:flex;gap:4px;padding:12px 16px 0;
+  display:flex;gap:0;padding:0 20px;
   border-bottom:1px solid var(--border);
-  background:var(--bg);position:sticky;top:57px;z-index:99;
+  background:var(--bg);position:sticky;top:61px;z-index:99;
 }
 .nav button{
-  flex:1;padding:10px 4px;font-size:.82rem;font-weight:600;
+  flex:1;padding:11px 4px;font-size:.8rem;font-weight:600;
   color:var(--text3);background:transparent;
   border-bottom:2px solid transparent;
-  transition:all .2s;
+  transition:color .2s,border-color .2s;letter-spacing:.01em;
 }
 .nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
 .nav button:hover{color:var(--text2)}
 
 /* SECTIONS */
-.tab-content{display:none;padding:16px;padding-bottom:100px}
+.tab-content{display:none;padding:16px 20px;padding-bottom:100px}
 .tab-content.active{display:block}
 
 /* CARDS */
@@ -66,72 +74,66 @@ input,select,textarea{
   border-radius:var(--radius);padding:16px;margin-bottom:12px;
 }
 .card-title{
-  font-size:.85rem;font-weight:700;color:var(--accent);
-  text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;
+  font-size:.72rem;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;
 }
+.card-title .icon{color:var(--accent);width:15px;height:15px}
 
 /* SELECTORS */
-.selector-row{
-  display:flex;gap:8px;margin-bottom:12px;
-}
+.selector-row{display:flex;gap:8px;margin-bottom:8px}
 .selector-row select{
   flex:1;padding:10px 12px;background:var(--surface2);
   color:var(--text);border:1px solid var(--border);
-  border-radius:var(--radius-sm);font-size:.9rem;
+  border-radius:var(--radius-sm);font-size:.88rem;font-weight:500;
 }
-.selector-row select:focus{
-  outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-glow);
-}
+.selector-row select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 
 /* BUTTONS */
 .btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
   padding:10px 18px;border-radius:var(--radius-sm);
-  font-size:.85rem;font-weight:600;transition:all .15s;
+  font-size:.82rem;font-weight:600;transition:all .15s;letter-spacing:.01em;
 }
-.btn-primary{background:var(--accent);color:#fff}
+.btn-primary{background:var(--accent);color:#111}
 .btn-primary:hover{background:var(--accent2)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--surface3)}
-.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.2)}
-.btn-success{background:var(--green-bg);color:var(--green);border:1px solid rgba(74,222,128,.2)}
-.btn-block{width:100%;padding:14px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.btn-block{width:100%;padding:13px}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .btn-row .btn{flex:1;min-width:calc(50% - 4px)}
+.btn .icon{width:15px;height:15px}
 
 /* PROGRESS BAR */
-.progress-wrap{
-  background:var(--surface2);border-radius:20px;height:8px;
-  overflow:hidden;margin:8px 0 4px;
-}
-.progress-bar{
-  height:100%;background:linear-gradient(90deg,var(--accent),var(--green));
-  border-radius:20px;transition:width .4s ease;min-width:0;
-}
-.progress-label{font-size:.75rem;color:var(--text2);text-align:right}
+.progress-wrap{background:var(--surface2);border-radius:20px;height:6px;overflow:hidden;margin:10px 0 4px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:20px;transition:width .4s ease;min-width:0}
+.progress-label{font-size:.72rem;color:var(--text3);text-align:right;font-variant-numeric:tabular-nums}
 
 /* TIMERS */
 .timer-section{
   display:flex;gap:8px;align-items:center;
   padding:12px;background:var(--surface2);
-  border-radius:var(--radius-sm);margin-bottom:12px;
+  border-radius:var(--radius-sm);
 }
 .timer-display{
-  font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;
-  min-width:80px;text-align:center;
+  font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums;
+  min-width:72px;text-align:center;color:var(--text);
 }
-.timer-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.timer-label{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
 .timer-btn{
-  width:36px;height:36px;border-radius:50%;
+  width:34px;height:34px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;
+  background:var(--surface3);color:var(--text);border:1px solid var(--border);
+  transition:all .15s;
 }
+.timer-btn:hover{border-color:var(--accent);color:var(--accent)}
+.timer-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .rest-input{
   width:56px;padding:6px 4px;text-align:center;
   background:var(--surface3);color:var(--text);
-  border:1px solid var(--border);border-radius:6px;
-  font-size:.85rem;
+  border:1px solid var(--border);border-radius:6px;font-size:.85rem;
 }
 .rest-input:focus{outline:none;border-color:var(--accent)}
 
@@ -141,89 +143,76 @@ input,select,textarea{
   padding:10px 0;border-bottom:1px solid var(--border);
 }
 .warmup-item:last-child{border-bottom:none}
-.warmup-item label{flex:1;font-size:.88rem;cursor:pointer}
-.warmup-item small{color:var(--text3);font-size:.75rem}
+.warmup-item label{flex:1;font-size:.86rem;cursor:pointer;line-height:1.4}
+.warmup-item small{color:var(--text3);font-size:.73rem}
 
 /* EXERCISE BLOCK */
-.exercise-block{margin-bottom:16px}
+.exercise-block{margin-bottom:12px}
 .exercise-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:8px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px;
 }
-.exercise-name{font-size:.95rem;font-weight:700}
-.exercise-fields{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.field-group{display:flex;flex-direction:column;gap:2px}
-.field-group label{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.exercise-name{font-size:.92rem;font-weight:700;letter-spacing:-.01em}
+.exercise-tag{font-size:.7rem;color:var(--text3);background:var(--surface3);padding:2px 8px;border-radius:4px}
+.exercise-fields{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.field-group{display:flex;flex-direction:column;gap:3px}
+.field-group label{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
 .field-group input,.field-group select{
   padding:8px 6px;background:var(--surface2);color:var(--text);
   border:1px solid var(--border);border-radius:6px;
-  font-size:.85rem;width:72px;text-align:center;
+  font-size:.84rem;width:72px;text-align:center;
 }
-.field-group input:focus,.field-group select:focus{
-  outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-glow);
-}
+.field-group input:focus,.field-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 .field-unit{width:80px}
 
 /* SET ROWS */
 .set-row{
   display:flex;align-items:center;gap:8px;
-  padding:8px;margin:4px 0;background:var(--surface2);
+  padding:8px 10px;margin:4px 0;background:var(--surface2);
   border-radius:var(--radius-sm);transition:all .2s;
+  border:1px solid transparent;
 }
-.set-row.done{background:var(--green-bg);opacity:.75}
-.set-label{
-  font-size:.8rem;font-weight:600;color:var(--text2);
-  min-width:38px;
-}
-.set-info{flex:1;font-size:.85rem}
+.set-row.done{background:var(--green-bg);border-color:var(--green-border);opacity:.8}
+.set-label{font-size:.78rem;font-weight:600;color:var(--text3);min-width:38px}
+.set-info{flex:1;font-size:.84rem;color:var(--text2)}
 .set-rest-btn{
-  padding:4px 10px;font-size:.72rem;font-weight:600;
+  padding:4px 10px;font-size:.7rem;font-weight:600;
   background:var(--surface3);color:var(--accent);
-  border-radius:6px;
+  border-radius:5px;border:1px solid var(--border);
+  display:flex;align-items:center;gap:4px;
+  transition:all .15s;
 }
+.set-rest-btn:hover{border-color:var(--accent-border)}
+.set-rest-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 
 /* REST OVERLAY */
 .rest-overlay{
   display:none;position:fixed;inset:0;z-index:200;
-  background:rgba(15,17,23,.95);backdrop-filter:blur(8px);
-  flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:rgba(10,10,14,.96);backdrop-filter:blur(12px);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
 }
 .rest-overlay.active{display:flex}
-.rest-overlay .timer-display{font-size:4rem;color:var(--accent)}
-.rest-overlay .rest-label{font-size:1rem;color:var(--text2)}
-.rest-ring{
-  width:200px;height:200px;position:relative;
-}
+.rest-overlay .timer-display{font-size:3.5rem;color:var(--accent)}
+.rest-overlay .rest-label{font-size:.85rem;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;font-weight:600}
+.rest-ring{width:200px;height:200px;position:relative}
 .rest-ring svg{transform:rotate(-90deg);width:200px;height:200px}
-.rest-ring circle{
-  fill:none;stroke-width:6;
-}
+.rest-ring circle{fill:none;stroke-width:5}
 .rest-ring .bg{stroke:var(--surface3)}
-.rest-ring .fg{
-  stroke:var(--accent);stroke-linecap:round;
-  transition:stroke-dashoffset .3s linear;
-}
-.rest-ring .timer-inner{
-  position:absolute;inset:0;display:flex;
-  align-items:center;justify-content:center;
-  flex-direction:column;
-}
+.rest-ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.rest-ring .timer-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
 
 /* CHECKBOX */
 input[type="checkbox"]{
-  width:22px;height:22px;border-radius:6px;
-  border:2px solid var(--border);background:var(--surface2);
-  cursor:pointer;position:relative;flex-shrink:0;
-  transition:all .15s;
+  width:20px;height:20px;border-radius:5px;
+  border:2px solid var(--border2);background:var(--surface2);
+  cursor:pointer;position:relative;flex-shrink:0;transition:all .15s;
 }
-input[type="checkbox"]:checked{
-  background:var(--accent);border-color:var(--accent);
-}
+input[type="checkbox"]:checked{background:var(--accent);border-color:var(--accent)}
 input[type="checkbox"]:checked::after{
-  content:'✓';position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:.75rem;font-weight:700;
+  content:'';position:absolute;
+  left:5px;top:2px;width:5px;height:9px;
+  border:solid #111;border-width:0 2px 2px 0;
+  transform:rotate(45deg);
 }
 
 /* NOTES */
@@ -231,12 +220,9 @@ textarea{
   width:100%;padding:12px;background:var(--surface2);
   color:var(--text);border:1px solid var(--border);
   border-radius:var(--radius-sm);resize:vertical;
-  min-height:80px;font-size:.88rem;line-height:1.5;
+  min-height:80px;font-size:.86rem;line-height:1.5;
 }
-textarea:focus{
-  outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-glow);
-}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 textarea::placeholder{color:var(--text3)}
 
 /* HISTORY */
@@ -244,80 +230,88 @@ textarea::placeholder{color:var(--text3)}
   background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:14px;margin-bottom:10px;
 }
-.history-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:8px;
-}
-.history-date{font-size:.82rem;font-weight:600}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.history-date{font-size:.82rem;font-weight:600;color:var(--text)}
 .history-badge{
-  font-size:.7rem;font-weight:700;padding:3px 8px;
-  border-radius:20px;background:var(--accent-glow);color:var(--accent);
+  font-size:.68rem;font-weight:700;padding:3px 9px;
+  border-radius:4px;background:var(--accent-glow);color:var(--accent);
+  border:1px solid var(--accent-border);
 }
-.history-detail{font-size:.8rem;color:var(--text2);line-height:1.6}
+.history-badge.complete{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.history-detail{font-size:.78rem;color:var(--text2);line-height:1.7}
 .history-notes{
-  margin-top:8px;padding:8px;background:var(--surface2);
-  border-radius:6px;font-size:.8rem;color:var(--yellow);
-  font-style:italic;
+  margin-top:10px;padding:9px 11px;background:var(--surface2);
+  border-radius:6px;font-size:.78rem;color:var(--yellow);
+  border-left:3px solid var(--yellow);line-height:1.5;
 }
-.history-empty{
-  text-align:center;color:var(--text3);padding:40px 16px;
-  font-size:.9rem;
-}
+.history-empty{text-align:center;color:var(--text3);padding:48px 16px;font-size:.88rem}
 
-/* RULES CARD */
+/* RULES */
 .rule{
-  display:flex;gap:8px;padding:8px 0;
+  display:flex;gap:10px;padding:9px 0;
   border-bottom:1px solid var(--border);
-  font-size:.85rem;line-height:1.5;
+  font-size:.83rem;line-height:1.5;
 }
 .rule:last-child{border-bottom:none}
-.rule-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.rule-icon{
+  width:22px;height:22px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:800;flex-shrink:0;margin-top:1px;
+  background:var(--surface3);color:var(--text2);
+}
+.rule-icon.ok{background:var(--green-bg);color:var(--green)}
+.rule-icon.stop{background:var(--red-bg);color:var(--red)}
+.rule-icon.warn{background:var(--yellow-bg);color:var(--yellow)}
+.rule-icon.info{background:var(--accent-glow);color:var(--accent)}
+.rule-icon.num{background:var(--surface3);color:var(--accent)}
 
 /* ALERT */
-.alert{
-  padding:12px 14px;border-radius:var(--radius-sm);
-  font-size:.82rem;line-height:1.5;margin-bottom:12px;
-}
-.alert-warn{background:var(--yellow-bg);color:var(--yellow);border:1px solid rgba(250,204,21,.15)}
-.alert-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.15)}
-.alert-info{background:var(--accent-glow);color:var(--accent);border:1px solid rgba(108,140,255,.15)}
+.alert{padding:12px 14px;border-radius:var(--radius-sm);font-size:.8rem;line-height:1.5;margin-bottom:12px}
+.alert-warn{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
 
 /* DELETE BTN */
-.delete-btn{
-  background:none;color:var(--text3);font-size:1rem;
-  padding:4px;border-radius:4px;
-}
+.delete-btn{background:none;color:var(--text3);font-size:.85rem;padding:4px 6px;border-radius:4px;transition:color .15s}
 .delete-btn:hover{color:var(--red)}
 
-/* SYMPTOM TOGGLE W7/W8 */
+/* SYMPTOM TOGGLE */
 .symptom-toggle{
-  display:flex;align-items:center;gap:8px;
-  padding:10px 12px;background:var(--yellow-bg);
-  border:1px solid rgba(250,204,21,.15);
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;background:var(--yellow-bg);
+  border:1px solid var(--yellow-border);
   border-radius:var(--radius-sm);margin-bottom:12px;
-  font-size:.85rem;color:var(--yellow);
+  font-size:.83rem;color:var(--yellow);
 }
-.symptom-toggle label{flex:1;cursor:pointer}
+.symptom-toggle label{flex:1;cursor:pointer;line-height:1.4}
 
 /* SCHEDULE GRID */
 .schedule-grid{
   display:grid;grid-template-columns:auto 1fr 1fr 1fr;
-  gap:1px;font-size:.75rem;
+  gap:1px;font-size:.75rem;border-radius:6px;overflow:hidden;
 }
-.schedule-grid>div{padding:8px 6px;background:var(--surface2);text-align:center}
+.schedule-grid>div{padding:9px 8px;background:var(--surface2);text-align:center}
 .schedule-grid .sh{font-weight:700;color:var(--accent);background:var(--surface3)}
 
+/* SEPARATOR */
+.section-sep{height:1px;background:var(--border);margin:16px 0}
+
 @media(max-width:380px){
-  .field-group input{width:60px}
-  .timer-display{font-size:1.2rem}
+  .field-group input{width:58px}
+  .timer-display{font-size:1.1rem}
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>💪 Spine-Safe Strength</h1>
-  <div class="header-sub">8-Week Flexion-Sparing Program</div>
+  <div class="header-row">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12M3 8h6M3 16h6M15 8h6M15 16h6"/></svg>
+    </div>
+    <div>
+      <h1>Spine-Safe Strength</h1>
+      <div class="header-sub">8-Week Flexion-Sparing Program</div>
+    </div>
+  </div>
 </div>
 
 <div class="nav">
@@ -337,12 +331,11 @@ textarea::placeholder{color:var(--text3)}
         <option value="B">Workout B</option>
       </select>
     </div>
-    <div id="schedule-hint" style="font-size:.78rem;color:var(--text3);margin-top:4px"></div>
+    <div id="schedule-hint" style="font-size:.75rem;color:var(--text3);margin-top:4px"></div>
   </div>
 
   <div id="symptom-box"></div>
 
-  <!-- Timers -->
   <div class="card" style="padding:12px">
     <div style="display:flex;gap:8px;align-items:stretch">
       <div style="flex:1" class="timer-section" id="workout-timer-wrap">
@@ -350,7 +343,10 @@ textarea::placeholder{color:var(--text3)}
           <div class="timer-label">Workout</div>
           <div class="timer-display" id="workout-timer">00:00</div>
         </div>
-        <button class="timer-btn btn-secondary" id="workout-timer-btn">▶</button>
+        <button class="timer-btn" id="workout-timer-btn">
+          <svg id="timer-icon-play" viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+          <svg id="timer-icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+        </button>
       </div>
       <div style="flex:1" class="timer-section">
         <div style="flex:1">
@@ -363,37 +359,51 @@ textarea::placeholder{color:var(--text3)}
     <div class="progress-label" id="progress-label">0 / 0 sets</div>
   </div>
 
-  <!-- Warm-up -->
   <div class="card">
-    <div class="card-title">Warm-Up</div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+      Warm-Up
+    </div>
     <div id="warmup-list"></div>
   </div>
 
-  <!-- Exercises -->
   <div id="exercises-container"></div>
 
-  <!-- Notes -->
   <div class="card">
-    <div class="card-title">Session Notes / Symptoms</div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      Session Notes / Symptoms
+    </div>
     <textarea id="session-notes" placeholder="How did it feel? Any pain, tingling, or numbness? Compare to last session..."></textarea>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="btn-row" style="padding:0 0 16px">
-    <button class="btn btn-secondary btn-block" onclick="loadRecommended()">📋 Use Recommended</button>
-    <button class="btn btn-secondary btn-block" onclick="saveSession()">💾 Save Progress</button>
+  <div class="btn-row" style="padding:0 0 8px">
+    <button class="btn btn-secondary btn-block" onclick="loadRecommended()">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+      Use Recommended
+    </button>
+    <button class="btn btn-secondary btn-block" onclick="saveSession()">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
+      Save Progress
+    </button>
   </div>
   <div class="btn-row" style="padding:0 0 16px">
-    <button class="btn btn-success btn-block" onclick="completeWorkout()">✅ Complete Workout</button>
-    <button class="btn btn-danger btn-block" onclick="resetSession()">🗑️ Reset / Clear</button>
+    <button class="btn btn-success btn-block" onclick="completeWorkout()">
+      <span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      Complete Workout
+    </button>
+    <button class="btn btn-danger btn-block" onclick="resetSession()">
+      <span class="icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span>
+      Reset / Clear
+    </button>
   </div>
 </div>
 
 <!-- HISTORY TAB -->
 <div id="tab-history" class="tab-content">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <h2 style="font-size:1rem">Workout History</h2>
-    <button class="btn btn-danger" style="font-size:.75rem;padding:6px 12px" onclick="clearAllHistory()">Clear All</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <h2 style="font-size:1rem;font-weight:700">Workout History</h2>
+    <button class="btn btn-danger" style="font-size:.72rem;padding:6px 12px" onclick="clearAllHistory()">Clear All</button>
   </div>
   <div id="history-list"></div>
 </div>
@@ -401,7 +411,10 @@ textarea::placeholder{color:var(--text3)}
 <!-- GUIDE TAB -->
 <div id="tab-guide" class="tab-content">
   <div class="card">
-    <div class="card-title">Schedule</div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+      Schedule
+    </div>
     <div class="schedule-grid">
       <div class="sh">Week</div><div class="sh">Day 1</div><div class="sh">Day 2</div><div class="sh">Day 3</div>
       <div class="sh">Odd</div><div>A</div><div>B</div><div>A</div>
@@ -410,32 +423,41 @@ textarea::placeholder{color:var(--text3)}
   </div>
 
   <div class="card">
-    <div class="card-title">⚠️ Stop / Progress Rules</div>
-    <div class="rule"><span class="rule-icon">✅</span><span>Mild discomfort or tightness during exercise is okay.</span></div>
-    <div class="rule"><span class="rule-icon">🛑</span><span>Sharp or radiating pain → stop that exercise immediately.</span></div>
-    <div class="rule"><span class="rule-icon">🦵</span><span>If symptoms travel farther down the leg, stop that lift and note it.</span></div>
-    <div class="rule"><span class="rule-icon">🔄</span><span>If next-day symptoms are worse, repeat the last good week instead of progressing.</span></div>
-    <div class="rule"><span class="rule-icon">🐌</span><span>All reps slow and controlled: 2-3 sec down, pause, 2 sec up.</span></div>
-    <div class="rule"><span class="rule-icon">🚫</span><span>Avoid: swings, cleans, snatches, floor deadlifts, heavy RDLs, twisting, sit-ups.</span></div>
-    <div class="rule"><span class="rule-icon">🧍</span><span>Keep a neutral spine at all times. Brace before every rep.</span></div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      Stop / Progress Rules
+    </div>
+    <div class="rule"><span class="rule-icon ok">OK</span><span>Mild discomfort or tightness during exercise is okay.</span></div>
+    <div class="rule"><span class="rule-icon stop">X</span><span>Sharp or radiating pain — stop that exercise immediately.</span></div>
+    <div class="rule"><span class="rule-icon warn">!</span><span>If symptoms travel farther down the leg, stop that lift and note it.</span></div>
+    <div class="rule"><span class="rule-icon info">R</span><span>If next-day symptoms are worse, repeat the last good week instead of progressing.</span></div>
+    <div class="rule"><span class="rule-icon info">S</span><span>All reps slow and controlled: 2–3 sec down, pause, 2 sec up.</span></div>
+    <div class="rule"><span class="rule-icon stop">X</span><span>Avoid: swings, cleans, snatches, floor deadlifts, heavy RDLs, twisting, sit-ups.</span></div>
+    <div class="rule"><span class="rule-icon ok">B</span><span>Keep a neutral spine at all times. Brace before every rep.</span></div>
   </div>
 
   <div class="card">
-    <div class="card-title">Workout A Exercises</div>
-    <div class="rule"><span class="rule-icon">1</span><span><strong>Goblet Box Squat</strong> — KB at chest, sit to box, neutral spine</span></div>
-    <div class="rule"><span class="rule-icon">2</span><span><strong>Dumbbell Floor Press</strong> — Lying on floor, elbows touch ground each rep</span></div>
-    <div class="rule"><span class="rule-icon">3</span><span><strong>Supported 1-Arm Row</strong> — Hand on bench, pull to hip, no rotation</span></div>
-    <div class="rule"><span class="rule-icon">4</span><span><strong>Glute Bridge</strong> — Shoulders on floor, squeeze glutes at top, hold 1 sec</span></div>
-    <div class="rule"><span class="rule-icon">5</span><span><strong>Farmer Carry</strong> — Tall posture, brace core, even steps</span></div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+      Workout A — Exercises
+    </div>
+    <div class="rule"><span class="rule-icon num">1</span><span><strong>Goblet Box Squat</strong> — KB at chest, sit to box, neutral spine</span></div>
+    <div class="rule"><span class="rule-icon num">2</span><span><strong>Dumbbell Floor Press</strong> — Lying on floor, elbows touch ground each rep</span></div>
+    <div class="rule"><span class="rule-icon num">3</span><span><strong>Supported 1-Arm Row</strong> — Hand on bench, pull to hip, no rotation</span></div>
+    <div class="rule"><span class="rule-icon num">4</span><span><strong>Glute Bridge</strong> — Shoulders on floor, squeeze glutes at top, hold 1 sec</span></div>
+    <div class="rule"><span class="rule-icon num">5</span><span><strong>Farmer Carry</strong> — Tall posture, brace core, even steps</span></div>
   </div>
 
   <div class="card">
-    <div class="card-title">Workout B Exercises</div>
-    <div class="rule"><span class="rule-icon">1</span><span><strong>Split Squat</strong> — Stationary lunge position, vertical torso</span></div>
-    <div class="rule"><span class="rule-icon">2</span><span><strong>Dumbbell Floor Press</strong> — Same as Workout A</span></div>
-    <div class="rule"><span class="rule-icon">3</span><span><strong>Supported 1-Arm Row</strong> — Same as Workout A</span></div>
-    <div class="rule"><span class="rule-icon">4</span><span><strong>Side Plank</strong> — From knees if needed, build time gradually</span></div>
-    <div class="rule"><span class="rule-icon">5</span><span><strong>Farmer Carry</strong> — Same as Workout A</span></div>
+    <div class="card-title">
+      <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+      Workout B — Exercises
+    </div>
+    <div class="rule"><span class="rule-icon num">1</span><span><strong>Split Squat</strong> — Stationary lunge position, vertical torso</span></div>
+    <div class="rule"><span class="rule-icon num">2</span><span><strong>Dumbbell Floor Press</strong> — Same as Workout A</span></div>
+    <div class="rule"><span class="rule-icon num">3</span><span><strong>Supported 1-Arm Row</strong> — Same as Workout A</span></div>
+    <div class="rule"><span class="rule-icon num">4</span><span><strong>Side Plank</strong> — From knees if needed, build time gradually</span></div>
+    <div class="rule"><span class="rule-icon num">5</span><span><strong>Farmer Carry</strong> — Same as Workout A</span></div>
   </div>
 </div>
 
@@ -450,33 +472,31 @@ textarea::placeholder{color:var(--text3)}
     </svg>
     <div class="timer-inner">
       <div class="timer-display" id="rest-display">90</div>
-      <div style="font-size:.8rem;color:var(--text3)">seconds</div>
+      <div style="font-size:.78rem;color:var(--text3);letter-spacing:.05em">seconds</div>
     </div>
   </div>
-  <div style="display:flex;gap:12px;margin-top:8px">
-    <button class="btn btn-secondary" onclick="adjustRest(-15)">−15s</button>
-    <button class="btn btn-danger" onclick="skipRest()" style="padding:10px 28px">Skip</button>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button class="btn btn-secondary" onclick="adjustRest(-15)">-15s</button>
+    <button class="btn btn-danger" onclick="skipRest()" style="padding:10px 32px">Skip</button>
     <button class="btn btn-secondary" onclick="adjustRest(15)">+15s</button>
   </div>
 </div>
 
 <script>
-// ========== PROGRAM DATA ==========
-const WARMUP = [
-  {id:'w1',text:'Walk 5–10 min',detail:'Easy pace, loosen up'},
+const WARMUP=[
+  {id:'w1',text:'Walk 5\u201310 min',detail:'Easy pace, loosen up'},
   {id:'w2',text:'Press-ups (optional)',detail:'Only if they reduce leg symptoms'},
-  {id:'w3',text:'McGill Curl-Up',detail:'2 × 5 each side'},
-  {id:'w4',text:'Side Plank',detail:'2 × 15–20 sec/side'},
-  {id:'w5',text:'Bird Dog',detail:'2 × 5 each side'},
-  {id:'w6',text:'BW Box Squat',detail:'1 × 8 reps'},
+  {id:'w3',text:'McGill Curl-Up',detail:'2 \u00d7 5 each side'},
+  {id:'w4',text:'Side Plank',detail:'2 \u00d7 15\u201320 sec/side'},
+  {id:'w5',text:'Bird Dog',detail:'2 \u00d7 5 each side'},
+  {id:'w6',text:'BW Box Squat',detail:'1 \u00d7 8 reps'},
 ];
 
-// t = "timed" set (seconds), r = reps
 function ex(name,weight,unit,sets,reps,mode,perSide){
   return {name,weight,unit,sets,reps,mode:mode||'r',perSide:!!perSide};
 }
 
-const PROGRAM = {
+const PROGRAM={
   1:{
     A:[ex('Goblet Box Squat','35','KB',3,8),ex('DB Floor Press','25s','DB',3,10),ex('1-Arm Row','25','DB',3,10,'r',true),ex('Glute Bridge','BW','',3,12),ex('Farmer Carry','25s','DB',3,20,'t')],
     B:[ex('Split Squat','BW','',3,8,'r',true),ex('DB Floor Press','25s','DB',3,10),ex('1-Arm Row','25','DB',3,10,'r',true),ex('Side Plank','BW','',2,15,'t',true),ex('Farmer Carry','25s','DB',3,20,'t')]
@@ -523,66 +543,58 @@ const PROGRAM = {
   }
 };
 
-// ========== STATE ==========
-let state = {
-  week:1, workout:'A', symptomFree:true,
-  warmup:{}, exercises:[], sets:{}, notes:'',
-  workoutTimerRunning:false, workoutSeconds:0
+let state={
+  week:1,workout:'A',symptomFree:true,
+  warmup:{},exercises:[],sets:{},notes:'',
+  workoutTimerRunning:false,workoutSeconds:0
 };
-let workoutInterval = null;
-let restInterval = null;
-let restRemaining = 0;
-let restTotal = 0;
+let workoutInterval=null;
+let restInterval=null;
+let restRemaining=0;
+let restTotal=0;
 
-// ========== INIT ==========
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 
 function init(){
-  // Populate week selector
   const sel=$('#sel-week');
   for(let i=1;i<=8;i++){
     const o=document.createElement('option');
-    o.value=i; o.textContent=`Week ${i}`;
+    o.value=i;o.textContent=`Week ${i}`;
     sel.appendChild(o);
   }
   sel.addEventListener('change',onSelectionChange);
   $('#sel-workout').addEventListener('change',onSelectionChange);
 
-  // Tab nav
   $$('.nav button').forEach(b=>{
     b.addEventListener('click',()=>{
       $$('.nav button').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
       $$('.tab-content').forEach(t=>t.classList.remove('active'));
       $(`#tab-${b.dataset.tab}`).classList.add('active');
-      if(b.dataset.tab==='history') renderHistory();
+      if(b.dataset.tab==='history')renderHistory();
     });
   });
 
-  // Workout timer
   $('#workout-timer-btn').addEventListener('click',toggleWorkoutTimer);
-
-  // Load saved or default
-  loadSaved() || loadRecommended();
+  loadSaved()||loadRecommended();
   renderWarmup();
 }
 
 function onSelectionChange(){
-  state.week = parseInt($('#sel-week').value);
-  state.workout = $('#sel-workout').value;
+  state.week=parseInt($('#sel-week').value);
+  state.workout=$('#sel-workout').value;
   updateScheduleHint();
   loadRecommended();
 }
 
 function updateScheduleHint(){
-  const w=state.week; const isOdd=w%2===1;
+  const w=state.week;const isOdd=w%2===1;
   const pattern=isOdd?['A','B','A']:['B','A','B'];
   $('#schedule-hint').innerHTML=
-    `Week ${w} schedule: ${pattern.map((p,i)=>`<strong>Day ${i+1}: ${p}</strong>`).join(' · ')}`;
+    `Week ${w} schedule: ${pattern.map((p,i)=>`<strong>Day ${i+1}: ${p}</strong>`).join(' \u00b7 ')}`;
 }
 
-// ========== WARMUP ==========
 function renderWarmup(){
   const c=$('#warmup-list');
   c.innerHTML=WARMUP.map(w=>`
@@ -596,24 +608,19 @@ function renderWarmup(){
   `).join('');
 }
 
-// ========== GET EXERCISES FOR WEEK ==========
 function getRecommendedExercises(week,workout,symptomFree){
   const wd=PROGRAM[week];
-  if(!wd) return [];
+  if(!wd)return[];
   const wk=wd[workout];
-  if(!wk) return [];
-  if(Array.isArray(wk)) return wk.map(e=>({...e}));
-  // Week 7/8 conditional
+  if(!wk)return[];
+  if(Array.isArray(wk))return wk.map(e=>({...e}));
   const key=symptomFree?'symptomFree':'conservative';
-  return (wk[key]||[]).map(e=>({...e}));
+  return(wk[key]||[]).map(e=>({...e}));
 }
 
-// ========== RENDER ==========
 function loadRecommended(){
-  const week=state.week;
-  const workout=state.workout;
   renderSymptomBox();
-  state.exercises=getRecommendedExercises(week,workout,state.symptomFree);
+  state.exercises=getRecommendedExercises(state.week,state.workout,state.symptomFree);
   state.sets={};
   state.warmup={};
   state.notes='';
@@ -632,10 +639,10 @@ function renderSymptomBox(){
         <input type="checkbox" id="symptom-free-check" ${state.symptomFree?'checked':''}
           onchange="state.symptomFree=this.checked;reloadForSymptom()">
         <label for="symptom-free-check">
-          <strong>Symptom-free?</strong> Check if you've had no increased pain. Uncheck for conservative loads.
+          <strong>Symptom-free?</strong> Check if you\u2019ve had no increased pain. Uncheck for conservative loads.
         </label>
       </div>`;
-  } else {
+  }else{
     box.innerHTML='';
   }
 }
@@ -654,15 +661,18 @@ function renderExercises(){
       const key=`${ei}-${si}`;
       const done=state.sets[key];
       const label=ex.mode==='t'
-        ? `${ex.reps}s${ex.perSide?' /side':''}`
-        : `${ex.reps} reps${ex.perSide?' /side':''}`;
+        ?`${ex.reps}s${ex.perSide?' /side':''}`
+        :`${ex.reps} reps${ex.perSide?' /side':''}`;
       return `
         <div class="set-row ${done?'done':''}" id="set-${key}">
           <input type="checkbox" ${done?'checked':''}
             onchange="toggleSet('${key}',this.checked)">
           <span class="set-label">Set ${si+1}</span>
           <span class="set-info">${label}</span>
-          <button class="set-rest-btn" onclick="startRest()">⏱ Rest</button>
+          <button class="set-rest-btn" onclick="startRest()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Rest
+          </button>
         </div>`;
     }).join('');
 
@@ -670,7 +680,7 @@ function renderExercises(){
     <div class="card exercise-block">
       <div class="exercise-header">
         <span class="exercise-name">${ex.name}</span>
-        <span style="font-size:.75rem;color:var(--text3)">${ex.perSide?'Per side':''}</span>
+        ${ex.perSide?'<span class="exercise-tag">Per side</span>':''}
       </div>
       <div class="exercise-fields">
         <div class="field-group">
@@ -703,16 +713,18 @@ function updateField(el){
   const ei=parseInt(el.dataset.ei);
   const field=el.dataset.field;
   state.exercises[ei][field]=el.type==='number'?parseInt(el.value):el.value;
+  if(field==='reps'){
+    renderExercises();
+  }
 }
 
 function updateSets(el){
   const ei=parseInt(el.dataset.ei);
   const newSets=Math.max(1,Math.min(10,parseInt(el.value)||1));
   state.exercises[ei].sets=newSets;
-  // clean up extra set checkboxes
   Object.keys(state.sets).forEach(k=>{
-    const [e,s]=k.split('-').map(Number);
-    if(e===ei && s>=newSets) delete state.sets[k];
+    const[e,s]=k.split('-').map(Number);
+    if(e===ei&&s>=newSets)delete state.sets[k];
   });
   renderExercises();
   updateProgress();
@@ -721,33 +733,33 @@ function updateSets(el){
 function toggleSet(key,checked){
   state.sets[key]=checked;
   const row=$(`#set-${key}`);
-  if(row) row.classList.toggle('done',checked);
+  if(row)row.classList.toggle('done',checked);
   updateProgress();
 }
 
-// ========== PROGRESS ==========
 function updateProgress(){
-  let total=0, done=0;
+  let total=0,done=0;
   state.exercises.forEach((ex,ei)=>{
     for(let si=0;si<ex.sets;si++){
       total++;
-      if(state.sets[`${ei}-${si}`]) done++;
+      if(state.sets[`${ei}-${si}`])done++;
     }
   });
   const pct=total?Math.round(done/total*100):0;
   $('#progress-bar').style.width=pct+'%';
-  $('#progress-label').textContent=`${done} / ${total} sets · ${pct}%`;
+  $('#progress-label').textContent=`${done} / ${total} sets \u00b7 ${pct}%`;
 }
 
-// ========== WORKOUT TIMER ==========
 function toggleWorkoutTimer(){
   if(state.workoutTimerRunning){
     clearInterval(workoutInterval);
     state.workoutTimerRunning=false;
-    $('#workout-timer-btn').textContent='▶';
-  } else {
+    $('#timer-icon-play').style.display='';
+    $('#timer-icon-pause').style.display='none';
+  }else{
     state.workoutTimerRunning=true;
-    $('#workout-timer-btn').textContent='⏸';
+    $('#timer-icon-play').style.display='none';
+    $('#timer-icon-pause').style.display='';
     workoutInterval=setInterval(()=>{
       state.workoutSeconds++;
       const m=String(Math.floor(state.workoutSeconds/60)).padStart(2,'0');
@@ -757,7 +769,6 @@ function toggleWorkoutTimer(){
   }
 }
 
-// ========== REST TIMER ==========
 function startRest(){
   restTotal=parseInt($('#rest-duration').value)||90;
   restRemaining=restTotal;
@@ -779,7 +790,7 @@ function startRest(){
 
 function updateRestDisplay(){
   $('#rest-display').textContent=restRemaining;
-  const circ=553; // 2πr
+  const circ=553;
   const offset=circ*(1-restRemaining/restTotal);
   $('#rest-ring-fg').style.strokeDashoffset=offset;
 }
@@ -795,7 +806,6 @@ function skipRest(){
   $('#rest-overlay').classList.remove('active');
 }
 
-// ========== SAVE / LOAD ==========
 function saveSession(){
   const key=`session-w${state.week}-${state.workout}`;
   const data={
@@ -809,13 +819,13 @@ function saveSession(){
     savedAt:new Date().toISOString()
   };
   localStorage.setItem(key,JSON.stringify(data));
-  showToast('Progress saved!');
+  showToast('Progress saved');
 }
 
 function loadSaved(){
   const key=`session-w${state.week}-${state.workout}`;
   const raw=localStorage.getItem(key);
-  if(!raw) return false;
+  if(!raw)return false;
   try{
     const data=JSON.parse(raw);
     state.week=data.week;
@@ -847,35 +857,27 @@ function completeWorkout(){
   state.exercises.forEach((ex,ei)=>{
     for(let si=0;si<ex.sets;si++){
       total++;
-      if(state.sets[`${ei}-${si}`]) done++;
+      if(state.sets[`${ei}-${si}`])done++;
     }
   });
   const entry={
     date:new Date().toISOString(),
-    week:state.week,
-    workout:state.workout,
+    week:state.week,workout:state.workout,
     symptomFree:state.symptomFree,
     exercises:state.exercises.map(e=>({...e})),
-    setsCompleted:done,
-    setsTotal:total,
-    duration:state.workoutSeconds,
-    notes
+    setsCompleted:done,setsTotal:total,
+    duration:state.workoutSeconds,notes
   };
   history.unshift(entry);
   localStorage.setItem('workout-history',JSON.stringify(history));
-
-  // Clear in-progress save
   const key=`session-w${state.week}-${state.workout}`;
   localStorage.removeItem(key);
-
-  showToast('Workout logged! 💪');
-
-  // Stop timer
-  if(state.workoutTimerRunning) toggleWorkoutTimer();
+  showToast('Workout logged');
+  if(state.workoutTimerRunning)toggleWorkoutTimer();
 }
 
 function resetSession(){
-  if(!confirm('Clear all current workout data?')) return;
+  if(!confirm('Clear all current workout data?'))return;
   const key=`session-w${state.week}-${state.workout}`;
   localStorage.removeItem(key);
   state.sets={};
@@ -884,14 +886,13 @@ function resetSession(){
   state.notes='';
   $('#session-notes').value='';
   $('#workout-timer').textContent='00:00';
-  if(state.workoutTimerRunning) toggleWorkoutTimer();
+  if(state.workoutTimerRunning)toggleWorkoutTimer();
   renderWarmup();
   renderExercises();
   updateProgress();
   showToast('Session cleared');
 }
 
-// ========== HISTORY ==========
 function renderHistory(){
   const history=JSON.parse(localStorage.getItem('workout-history')||'[]');
   const c=$('#history-list');
@@ -902,12 +903,12 @@ function renderHistory(){
   c.innerHTML=history.map((h,i)=>{
     const d=new Date(h.date);
     const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    const dur=h.duration?`${Math.floor(h.duration/60)}m ${h.duration%60}s`:'—';
+    const dur=h.duration?`${Math.floor(h.duration/60)}m ${h.duration%60}s`:'\u2014';
     const details=h.exercises.map(e=>{
       const u=e.unit?` ${e.unit}`:'';
       const ps=e.perSide?' /side':'';
       const label=e.mode==='t'?`${e.reps}s${ps}`:`${e.reps}${ps}`;
-      return `${e.name}: ${e.weight}${u} ${e.sets}×${label}`;
+      return `${e.name}: ${e.weight}${u} ${e.sets}\u00d7${label}`;
     }).join('<br>');
     const pct=h.setsTotal?Math.round(h.setsCompleted/h.setsTotal*100):0;
     return `
@@ -916,18 +917,18 @@ function renderHistory(){
           <span class="history-date">${dateStr}</span>
           <div style="display:flex;gap:6px;align-items:center">
             <span class="history-badge">W${h.week} ${h.workout}</span>
-            <span class="history-badge" style="${pct===100?'background:var(--green-bg);color:var(--green)':''}">${pct}%</span>
-            <button class="delete-btn" onclick="deleteHistory(${i})" title="Delete">✕</button>
+            <span class="history-badge ${pct===100?'complete':''}">${pct}%</span>
+            <button class="delete-btn" onclick="deleteHistory(${i})" title="Delete">&times;</button>
           </div>
         </div>
-        <div class="history-detail">${details}<br>⏱ ${dur}</div>
-        ${h.notes?`<div class="history-notes">📝 ${h.notes}</div>`:''}
+        <div class="history-detail">${details}<br>Duration: ${dur}</div>
+        ${h.notes?`<div class="history-notes">${h.notes}</div>`:''}
       </div>`;
   }).join('');
 }
 
 function deleteHistory(idx){
-  if(!confirm('Delete this entry?')) return;
+  if(!confirm('Delete this entry?'))return;
   const history=JSON.parse(localStorage.getItem('workout-history')||'[]');
   history.splice(idx,1);
   localStorage.setItem('workout-history',JSON.stringify(history));
@@ -935,22 +936,22 @@ function deleteHistory(idx){
 }
 
 function clearAllHistory(){
-  if(!confirm('Delete ALL workout history? This cannot be undone.')) return;
+  if(!confirm('Delete ALL workout history? This cannot be undone.'))return;
   localStorage.removeItem('workout-history');
   renderHistory();
   showToast('History cleared');
 }
 
-// ========== TOAST ==========
 function showToast(msg){
   let t=document.createElement('div');
   t.textContent=msg;
   Object.assign(t.style,{
     position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',
-    background:'var(--accent)',color:'#fff',padding:'10px 20px',
-    borderRadius:'8px',fontSize:'.88rem',fontWeight:'600',
+    background:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+    color:'#111',padding:'10px 24px',
+    borderRadius:'8px',fontSize:'.85rem',fontWeight:'700',
     zIndex:'999',opacity:'0',transition:'opacity .3s',
-    boxShadow:'0 4px 20px rgba(0,0,0,.4)'
+    boxShadow:'0 4px 24px rgba(0,0,0,.5)',letterSpacing:'.01em'
   });
   document.body.appendChild(t);
   requestAnimationFrame(()=>t.style.opacity='1');
@@ -960,7 +961,6 @@ function showToast(msg){
   },2000);
 }
 
-// ========== BOOT ==========
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
