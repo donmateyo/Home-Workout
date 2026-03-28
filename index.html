@@ -9,12 +9,11 @@
     <style>
         :root {
             --bg: #050505;
-            --bg-card: #111113;
-            --border: #1f1f23;
-            --fg: #fafafa;
-            --muted: #71717a;
-            --accent: #34d399; /* Emerald */
-            --accent-dim: rgba(52, 211, 153, 0.1);
+            --card: #0f0f11;
+            --border: #1a1a1d;
+            --text: #e5e5e5;
+            --muted: #6b7280;
+            --accent: #10b981; /* Emerald */
         }
 
         * {
@@ -23,45 +22,48 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
-            color: var(--fg);
-            height: 100vh; /* Fallback */
-            height: 100dvh; /* Dynamic viewport height for mobile */
+            color: var(--text);
+            height: 100dvh; /* Dynamic height for mobile */
+            width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            margin: 0;
         }
 
         h1, h2, h3, .font-display {
             font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* Scrollable level container */
-        .levels-scroll {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .levels-scroll::-webkit-scrollbar {
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-        /* Checkbox styling */
+        /* Custom Checkbox */
         .set-check {
             appearance: none;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border: 1px solid var(--border);
-            background: #0a0a0a;
+            background: #000;
             border-radius: 50%;
             cursor: pointer;
             position: relative;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         .set-check:checked {
             background: var(--accent);
             border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
         }
 
         .set-check:checked::after {
@@ -70,462 +72,437 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
-            background: var(--bg);
+            width: 8px;
+            height: 8px;
+            background: #000;
             border-radius: 50%;
         }
 
-        /* Input styling */
+        /* Level Pill */
+        .level-pill {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            background: #1a1a1d;
+            color: var(--muted);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .level-pill.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Input Resets */
         input[type="number"] {
             -moz-appearance: textfield;
-            background: #0a0a0a;
-            border: 1px solid var(--border);
-            color: var(--fg);
-            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            width: 32px;
             text-align: center;
-            font-weight: 600;
-            width: 48px;
-            padding: 4px;
         }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-
-        /* Modal/Overlay base */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(20px);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Tooltip for muscle groups */
-        .tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #222;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            margin-bottom: 5px;
-        }
         
-        .has-tooltip:hover .tooltip {
-            opacity: 1;
-        }
-
-        /* Animation */
-        @keyframes slideUp {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .exercise-row {
-            animation: slideUp 0.4s ease forwards;
-        }
-
-        /* Safe area for modern iPhones */
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            .footer-btn {
-                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-            }
+        /* Safe Area Padding for Footer */
+        .footer-safe {
+            padding-bottom: env(safe-area-inset-bottom, 12px);
         }
     </style>
 </head>
 <body>
 
-    <!-- Main App Container -->
-    <div class="flex flex-col h-full w-full max-w-md mx-auto">
-
-        <!-- Header -->
-        <header class="flex items-center justify-between px-4 py-3 border-b border-[#1f1f23] flex-shrink-0">
-            <div>
-                <h1 class="text-lg font-bold tracking-tight leading-none">Bodyweight Pro</h1>
-                <p class="text-[10px] text-[#71717a] mt-1 uppercase tracking-widest">Fundamental Routine</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="historyBtn" aria-label="History" class="text-[#71717a] hover:text-white transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <!-- Header -->
+    <header class="flex-shrink-0 px-4 pt-2 pb-1 border-b border-[#1a1a1d]">
+        <div class="flex justify-between items-center h-10">
+            <h1 class="text-lg font-bold tracking-tight leading-none">Routine</h1>
+            <div class="flex items-center gap-3">
+                <button id="histBtn" class="p-1 opacity-60 hover:opacity-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </button>
                 <div class="flex items-center gap-1.5 text-emerald-400">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25"/></svg>
-                    <span id="streakNum" class="text-sm font-bold">0</span>
+                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25"/></svg>
+                   <span id="streakNum" class="text-xs font-bold">0</span>
                 </div>
             </div>
-        </header>
-
-        <!-- Exercise List (Scroll container for small screens, but fits iPhone 16 PM) -->
-        <div id="exerciseList" class="flex-1 overflow-y-auto px-2 py-2 space-y-2">
-            <!-- JS injects rows here -->
         </div>
+    </header>
 
-        <!-- Footer -->
-        <footer class="flex-shrink-0 border-t border-[#1f1f23] bg-[#0a0a0a]">
-            <div class="flex items-center justify-between px-4 py-2 text-xs text-[#71717a]">
-                <div class="flex items-center gap-1">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span>Completed: <span id="completedCount" class="text-white font-medium">0</span>/6</span>
-                </div>
-                <div>
-                    Total Vol: <span id="totalVol" class="text-white font-medium">0</span> reps
+    <!-- Main List Container -->
+    <main id="listContainer" class="flex-1 overflow-y-auto hide-scrollbar px-3 py-2 space-y-2">
+        <!-- JS injects rows here -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex-shrink-0 border-t border-[#1a1a1d] bg-[#0a0a0a] footer-safe">
+        <div class="flex items-center justify-between px-4 py-1 text-[10px] text-[#6b7280] uppercase tracking-wider">
+            <span>Progress: <span id="progCount" class="text-white font-bold">0/6</span></span>
+            <span>Volume: <span id="volCount" class="text-white font-bold">0</span> reps</span>
+        </div>
+        <button id="mainAction" class="w-full py-3 bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 active:scale-[0.98] transition-all">
+            Start
+        </button>
+    </footer>
+
+    <!-- Timer Overlay -->
+    <div id="timerOverlay" class="overlay flex-col">
+        <div class="text-center">
+            <p class="text-xs uppercase tracking-[0.2em] text-[#6b7280] mb-6">Rest Period</p>
+            <div class="relative w-40 h-40 mx-auto mb-6">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" stroke="#1a1a1d" stroke-width="4" fill="none"/>
+                    <circle id="timerRing" cx="50" cy="50" r="45" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="timerDisplay" class="text-5xl font-bold font-display">60</span>
                 </div>
             </div>
-            <button id="mainActionBtn" class="footer-btn w-full py-4 bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 transition-colors active:scale-95">
-                Start Workout
-            </button>
-        </footer>
-    </div>
-
-    <!-- Rest Timer Overlay -->
-    <div id="timerOverlay" class="overlay flex-col text-center">
-        <p class="text-xs uppercase tracking-[0.3em] text-[#71717a] mb-4">Rest Timer</p>
-        <div class="relative w-48 h-48 flex items-center justify-center mb-6">
-            <svg class="absolute w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" stroke="#1f1f23" stroke-width="6" fill="none"/>
-                <circle id="timerCircle" cx="50" cy="50" r="45" stroke="#34d399" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0"></circle>
-            </svg>
-            <span id="timerVal" class="text-5xl font-bold font-display">90</span>
-        </div>
-        <p id="nextExName" class="text-lg font-medium mb-8">Next: Push-ups</p>
-        <div class="flex gap-4">
-            <button id="skipBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">Skip</button>
-            <button id="addTimeBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">+30s</button>
+            <p id="timerNextLabel" class="text-sm text-white mb-8">Next: Exercise</p>
+            <div class="flex gap-3 justify-center">
+                <button id="skipBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">Skip</button>
+                <button id="addTimeBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">+30s</button>
+            </div>
         </div>
     </div>
 
     <!-- History Overlay -->
-    <div id="historyOverlay" class="overlay flex-col justify-start pt-12">
-        <div class="w-full max-w-md">
-            <div class="flex justify-between items-center mb-6 px-2">
-                <h2 class="text-2xl font-bold font-display">History</h2>
-                <button id="closeHistBtn" class="p-2 hover:bg-white/5 rounded-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    <div id="histOverlay" class="overlay justify-start pt-10 overflow-y-auto">
+        <div class="w-full max-w-md mx-auto px-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold font-display">History</h2>
+                <button id="closeHistBtn" class="p-2 hover:bg-white/5 rounded-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div id="historyList" class="h-[60vh] overflow-y-auto space-y-3 px-2">
-                <!-- History injected here -->
+            <div id="histList" class="space-y-2 pb-10">
+                <!-- History content -->
             </div>
         </div>
     </div>
 
     <script>
-        // --- Data & State ---
-        const ROUTINE = [
-            { id: 'push', name: 'Push-ups', muscles: 'Chest, Triceps, Front Delts', levels: ['Wall', 'Incline', 'Kneeling', 'Regular', 'Decline', 'Diamond', 'Archer', 'One-Arm'], defLevel: 3, defSets: 3, defReps: 10 },
-            { id: 'squat', name: 'Squats', muscles: 'Quads, Glutes, Core', levels: ['Assisted', 'Quarter', 'Half', 'Parallel', 'Deep', 'Pistol Prep', 'Pistol'], defLevel: 3, defSets: 3, defReps: 12 },
-            { id: 'pull', name: 'Pull-ups', muscles: 'Lats, Biceps, Grip', levels: ['Dead Hang', 'Scapular', 'Chin Neg', 'Chin-up', 'Pull-up', 'Wide Grip', 'Weighted'], defLevel: 3, defSets: 3, defReps: 5 },
-            { id: 'dip', name: 'Dips', muscles: 'Triceps, Lower Chest', levels: ['Bench', 'Assisted', 'Parallel Neg', 'Parallel', 'Deep', 'Weighted'], defLevel: 0, defSets: 3, defReps: 10 },
-            { id: 'hinge', name: 'Leg Raises', muscles: 'Abs, Hip Flexors', levels: ['Knee Tuck', 'Flat Knee', 'Flat Leg', 'Hanging Knee', 'Hanging Leg', 'Toes-to-Bar'], defLevel: 1, defSets: 3, defReps: 12 },
-            { id: 'lunge', name: 'Lunges', muscles: 'Quads, Glutes, Balance', levels: ['Assisted', 'Static', 'Forward', 'Reverse', 'Walking', 'Jumping', 'Bulgarian'], defLevel: 2, defSets: 3, defReps: 10 }
+        // --- 1. DATA & CONFIG ---
+        const EXERCISES = [
+            { id: 'push', name: 'Push-ups', levels: ['Wall', 'Incline', 'Kneeling', 'Standard', 'Decline', 'Diamond', 'Archer'], defLevel: 3, defSets: 3, defReps: 10 },
+            { id: 'squat', name: 'Squats', levels: ['Assisted', 'Partial', 'Parallel', 'Deep', 'Pistol-Assist', 'Pistol'], defLevel: 3, defSets: 3, defReps: 12 },
+            { id: 'pull', name: 'Pull-ups', levels: ['Dead Hang', 'Scapular', 'Negatives', 'Chin-up', 'Pull-up', 'Wide Grip', 'Weighted'], defLevel: 3, defSets: 3, defReps: 5 },
+            { id: 'dip', name: 'Dips', levels: ['Bench', 'Assisted', 'Negatives', 'Standard', 'Deep', 'Weighted'], defLevel: 0, defSets: 3, defReps: 10 },
+            { id: 'hinge', name: 'Leg Raises', levels: ['Knee Tucks', 'Floor Raises', 'Hanging Knee', 'Hanging Leg', 'Toes-to-Bar'], defLevel: 1, defSets: 3, defReps: 12 },
+            { id: 'lunge', name: 'Lunges', levels: ['Assisted', 'Static', 'Forward', 'Reverse', 'Walking', 'Jumping'], defLevel: 2, defSets: 3, defReps: 10 }
         ];
 
-        const LS_KEY = 'bwProData';
+        const STORE_KEY = 'bwp_v1';
         let state = loadState();
         let timerInterval = null;
-        let timerTime = 0;
 
         function loadState() {
-            const data = localStorage.getItem(LS_KEY);
-            if (!data) {
-                const initial = { exercises: {}, history: [], streak: 0 };
-                ROUTINE.forEach(ex => {
-                    initial.exercises[ex.id] = { level: ex.defLevel, sets: ex.defSets, reps: ex.defReps, done: [] };
-                });
-                return initial;
+            try {
+                const data = localStorage.getItem(STORE_KEY);
+                if (!data) return initFreshState();
+                return JSON.parse(data);
+            } catch (e) {
+                return initFreshState();
             }
-            return JSON.parse(data);
+        }
+
+        function initFreshState() {
+            const s = { ex: {}, hist: [], streak: 0 };
+            EXERCISES.forEach(e => {
+                s.ex[e.id] = { lvl: e.defLevel, sets: e.defSets, reps: e.defReps, done: [] };
+            });
+            return s;
         }
 
         function saveState() {
-            localStorage.setItem(LS_KEY, JSON.stringify(state));
+            localStorage.setItem(STORE_KEY, JSON.stringify(state));
         }
 
-        // --- Rendering ---
-        function renderList() {
-            const container = document.getElementById('exerciseList');
-            container.innerHTML = '';
+        // --- 2. RENDERING ---
+        const listContainer = document.getElementById('listContainer');
+        const progCountEl = document.getElementById('progCount');
+        const volCountEl = document.getElementById('volCount');
+        const streakEl = document.getElementById('streakNum');
+        const mainActionBtn = document.getElementById('mainAction');
 
-            ROUTINE.forEach((ex, index) => {
-                const exState = state.exercises[ex.id];
-                const row = document.createElement('div');
-                row.className = 'exercise-row bg-[#111113] rounded-lg border border-[#1f1f23] p-2.5 flex flex-col gap-2';
-                row.style.animationDelay = `${index * 50}ms`;
+        function renderAll() {
+            listContainer.innerHTML = '';
+            let completedCount = 0;
+            let totalVol = 0;
 
-                // Level pills HTML generation
-                let pillsHtml = ex.levels.map((lvl, i) => 
-                    `<button class="lvl-btn px-2.5 py-1 rounded text-[10px] font-medium transition-colors whitespace-nowrap ${i === exState.level ? 'bg-emerald-500 text-black' : 'bg-[#0a0a0a] text-[#71717a] hover:text-white'}" data-lvl="${i}">${lvl}</button>`
-                ).join('');
+            EXERCISES.forEach(ex => {
+                const st = state.ex[ex.id];
+                const doneCount = st.done.filter(Boolean).length;
+                if (doneCount >= st.sets) completedCount++;
+                totalVol += st.done.reduce((a, b) => a + (b || 0), 0);
 
-                // Checkboxes
-                let checksHtml = '';
-                for(let i=0; i<exState.sets; i++) {
-                    checksHtml += `<input type="checkbox" class="set-check" data-idx="${i}" ${exState.done[i] ? 'checked' : ''} aria-label="Set ${i+1}">`;
-                }
-
-                row.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div class="has-tooltip relative">
-                            <h3 class="text-sm font-semibold font-display text-white">${ex.name}</h3>
-                            <div class="tooltip">${ex.muscles}</div>
-                        </div>
-                        <div class="flex items-center gap-2 text-[#71717a]">
-                            <div class="flex items-center gap-1 text-xs">
-                                <input type="number" class="h-6 text-xs w-7 p-0 border-0 bg-transparent text-center font-bold text-white" value="${exState.sets}" min="1" max="10" data-field="sets" aria-label="Sets">
-                                <span class="opacity-50">x</span>
-                                <input type="number" class="h-6 text-xs w-9 p-0 border-0 bg-transparent text-center font-bold text-white" value="${exState.reps}" min="1" max="100" data-field="reps" aria-label="Reps">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="levels-scroll flex gap-1 overflow-x-auto pb-1 -mb-1">
-                        ${pillsHtml}
-                    </div>
-                    <div class="flex justify-between items-center pt-1 border-t border-[#1f1f23]">
-                        <div class="text-[10px] text-[#71717a] uppercase tracking-wider">Progression</div>
-                        <div class="flex gap-2">
-                            ${checksHTML}
-                        </div>
+                const card = document.createElement('div');
+                card.className = 'bg-[#0f0f11] rounded-lg border border-[#1a1a1d] p-3 space-y-2';
+                
+                // Header Row
+                const topRow = document.createElement('div');
+                topRow.className = 'flex justify-between items-center';
+                topRow.innerHTML = `
+                    <h3 class="font-bold text-sm">${ex.name}</h3>
+                    <div class="flex items-center gap-1 text-xs text-[#6b7280]">
+                        <input type="number" class="sets-input" data-id="${ex.id}" value="${st.sets}" min="1" max="10">
+                        <span class="opacity-70 font-sans">×</span>
+                        <input type="number" class="reps-input" data-id="${ex.id}" value="${st.reps}" min="1" max="100">
                     </div>
                 `;
+                card.appendChild(topRow);
 
-                // Correct the innerHTML construction for checkboxes
-                const checkContainer = row.querySelector('.flex.gap-2');
-                for(let i=0; i<exState.sets; i++) {
+                // Levels Row
+                const lvlRow = document.createElement('div');
+                lvlRow.className = 'flex gap-1 overflow-x-auto hide-scrollbar py-1';
+                ex.levels.forEach((lvlName, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `level-pill ${idx === st.lvl ? 'active' : ''}`;
+                    btn.textContent = lvlName;
+                    btn.onclick = () => {
+                        state.ex[ex.id].lvl = idx;
+                        saveState();
+                        renderAll();
+                    };
+                    lvlRow.appendChild(btn);
+                });
+                card.appendChild(lvlRow);
+
+                // Checkboxes Row
+                const checkRow = document.createElement('div');
+                checkRow.className = 'flex items-center justify-between pt-1 border-t border-[#1a1a1d]';
+                
+                const label = document.createElement('span');
+                label.className = 'text-[10px] text-[#6b7280] uppercase tracking-wider';
+                label.textContent = 'Sets';
+                checkRow.appendChild(label);
+
+                const checksContainer = document.createElement('div');
+                checksContainer.className = 'flex gap-2';
+                
+                for (let i = 0; i < st.sets; i++) {
                     const chk = document.createElement('input');
                     chk.type = 'checkbox';
                     chk.className = 'set-check';
-                    chk.dataset.idx = i;
-                    chk.checked = exState.done[i] ? true : false;
-                    chk.setAttribute('aria-label', `Set ${i+1}`);
-                    checkContainer.appendChild(chk);
-                }
-
-                // Events
-                row.querySelectorAll('.lvl-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        state.exercises[ex.id].level = parseInt(btn.dataset.lvl);
-                        saveState();
-                        renderList();
-                    });
-                });
-
-                row.querySelectorAll('input[data-field]').forEach(inp => {
-                    inp.addEventListener('change', (e) => {
-                        const val = parseInt(e.target.value) || 1;
-                        state.exercises[ex.id][e.target.dataset.field] = val;
-                        // Reset done if sets change?
-                        if(e.target.dataset.field === 'sets') state.exercises[ex.id].done = [];
-                        saveState();
-                        renderList();
-                    });
-                });
-
-                row.querySelectorAll('.set-check').forEach(chk => {
-                    chk.addEventListener('change', (e) => {
-                        const idx = parseInt(e.target.dataset.idx);
-                        if(!state.exercises[ex.id].done) state.exercises[ex.id].done = [];
+                    chk.checked = !!st.done[i];
+                    chk.onchange = (e) => {
+                        // If checked, set to target reps, else false
                         if(e.target.checked) {
-                            state.exercises[ex.id].done[idx] = state.exercises[ex.id].reps; // default to target reps
+                            state.ex[ex.id].done[i] = state.ex[ex.id].reps;
                         } else {
-                            state.exercises[ex.id].done[idx] = false;
+                            state.ex[ex.id].done[i] = false;
                         }
                         saveState();
-                        updateStats();
-                    });
-                });
+                        updateStats(); // Just update stats, no full re-render needed for checkbox click
+                    };
+                    checksContainer.appendChild(chk);
+                }
+                checkRow.appendChild(checksContainer);
+                card.appendChild(checkRow);
 
-                container.appendChild(row);
+                listContainer.appendChild(card);
             });
-            updateStats();
+
+            // Update Stats
+            progCountEl.textContent = `${completedCount}/6`;
+            volCountEl.textContent = totalVol;
+            streakEl.textContent = state.streak;
+
+            if (completedCount === EXERCISES.length) {
+                mainActionBtn.textContent = 'Finish';
+                mainActionBtn.classList.add('bg-sky-600');
+                mainActionBtn.classList.remove('bg-emerald-600');
+            } else {
+                mainActionBtn.textContent = 'Start';
+                mainActionBtn.classList.remove('bg-sky-600');
+                mainActionBtn.classList.add('bg-emerald-600');
+            }
+
+            // Attach input listeners
+            document.querySelectorAll('.sets-input').forEach(inp => {
+                inp.onchange = (e) => {
+                    const id = e.target.dataset.id;
+                    let val = parseInt(e.target.value) || 1;
+                    state.ex[id].sets = val;
+                    state.ex[id].done = []; // Reset checks
+                    saveState();
+                    renderAll();
+                };
+            });
+            document.querySelectorAll('.reps-input').forEach(inp => {
+                inp.onchange = (e) => {
+                    const id = e.target.dataset.id;
+                    let val = parseInt(e.target.value) || 1;
+                    state.ex[id].reps = val;
+                    saveState();
+                    // No re-render needed, just save
+                };
+            });
         }
 
         function updateStats() {
-            let completed = 0;
-            let volume = 0;
-            ROUTINE.forEach(ex => {
-                const st = state.exercises[ex.id];
-                const setsDone = st.done.filter(Boolean).length;
-                if(setsDone >= st.sets) completed++;
-                volume += st.done.reduce((a,b) => a + (b||0), 0);
+            let completedCount = 0;
+            let totalVol = 0;
+            EXERCISES.forEach(ex => {
+                const st = state.ex[ex.id];
+                const doneCount = st.done.filter(Boolean).length;
+                if (doneCount >= st.sets) completedCount++;
+                totalVol += st.done.reduce((a, b) => a + (b || 0), 0);
             });
-            
-            document.getElementById('completedCount').textContent = completed;
-            document.getElementById('totalVol').textContent = volume;
-            
-            const btn = document.getElementById('mainActionBtn');
-            if(completed === ROUTINE.length) {
-                btn.textContent = 'Finish & Save';
-                btn.classList.add('bg-sky-600');
-                btn.classList.remove('bg-emerald-600');
-            } else {
-                btn.textContent = 'Start Workout';
-                btn.classList.remove('bg-sky-600');
-                btn.classList.add('bg-emerald-600');
+            progCountEl.textContent = `${completedCount}/6`;
+            volCountEl.textContent = totalVol;
+
+            if (completedCount === EXERCISES.length) {
+                mainActionBtn.textContent = 'Finish';
+                mainActionBtn.classList.add('bg-sky-600');
+                mainActionBtn.classList.remove('bg-emerald-600');
             }
-            
-            // Calc Streak
-            let streak = 0;
-            const today = new Date().toDateString();
-            if(state.history.length > 0 && new Date(state.history[0].date).toDateString() === today) streak = 1;
-            // Simple streak logic: check previous days
-            let d = new Date();
-            d.setDate(d.getDate()-1);
-            // For simplicity, let's assume the server tracks this, but for this app we just check if yesterday exists
-            // Simplified logic for streak:
-            document.getElementById('streakNum').textContent = state.streak || 0;
         }
 
-        // --- Logic ---
-        function startTimer(duration, nextName) {
+        // --- 3. ACTIONS ---
+        
+        // Timer Logic
+        function startTimer(secs, nextName) {
+            clearInterval(timerInterval);
             const overlay = document.getElementById('timerOverlay');
-            const display = document.getElementById('timerVal');
-            const circle = document.getElementById('timerCircle');
-            const nextText = document.getElementById('nextExName');
+            const display = document.getElementById('timerDisplay');
+            const ring = document.getElementById('timerRing');
+            const label = document.getElementById('timerNextLabel');
             
-            nextText.textContent = `Next: ${nextName}`;
+            label.textContent = "Next: " + nextName;
             overlay.classList.add('active');
             
-            timerTime = duration;
-            display.textContent = timerTime;
-            circle.style.strokeDashoffset = 0; // Reset visual
-            
-            const startOffset = 283;
-            
-            clearInterval(timerInterval);
+            let timeLeft = secs;
+            const startVal = secs;
+            display.textContent = timeLeft;
+            ring.style.strokeDashoffset = 0;
+
             timerInterval = setInterval(() => {
-                timerTime--;
-                display.textContent = timerTime;
-                const progress = (duration - timerTime) / duration;
-                circle.style.strokeDashoffset = startOffset * progress;
-                
-                if(timerTime <= 0) {
+                timeLeft--;
+                display.textContent = timeLeft;
+                const progress = (startVal - timeLeft) / startVal;
+                ring.style.strokeDashoffset = 283 * progress;
+
+                if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     overlay.classList.remove('active');
                 }
             }, 1000);
         }
 
-        function skipTimer() {
+        document.getElementById('skipBtn').onclick = () => {
             clearInterval(timerInterval);
             document.getElementById('timerOverlay').classList.remove('active');
-        }
-        
-        function addTime() {
-            timerTime += 30;
-            // We need to adjust the max duration for the circle animation logic to stay smooth, 
-            // but for simplicity we'll just update the text and extend.
-            document.getElementById('timerVal').textContent = timerTime;
-        }
+        };
 
-        function handleMainAction() {
-            // Check if workout complete
-            let completed = 0;
-            ROUTINE.forEach(ex => {
-                const st = state.exercises[ex.id];
-                if(st.done.filter(Boolean).length >= st.sets) completed++;
+        document.getElementById('addTimeBtn').onclick = () => {
+            // Just extend logic is complex for the ring, so we just add time and restart visual
+            // For simplicity, we just add 30s to current display and keep going roughly
+            // V2 feature: proper timer extension.
+            // Simpler: Just restart timer with +30s
+            const current = parseInt(document.getElementById('timerDisplay').textContent);
+            clearInterval(timerInterval);
+            startTimer(current + 30, document.getElementById('timerNextLabel').textContent.replace('Next: ', ''));
+        };
+
+        // Main Button
+        mainActionBtn.onclick = () => {
+            // Check completion
+            let allDone = true;
+            EXERCISES.forEach(ex => {
+                if(state.ex[ex.id].done.filter(Boolean).length < state.ex[ex.id].sets) allDone = false;
             });
 
-            if(completed === ROUTINE.length) {
-                // Save workout
-                const workout = {
+            if (allDone) {
+                // SAVE
+                state.hist.unshift({
                     date: new Date().toISOString(),
-                    routine: JSON.parse(JSON.stringify(state.exercises))
-                };
-                state.history.unshift(workout);
-                if(state.history.length > 20) state.history.pop();
-                
-                // Update Streak
-                const lastDate = state.history.length > 1 ? new Date(state.history[1].date).toDateString() : null;
+                    vol: state.ex.reduce((sum, x) => sum + state.ex[x.id].done.reduce((a,b)=>a+(b||0),0), 0) // Approx calculation
+                });
+                // Streak logic
                 const today = new Date().toDateString();
-                if(lastDate !== today) {
-                    // Simple check: if last workout was yesterday or earlier, increment?
-                    // Real streak logic requires checking date diffs. 
-                    // Let's keep it simple: if today's date isn't the same as last entry (which we just added), increment?
-                    // Actually, we just added today's entry. So logic is complex. 
-                    // Let's just set streak based on consecutive days found in history.
-                    // For this snippet, we'll just increment if not already counted today.
-                    state.streak = (state.streak || 0) + 1;
-                }
+                const last = state.hist.length > 1 ? new Date(state.hist[1].date).toDateString() : null;
+                if(last !== today) state.streak++;
                 
-                saveState();
-                
-                // Reset state for next time
-                ROUTINE.forEach(ex => {
-                    state.exercises[ex.id].done = [];
+                // Reset
+                EXERCISES.forEach(ex => {
+                    state.ex[ex.id].done = [];
                 });
                 saveState();
-                renderList();
-                
-                // Show confirmation
-                alert('Workout Saved! Great job.');
+                renderAll();
+                alert("Workout Complete!");
                 return;
             }
 
-            // Find next incomplete exercise
-            const nextEx = ROUTINE.find(ex => {
-                const st = state.exercises[ex.id];
+            // Find next incomplete
+            const next = EXERCISES.find(ex => {
+                const st = state.ex[ex.id];
                 return st.done.filter(Boolean).length < st.sets;
             });
 
-            if(nextEx) {
-                startTimer(90, nextEx.name);
+            if (next) {
+                startTimer(90, next.name);
             }
-        }
+        };
 
-        function showHistory() {
-            const list = document.getElementById('historyList');
-            if(state.history.length === 0) {
-                list.innerHTML = '<p class="text-center text-[#71717a]">No history yet.</p>';
+        // History
+        document.getElementById('histBtn').onclick = () => {
+            const list = document.getElementById('histList');
+            if(state.hist.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-500 py-10">No history yet.</p>';
             } else {
-                list.innerHTML = state.history.map(h => {
+                list.innerHTML = state.hist.map(h => {
                     const d = new Date(h.date);
                     return `
-                    <div class="bg-[#111113] p-3 rounded-lg border border-[#1f1f23]">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-medium">${d.toLocaleDateString()}</span>
-                            <span class="text-xs text-[#71717a]">${d.toLocaleTimeString()}</span>
+                        <div class="bg-[#111] p-3 rounded border border-[#1a1a1d]">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-sm">${d.toLocaleDateString()}</span>
+                                <span class="text-xs text-emerald-400">${d.toLocaleTimeString()}</span>
+                            </div>
                         </div>
-                        <div class="text-xs text-emerald-400">${ROUTINE.length} exercises completed</div>
-                    </div>
                     `;
                 }).join('');
             }
-            document.getElementById('historyOverlay').classList.add('active');
-        }
-
-        // --- Init ---
-        function init() {
-            renderList();
-            
-            document.getElementById('mainActionBtn').addEventListener('click', handleMainAction);
-            document.getElementById('skipBtn').addEventListener('click', skipTimer);
-            document.getElementById('addTimeBtn').addEventListener('click', addTime);
-            document.getElementById('historyBtn').addEventListener('click', showHistory);
-            document.getElementById('closeHistBtn').addEventListener('click', () => {
-                document.getElementById('historyOverlay').classList.remove('active');
-            });
-        }
+            document.getElementById('histOverlay').classList.add('active');
+        };
         
-        init();
+        document.getElementById('closeHistBtn').onclick = () => {
+            document.getElementById('histOverlay').classList.remove('active');
+        };
+
+        // --- 4. INIT ---
+        renderAll();
+
     </script>
 </body>
 </html>
