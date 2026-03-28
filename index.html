@@ -3,505 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bodyweight Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>BW Pro: Zero Scroll</title>
     <style>
         :root {
-            --bg: #050505;
-            --card: #0f0f11;
-            --border: #1a1a1d;
-            --text: #e5e5e5;
-            --muted: #6b7280;
-            --accent: #10b981; /* Emerald */
+            --bg: #121212;
+            --card: #1e1e1e;
+            --accent: #00e676; /* Matrix Green */
+            --text: #ffffff;
+            --subtext: #b0b0b0;
+            --danger: #ff5252;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
+            margin: 0;
+            background-color: var(--bg);
             color: var(--text);
-            height: 100dvh; /* Dynamic height for mobile */
-            width: 100vw;
-            overflow: hidden;
+            font-family: var(--font-main);
+            height: 100vh; /* Force viewport height */
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            overflow: hidden; /* CRITICAL: No scrolling */
             display: flex;
             flex-direction: column;
-            margin: 0;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        h1, h2, h3, .font-display {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Custom Checkbox */
-        .set-check {
-            appearance: none;
-            width: 28px;
-            height: 28px;
-            border: 1px solid var(--border);
-            background: #000;
-            border-radius: 50%;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-
-        .set-check:checked {
-            background: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-        }
-
-        .set-check:checked::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background: #000;
-            border-radius: 50%;
-        }
-
-        /* Level Pill */
-        .level-pill {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 500;
-            white-space: nowrap;
-            background: #1a1a1d;
-            color: var(--muted);
-            border: 1px solid transparent;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .level-pill.active {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent);
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            z-index: 100;
+        /* --- HEADER & TIMERS --- */
+        header {
+            flex: 0 0 auto;
+            padding: 15px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .overlay.active {
-            opacity: 1;
-            pointer-events: auto;
+            background: var(--card);
+            border-bottom: 1px solid #333;
         }
 
-        /* Input Resets */
-        input[type="number"] {
-            -moz-appearance: textfield;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            width: 32px;
+        .timer-box {
+            font-variant-numeric: tabular-nums;
+            font-weight: bold;
+        }
+
+        .total-time { font-size: 1.2rem; color: var(--accent); }
+        .label { font-size: 0.7rem; color: var(--subtext); display: block; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- MAIN CONTENT (DYNAMIC) --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
             text-align: center;
         }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+
+        h1 { font-size: 2rem; margin: 0 0 10px 0; line-height: 1.1; }
+        .current-reps { font-size: 3.5rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
+        .progression-tag { 
+            background: #333; padding: 4px 12px; border-radius: 20px; 
+            font-size: 0.8rem; color: var(--subtext); margin-bottom: 15px; display: inline-block;
         }
+
+        /* --- CONTROLS --- */
+        .controls {
+            flex: 0 0 auto;
+            padding: 20px;
+            background: var(--card);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--accent); color: #000; grid-column: span 2; }
+        .btn-secondary { background: #333; color: var(--text); }
+        .btn-danger { background: #3a1a1a; color: var(--danger); }
+
+        /* --- FLOATING REST TIMER (Bottom Left) --- */
+        #rest-overlay {
+            position: fixed;
+            bottom: 120px; /* Above controls */
+            left: 20px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 15px;
+            width: 140px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+            transform: translateY(150%); /* Hidden by default */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #rest-overlay.active { transform: translateY(0); }
         
-        /* Safe Area Padding for Footer */
-        .footer-safe {
-            padding-bottom: env(safe-area-inset-bottom, 12px);
+        .rest-time-display { font-size: 2.5rem; font-weight: bold; color: var(--text); }
+        .rest-config {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
         }
+        .mini-btn {
+            background: #333; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-weight: bold;
+        }
+
+        /* --- SETTINGS MODAL --- */
+        .modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: center;
+        }
+        .modal.open { display: flex; }
+        .modal h2 { margin-top: 0; }
+        .setting-row { margin-bottom: 20px; text-align: left; }
+        .setting-row label { display: block; margin-bottom: 8px; color: var(--subtext); }
+        .setting-row select, .setting-row input {
+            width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; font-size: 16px;
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="flex-shrink-0 px-4 pt-2 pb-1 border-b border-[#1a1a1d]">
-        <div class="flex justify-between items-center h-10">
-            <h1 class="text-lg font-bold tracking-tight leading-none">Routine</h1>
-            <div class="flex items-center gap-3">
-                <button id="histBtn" class="p-1 opacity-60 hover:opacity-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </button>
-                <div class="flex items-center gap-1.5 text-emerald-400">
-                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25"/></svg>
-                   <span id="streakNum" class="text-xs font-bold">0</span>
-                </div>
-            </div>
+    <!-- HEADER -->
+    <header>
+        <div>
+            <span class="label">Total Time</span>
+            <span class="timer-box total-time" id="total-timer">00:00</span>
+        </div>
+        <div style="text-align: right;">
+            <span class="label">Routine</span>
+            <span class="timer-box">Full Body Strength</span>
         </div>
     </header>
 
-    <!-- Main List Container -->
-    <main id="listContainer" class="flex-1 overflow-y-auto hide-scrollbar px-3 py-2 space-y-2">
-        <!-- JS injects rows here -->
+    <!-- MAIN EXERCISE VIEW -->
+    <main id="exercise-view">
+        <span class="progression-tag" id="level-tag">Level 1</span>
+        <h1 id="ex-name">Push-Ups</h1>
+        <div class="current-reps" id="ex-reps">8 - 12</div>
+        <div style="color: var(--subtext); font-size: 0.9rem;">Target Reps</div>
     </main>
 
-    <!-- Footer -->
-    <footer class="flex-shrink-0 border-t border-[#1a1a1d] bg-[#0a0a0a] footer-safe">
-        <div class="flex items-center justify-between px-4 py-1 text-[10px] text-[#6b7280] uppercase tracking-wider">
-            <span>Progress: <span id="progCount" class="text-white font-bold">0/6</span></span>
-            <span>Volume: <span id="volCount" class="text-white font-bold">0</span> reps</span>
+    <!-- FLOATING REST TIMER -->
+    <div id="rest-overlay">
+        <span class="label">Resting</span>
+        <div class="rest-time-display" id="rest-display">01:30</div>
+        <div class="rest-config">
+            <button class="mini-btn" onclick="adjustRest(-15)">-</button>
+            <span style="font-size: 0.8rem; line-height: 30px;">Sec</span>
+            <button class="mini-btn" onclick="adjustRest(15)">+</button>
         </div>
-        <button id="mainAction" class="w-full py-3 bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 active:scale-[0.98] transition-all">
-            Start
-        </button>
-    </footer>
-
-    <!-- Timer Overlay -->
-    <div id="timerOverlay" class="overlay flex-col">
-        <div class="text-center">
-            <p class="text-xs uppercase tracking-[0.2em] text-[#6b7280] mb-6">Rest Period</p>
-            <div class="relative w-40 h-40 mx-auto mb-6">
-                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" stroke="#1a1a1d" stroke-width="4" fill="none"/>
-                    <circle id="timerRing" cx="50" cy="50" r="45" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0"></circle>
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="timerDisplay" class="text-5xl font-bold font-display">60</span>
-                </div>
-            </div>
-            <p id="timerNextLabel" class="text-sm text-white mb-8">Next: Exercise</p>
-            <div class="flex gap-3 justify-center">
-                <button id="skipBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">Skip</button>
-                <button id="addTimeBtn" class="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">+30s</button>
-            </div>
-        </div>
+        <button style="margin-top:10px; width:100%; padding: 8px; background:var(--accent); border:none; border-radius:6px; font-weight:bold;" onclick="stopRest()">SKIP</button>
     </div>
 
-    <!-- History Overlay -->
-    <div id="histOverlay" class="overlay justify-start pt-10 overflow-y-auto">
-        <div class="w-full max-w-md mx-auto px-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold font-display">History</h2>
-                <button id="closeHistBtn" class="p-2 hover:bg-white/5 rounded-full">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div id="histList" class="space-y-2 pb-10">
-                <!-- History content -->
-            </div>
+    <!-- CONTROLS -->
+    <div class="controls">
+        <button class="btn btn-secondary" onclick="changeLevel(-1)">Regression</button>
+        <button class="btn btn-secondary" onclick="changeLevel(1)">Progression</button>
+        <button class="btn btn-primary" onclick="completeSet()">COMPLETE SET & START REST</button>
+        <button class="btn btn-danger" onclick="resetWorkout()" style="grid-column: span 2; font-size: 0.8rem; padding: 10px;">Reset Workout</button>
+    </div>
+
+    <!-- SETTINGS MODAL (Opens on App Load to set logic) -->
+    <div id="settings-modal" class="modal open">
+        <h2>⚙️ Setup</h2>
+        <p style="color: #aaa; margin-bottom: 20px;">Select your current tier for each movement.</p>
+        
+        <div class="setting-row">
+            <label>Push (Vertical/Horizontal)</label>
+            <select id="set-push">
+                <option value="0">Wall Pushups (Beginner)</option>
+                <option value="1" selected>Incline Pushups (Novice)</option>
+                <option value="2">Standard Pushups (Intermediate)</option>
+                <option value="3">Diamond Pushups (Advanced)</option>
+                <option value="4">Pseudo Planche Pushups (Elite)</option>
+            </select>
         </div>
+
+        <div class="setting-row">
+            <label>Pull (Requires a bar or sturdy table)</label>
+            <select id="set-pull">
+                <option value="0">Doorframe Rows (Beginner)</option>
+                <option value="1" selected>Australian Rows (Novice)</option>
+                <option value="2">Chin-Up Negatives (Intermediate)</option>
+                <option value="3">Chin-Ups (Advanced)</option>
+                <option value="4">Pull-Ups (Elite)</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveSettings()">START TRAINING</button>
     </div>
 
     <script>
-        // --- 1. DATA & CONFIG ---
-        const EXERCISES = [
-            { id: 'push', name: 'Push-ups', levels: ['Wall', 'Incline', 'Kneeling', 'Standard', 'Decline', 'Diamond', 'Archer'], defLevel: 3, defSets: 3, defReps: 10 },
-            { id: 'squat', name: 'Squats', levels: ['Assisted', 'Partial', 'Parallel', 'Deep', 'Pistol-Assist', 'Pistol'], defLevel: 3, defSets: 3, defReps: 12 },
-            { id: 'pull', name: 'Pull-ups', levels: ['Dead Hang', 'Scapular', 'Negatives', 'Chin-up', 'Pull-up', 'Wide Grip', 'Weighted'], defLevel: 3, defSets: 3, defReps: 5 },
-            { id: 'dip', name: 'Dips', levels: ['Bench', 'Assisted', 'Negatives', 'Standard', 'Deep', 'Weighted'], defLevel: 0, defSets: 3, defReps: 10 },
-            { id: 'hinge', name: 'Leg Raises', levels: ['Knee Tucks', 'Floor Raises', 'Hanging Knee', 'Hanging Leg', 'Toes-to-Bar'], defLevel: 1, defSets: 3, defReps: 12 },
-            { id: 'lunge', name: 'Lunges', levels: ['Assisted', 'Static', 'Forward', 'Reverse', 'Walking', 'Jumping'], defLevel: 2, defSets: 3, defReps: 10 }
+        // --- DATA: The "Golden 5" ---
+        // Structure: [Name, RepScheme, DifficultyTier]
+        const workoutPlan = [
+            {
+                category: "Vertical Push",
+                progressions: [
+                    { name: "Wall Pushups", reps: "20-30" },
+                    { name: "Incline Pushups", reps: "15-20" },
+                    { name: "Standard Pushups", reps: "10-15" },
+                    { name: "Diamond Pushups", reps: "8-12" },
+                    { name: "Pseudo Planche Pushups", reps: "6-10" }
+                ]
+            },
+            {
+                category: "Squat",
+                progressions: [
+                    { name: "Assisted Squats", reps: "20-30" },
+                    { name: "Box Squats", reps: "15-20" },
+                    { name: "Bodyweight Squats", reps: "15-25" },
+                    { name: "Bulgarian Split Squats", reps: "8-12 /side" },
+                    { name: "Pistol Squats", reps: "5-8 /side" }
+                ]
+            },
+            {
+                category: "Vertical Pull",
+                progressions: [
+                    { name: "Doorframe Rows", reps: "20-30" },
+                    { name: "Australian Rows", reps: "15-20" },
+                    { name: "Chin-Up Negatives", reps: "5-8" },
+                    { name: "Chin-Ups", reps: "6-10" },
+                    { name: "Pull-Ups", reps: "6-10" }
+                ]
+            },
+            {
+                category: "Hinge",
+                progressions: [
+                    { name: "Glute Bridges", reps: "20-30" },
+                    { name: "Single Leg Glute Bridge", reps: "12-15" },
+                    { name: "Romanian Deadlift (Bodyweight)", reps: "10-15" },
+                    { name: "Hamstring Walkouts", reps: "8-12" },
+                    { name: "Single Leg Deadlift", reps: "8-10" }
+                ]
+            },
+            {
+                category: "Core",
+                progressions: [
+                    { name: "Plank", reps: "60 sec" },
+                    { name: "Hollow Body Hold", reps: "45 sec" },
+                    { name: "Knee Raises", reps: "15-20" },
+                    { name: "L-Sit Tuck", reps: "30 sec" },
+                    { name: "Hanging Leg Raises", reps: "10-15" }
+                ]
+            }
         ];
 
-        const STORE_KEY = 'bwp_v1';
-        let state = loadState();
-        let timerInterval = null;
+        // --- STATE ---
+        let currentStep = 0;
+        let currentLevels = [1, 1, 1, 1, 1]; // Default novice
+        let restDuration = 90; // Default 90s
+        let restTimerInterval = null;
+        let totalTimerInterval = null;
+        let totalSeconds = 0;
+        let isResting = false;
 
-        function loadState() {
-            try {
-                const data = localStorage.getItem(STORE_KEY);
-                if (!data) return initFreshState();
-                return JSON.parse(data);
-            } catch (e) {
-                return initFreshState();
+        // --- DOM ELEMENTS ---
+        const elName = document.getElementById('ex-name');
+        const elReps = document.getElementById('ex-reps');
+        const elLevel = document.getElementById('level-tag');
+        const restOverlay = document.getElementById('rest-overlay');
+        const restDisplay = document.getElementById('rest-display');
+        const totalTimeDisplay = document.getElementById('total-timer');
+
+        // --- INITIALIZATION ---
+        function saveSettings() {
+            currentLevels[0] = parseInt(document.getElementById('set-push').value);
+            currentLevels[2] = parseInt(document.getElementById('set-pull').value);
+            
+            document.getElementById('settings-modal').classList.remove('open');
+            startTotalTimer();
+            renderExercise();
+        }
+
+        function renderExercise() {
+            const exerciseGroup = workoutPlan[currentStep];
+            const levelIndex = currentLevels[currentStep];
+            const data = exerciseGroup.progressions[levelIndex];
+
+            // Animation effect
+            elName.style.opacity = 0;
+            setTimeout(() => {
+                elName.innerText = data.name;
+                elReps.innerText = data.reps;
+                elLevel.innerText = exerciseGroup.category + " - Lvl " + (levelIndex + 1);
+                elName.style.opacity = 1;
+            }, 150);
+        }
+
+        // --- PROGRESSIVE OVERLOAD LOGIC ---
+        function changeLevel(direction) {
+            let lvl = currentLevels[currentStep];
+            let newLvl = lvl + direction;
+            
+            // Clamp between 0 and 4
+            if(newLvl >= 0 && newLvl < 5) {
+                currentLevels[currentStep] = newLvl;
+                renderExercise();
             }
         }
 
-        function initFreshState() {
-            const s = { ex: {}, hist: [], streak: 0 };
-            EXERCISES.forEach(e => {
-                s.ex[e.id] = { lvl: e.defLevel, sets: e.defSets, reps: e.defReps, done: [] };
-            });
-            return s;
-        }
+        // --- WORKOUT FLOW ---
+        function completeSet() {
+            // Sound effect (simple beep context)
+            playBeep();
 
-        function saveState() {
-            localStorage.setItem(STORE_KEY, JSON.stringify(state));
-        }
-
-        // --- 2. RENDERING ---
-        const listContainer = document.getElementById('listContainer');
-        const progCountEl = document.getElementById('progCount');
-        const volCountEl = document.getElementById('volCount');
-        const streakEl = document.getElementById('streakNum');
-        const mainActionBtn = document.getElementById('mainAction');
-
-        function renderAll() {
-            listContainer.innerHTML = '';
-            let completedCount = 0;
-            let totalVol = 0;
-
-            EXERCISES.forEach(ex => {
-                const st = state.ex[ex.id];
-                const doneCount = st.done.filter(Boolean).length;
-                if (doneCount >= st.sets) completedCount++;
-                totalVol += st.done.reduce((a, b) => a + (b || 0), 0);
-
-                const card = document.createElement('div');
-                card.className = 'bg-[#0f0f11] rounded-lg border border-[#1a1a1d] p-3 space-y-2';
-                
-                // Header Row
-                const topRow = document.createElement('div');
-                topRow.className = 'flex justify-between items-center';
-                topRow.innerHTML = `
-                    <h3 class="font-bold text-sm">${ex.name}</h3>
-                    <div class="flex items-center gap-1 text-xs text-[#6b7280]">
-                        <input type="number" class="sets-input" data-id="${ex.id}" value="${st.sets}" min="1" max="10">
-                        <span class="opacity-70 font-sans">×</span>
-                        <input type="number" class="reps-input" data-id="${ex.id}" value="${st.reps}" min="1" max="100">
-                    </div>
-                `;
-                card.appendChild(topRow);
-
-                // Levels Row
-                const lvlRow = document.createElement('div');
-                lvlRow.className = 'flex gap-1 overflow-x-auto hide-scrollbar py-1';
-                ex.levels.forEach((lvlName, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = `level-pill ${idx === st.lvl ? 'active' : ''}`;
-                    btn.textContent = lvlName;
-                    btn.onclick = () => {
-                        state.ex[ex.id].lvl = idx;
-                        saveState();
-                        renderAll();
-                    };
-                    lvlRow.appendChild(btn);
-                });
-                card.appendChild(lvlRow);
-
-                // Checkboxes Row
-                const checkRow = document.createElement('div');
-                checkRow.className = 'flex items-center justify-between pt-1 border-t border-[#1a1a1d]';
-                
-                const label = document.createElement('span');
-                label.className = 'text-[10px] text-[#6b7280] uppercase tracking-wider';
-                label.textContent = 'Sets';
-                checkRow.appendChild(label);
-
-                const checksContainer = document.createElement('div');
-                checksContainer.className = 'flex gap-2';
-                
-                for (let i = 0; i < st.sets; i++) {
-                    const chk = document.createElement('input');
-                    chk.type = 'checkbox';
-                    chk.className = 'set-check';
-                    chk.checked = !!st.done[i];
-                    chk.onchange = (e) => {
-                        // If checked, set to target reps, else false
-                        if(e.target.checked) {
-                            state.ex[ex.id].done[i] = state.ex[ex.id].reps;
-                        } else {
-                            state.ex[ex.id].done[i] = false;
-                        }
-                        saveState();
-                        updateStats(); // Just update stats, no full re-render needed for checkbox click
-                    };
-                    checksContainer.appendChild(chk);
-                }
-                checkRow.appendChild(checksContainer);
-                card.appendChild(checkRow);
-
-                listContainer.appendChild(card);
-            });
-
-            // Update Stats
-            progCountEl.textContent = `${completedCount}/6`;
-            volCountEl.textContent = totalVol;
-            streakEl.textContent = state.streak;
-
-            if (completedCount === EXERCISES.length) {
-                mainActionBtn.textContent = 'Finish';
-                mainActionBtn.classList.add('bg-sky-600');
-                mainActionBtn.classList.remove('bg-emerald-600');
+            if (currentStep < workoutPlan.length - 1) {
+                currentStep++;
+                startRest();
             } else {
-                mainActionBtn.textContent = 'Start';
-                mainActionBtn.classList.remove('bg-sky-600');
-                mainActionBtn.classList.add('bg-emerald-600');
-            }
-
-            // Attach input listeners
-            document.querySelectorAll('.sets-input').forEach(inp => {
-                inp.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    let val = parseInt(e.target.value) || 1;
-                    state.ex[id].sets = val;
-                    state.ex[id].done = []; // Reset checks
-                    saveState();
-                    renderAll();
-                };
-            });
-            document.querySelectorAll('.reps-input').forEach(inp => {
-                inp.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    let val = parseInt(e.target.value) || 1;
-                    state.ex[id].reps = val;
-                    saveState();
-                    // No re-render needed, just save
-                };
-            });
-        }
-
-        function updateStats() {
-            let completedCount = 0;
-            let totalVol = 0;
-            EXERCISES.forEach(ex => {
-                const st = state.ex[ex.id];
-                const doneCount = st.done.filter(Boolean).length;
-                if (doneCount >= st.sets) completedCount++;
-                totalVol += st.done.reduce((a, b) => a + (b || 0), 0);
-            });
-            progCountEl.textContent = `${completedCount}/6`;
-            volCountEl.textContent = totalVol;
-
-            if (completedCount === EXERCISES.length) {
-                mainActionBtn.textContent = 'Finish';
-                mainActionBtn.classList.add('bg-sky-600');
-                mainActionBtn.classList.remove('bg-emerald-600');
+                finishWorkout();
             }
         }
 
-        // --- 3. ACTIONS ---
+        function finishWorkout() {
+            stopTotalTimer();
+            elName.innerText = "WORKOUT COMPLETE";
+            elReps.innerText = "🏆";
+            elLevel.innerText = "Great job, Mateo!";
+            
+            // Change main button to restart
+            const mainBtn = document.querySelector('.btn-primary');
+            mainBtn.innerText = "FINISH & RESET";
+            mainBtn.onclick = () => location.reload();
+        }
+
+        function resetWorkout() {
+            if(confirm("Reset entire workout?")) location.reload();
+        }
+
+        // --- TIMERS ---
         
-        // Timer Logic
-        function startTimer(secs, nextName) {
-            clearInterval(timerInterval);
-            const overlay = document.getElementById('timerOverlay');
-            const display = document.getElementById('timerDisplay');
-            const ring = document.getElementById('timerRing');
-            const label = document.getElementById('timerNextLabel');
-            
-            label.textContent = "Next: " + nextName;
-            overlay.classList.add('active');
-            
-            let timeLeft = secs;
-            const startVal = secs;
-            display.textContent = timeLeft;
-            ring.style.strokeDashoffset = 0;
+        // Rest Timer
+        function startRest() {
+            isResting = true;
+            restOverlay.classList.add('active');
+            let left = restDuration;
+            updateRestDisplay(left);
 
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                display.textContent = timeLeft;
-                const progress = (startVal - timeLeft) / startVal;
-                ring.style.strokeDashoffset = 283 * progress;
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    overlay.classList.remove('active');
+            clearInterval(restTimerInterval);
+            restTimerInterval = setInterval(() => {
+                left--;
+                updateRestDisplay(left);
+                if (left <= 0) {
+                    stopRest();
                 }
             }, 1000);
         }
 
-        document.getElementById('skipBtn').onclick = () => {
-            clearInterval(timerInterval);
-            document.getElementById('timerOverlay').classList.remove('active');
-        };
+        function updateRestDisplay(val) {
+            let m = Math.floor(val / 60);
+            let s = val % 60;
+            restDisplay.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
 
-        document.getElementById('addTimeBtn').onclick = () => {
-            // Just extend logic is complex for the ring, so we just add time and restart visual
-            // For simplicity, we just add 30s to current display and keep going roughly
-            // V2 feature: proper timer extension.
-            // Simpler: Just restart timer with +30s
-            const current = parseInt(document.getElementById('timerDisplay').textContent);
-            clearInterval(timerInterval);
-            startTimer(current + 30, document.getElementById('timerNextLabel').textContent.replace('Next: ', ''));
-        };
+        function stopRest() {
+            clearInterval(restTimerInterval);
+            restOverlay.classList.remove('active');
+            renderExercise(); // Load next exercise
+        }
 
-        // Main Button
-        mainActionBtn.onclick = () => {
-            // Check completion
-            let allDone = true;
-            EXERCISES.forEach(ex => {
-                if(state.ex[ex.id].done.filter(Boolean).length < state.ex[ex.id].sets) allDone = false;
-            });
+        function adjustRest(amount) {
+            // This adjusts the *current* ongoing rest, and sets the default for next time
+            restDuration += amount;
+            if(restDuration < 15) restDuration = 15;
+            updateRestDisplay(restDuration);
+        }
 
-            if (allDone) {
-                // SAVE
-                state.hist.unshift({
-                    date: new Date().toISOString(),
-                    vol: state.ex.reduce((sum, x) => sum + state.ex[x.id].done.reduce((a,b)=>a+(b||0),0), 0) // Approx calculation
-                });
-                // Streak logic
-                const today = new Date().toDateString();
-                const last = state.hist.length > 1 ? new Date(state.hist[1].date).toDateString() : null;
-                if(last !== today) state.streak++;
-                
-                // Reset
-                EXERCISES.forEach(ex => {
-                    state.ex[ex.id].done = [];
-                });
-                saveState();
-                renderAll();
-                alert("Workout Complete!");
-                return;
-            }
+        // Total Timer
+        function startTotalTimer() {
+            totalTimerInterval = setInterval(() => {
+                totalSeconds++;
+                let m = Math.floor(totalSeconds / 60);
+                let s = totalSeconds % 60;
+                totalTimeDisplay.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
 
-            // Find next incomplete
-            const next = EXERCISES.find(ex => {
-                const st = state.ex[ex.id];
-                return st.done.filter(Boolean).length < st.sets;
-            });
+        function stopTotalTimer() {
+            clearInterval(totalTimerInterval);
+        }
 
-            if (next) {
-                startTimer(90, next.name);
-            }
-        };
-
-        // History
-        document.getElementById('histBtn').onclick = () => {
-            const list = document.getElementById('histList');
-            if(state.hist.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-500 py-10">No history yet.</p>';
-            } else {
-                list.innerHTML = state.hist.map(h => {
-                    const d = new Date(h.date);
-                    return `
-                        <div class="bg-[#111] p-3 rounded border border-[#1a1a1d]">
-                            <div class="flex justify-between items-center">
-                                <span class="font-medium text-sm">${d.toLocaleDateString()}</span>
-                                <span class="text-xs text-emerald-400">${d.toLocaleTimeString()}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            document.getElementById('histOverlay').classList.add('active');
-        };
-        
-        document.getElementById('closeHistBtn').onclick = () => {
-            document.getElementById('histOverlay').classList.remove('active');
-        };
-
-        // --- 4. INIT ---
-        renderAll();
+        // Simple Audio Beep for transition
+        function playBeep() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 880; // A5
+            gain.gain.value = 0.1;
+            osc.start();
+            setTimeout(() => osc.stop(), 100);
+        }
 
     </script>
 </body>
